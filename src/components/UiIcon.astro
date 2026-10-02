@@ -5,10 +5,12 @@ import Bold from '@lucide/astro/icons/bold';
 import Book from '@lucide/astro/icons/book';
 import BookOpen from '@lucide/astro/icons/book-open';
 import ChevronDown from '@lucide/astro/icons/chevron-down';
+import ChevronRight from '@lucide/astro/icons/chevron-right';
 import ChevronUp from '@lucide/astro/icons/chevron-up';
 import CircleUserRound from '@lucide/astro/icons/circle-user-round';
 import CodeXml from '@lucide/astro/icons/code-xml';
 import Eye from '@lucide/astro/icons/eye';
+import Undo2 from '@lucide/astro/icons/undo-2';
 import Italic from '@lucide/astro/icons/italic';
 import Link from '@lucide/astro/icons/link';
 import List from '@lucide/astro/icons/list';
@@ -30,9 +32,11 @@ type UiIconName =
   | 'book-closed'
   | 'book-open'
   | 'chevron-down'
+  | 'chevron-right'
   | 'chevron-up'
   | 'code'
   | 'eye'
+  | 'resume-reading'
   | 'italic'
   | 'link'
   | 'list'
@@ -71,9 +75,11 @@ const uiIconComponents = {
   'book-closed': Book,
   'book-open': BookOpen,
   'chevron-down': ChevronDown,
+  'chevron-right': ChevronRight,
   'chevron-up': ChevronUp,
   code: CodeXml,
   eye: Eye,
+  'resume-reading': Undo2,
   italic: Italic,
   link: Link,
   list: List,

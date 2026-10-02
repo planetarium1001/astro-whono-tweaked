@@ -126,10 +126,14 @@
   --font-mono: "Sarasa Mono SC", "Noto Sans Mono CJK SC", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --font-brand: Georgia, serif;
   --max: 900px;
-  --sidebar: 320px;
-  --layout-shell-max-inline-size: 1100px;
+  --sidebar: 224px;
+  /* 前后台侧栏共用；内容宽度 = --sidebar - 2 * 内边距 */
+  --sidebar-padding-block: 52px;
+  --sidebar-padding-inline: 18px;
+  /* 壳层随视口自适应，小屏保底 1100px */
+  --layout-shell-max-inline-size: clamp(1100px, 94vw, 1440px);
   --layout-divider-inline-size: 1px;
-  --public-sidebar-inline-size: 320px;
+  --public-sidebar-inline-size: 224px;
   --public-content-padding-inline: 48px;
   --article-readable-inline-size: min(
     var(--max),
@@ -163,6 +167,16 @@
   --lightbox-text: #ffffff;
   --lightbox-border: rgba(255, 255, 255, 0.2);
   --lightbox-dot-muted: rgba(255, 255, 255, 0.35);
+}
+
+/* ===============================
+   主题切换：圆形涟漪（View Transitions）
+=============================== */
+/* 由 scripts/sidebar-theme.ts 驱动；若启用 ClientRouter 页面过渡，需收窄到主题切换场景 */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 /* ===============================

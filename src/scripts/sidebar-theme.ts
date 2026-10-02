@@ -98,10 +98,85 @@ const listenSystemThemeChange = (listener: () => void) => {
   legacyColorSchemeMq.addListener?.(listener);
 };
 
+// 主题切换涟漪：新主题快照以点击处为圆心用 clip-path 展开；
+// 不支持 startViewTransition 或偏好减少动效时直接切换。
+type ViewTransitionLike = { ready: Promise<void> };
+type StartViewTransitionLike = (callback: () => void) => ViewTransitionLike;
+
+const RIPPLE_DURATION_MS = 1040;
+const RIPPLE_EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
+const prefersReducedMotion = () =>
+  typeof window.matchMedia === 'function'
+  && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const getStartViewTransition = (): StartViewTransitionLike | null => {
+  const candidate = (document as unknown as { startViewTransition?: unknown }).startViewTransition;
+  if (typeof candidate !== 'function') return null;
+  // 必须以 document 为 this 调用，不能取裸函数
+  return (candidate as StartViewTransitionLike).bind(document);
+};
+
+// 圆心取指针位置；键盘触发（clientX/Y 为 0）时回退到按钮中心
+const resolveRippleOrigin = (event: MouseEvent) => {
+  if (event.clientX > 0 || event.clientY > 0) {
+    return { x: event.clientX, y: event.clientY };
+  }
+
+  const rect = themeBtn?.getBoundingClientRect();
+  if (rect && (rect.width > 0 || rect.height > 0)) {
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  }
+
+  return { x: window.innerWidth / 2, y: 0 };
+};
+
+const applyThemeWithRipple = (event: MouseEvent, apply: () => void) => {
+  const startViewTransition = getStartViewTransition();
+  if (!startViewTransition || prefersReducedMotion()) {
+    apply();
+    return;
+  }
+
+  const { x, y } = resolveRippleOrigin(event);
+  const radius = Math.hypot(
+    Math.max(x, window.innerWidth - x),
+    Math.max(y, window.innerHeight - y)
+  );
+
+  const transition = startViewTransition(apply);
+  transition.ready
+    .then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${Math.ceil(radius)}px at ${x}px ${y}px)`
+          ]
+        },
+        {
+          duration: RIPPLE_DURATION_MS,
+          easing: RIPPLE_EASING,
+          pseudoElement: '::view-transition-new(root)'
+        }
+      );
+    })
+    .catch(() => {});
+};
+
 const initTheme = () => {
   setThemeMode(activeThemeMode, false);
-  themeBtn?.addEventListener('click', () => {
-    setThemeMode(getNextThemeMode(activeThemeMode));
+  themeBtn?.addEventListener('click', (event) => {
+    const nextMode = getNextThemeMode(activeThemeMode);
+    const apply = () => setThemeMode(nextMode);
+
+    // 解析后主题未变（如浅色 → 跟随系统且系统为浅色）时不跑涟漪
+    if (resolveTheme(nextMode) === resolveTheme(activeThemeMode)) {
+      apply();
+      return;
+    }
+
+    applyThemeWithRipple(event, apply);
   });
 
   const syncSystemTheme = () => {

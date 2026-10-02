@@ -1,6 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import UiIcon from '../components/UiIcon.astro';
+import ArticleToc from '../components/ArticleToc.astro';
 import Lightbox from '../components/Lightbox.astro';
 import '../styles/article.css';
 import { getEssayDerivedText, type EssayEntry } from '../lib/content';
@@ -24,14 +24,22 @@ const {
   prev,
   next,
   articleMetaSettings,
-  visibleTags = []
+  visibleTags = [],
+  headings = []
 } = Astro.props as {
   entry: EssayEntry;
   prev: ArticleNeighborLink | null;
   next: ArticleNeighborLink | null;
   articleMetaSettings: ArticleMetaSettings;
   visibleTags?: string[];
+  headings?: { depth: number; slug: string; text?: string }[];
 };
+
+// 目录只收有锚点文本的 h2/h3
+const tocHeadings = headings.filter(
+  (heading) => (heading.depth === 2 || heading.depth === 3) && heading.slug && (heading.text ?? '').trim()
+);
+const hasToc = tocHeadings.length > 0;
 
 const entryTags: string[] = entry?.data?.tags ?? [];
 const defaultImage = '/og.svg';
@@ -70,7 +78,13 @@ const shouldShowMetaLine = articleMetaSettings.showDate
   ogType="article"
   bodyClass="article-page immersive-page"
   activeNavId={activeNavId}
+  tocRail={hasToc}
 >
+  {hasToc ? (
+    <Fragment slot="toc-rail">
+      <ArticleToc headings={tocHeadings} variant="rail" />
+    </Fragment>
+  ) : null}
   <Fragment slot="head">
     <meta property="article:published_time" content={entry.data.date.toISOString()} />
     {updatedAt ? <meta property="article:modified_time" content={updatedAt.toISOString()} /> : null}
@@ -85,20 +99,27 @@ const shouldShowMetaLine = articleMetaSettings.showDate
         {...katexStylesheetAttrs}
       />
     ) : null}
+    {hasToc ? (
+      <script is:inline>
+        // 目录状态须在首绘前落到 <html>：手动收起过就保持收起，否则先按收起态渲染
+        // （data-toc-intro），由 article-toc.ts 撤掉后平滑展开；键名与 TOC_COLLAPSED_KEY 一致。
+        (() => {
+          try {
+            const root = document.documentElement;
+            if (window.localStorage.getItem('astro-whono:toc-collapsed') === '1') {
+              root.dataset.tocCollapsed = 'true';
+              return;
+            }
+            const reduceMotion = typeof window.matchMedia === 'function'
+              && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!reduceMotion) root.dataset.tocIntro = 'true';
+          } catch (_) {}
+        })();
+      </script>
+    ) : null}
   </Fragment>
-  <div class="article-header reader-exit-anchor">
+  <div class="article-header">
     <h1 class="page-title">{entry.data.title}</h1>
-    <button
-      id="reader-exit"
-      class="icon-button reader-exit"
-      type="button"
-      aria-label="退出阅读"
-      title="退出阅读"
-      aria-hidden="true"
-      tabindex="-1"
-    >
-      <UiIcon name="reader-exit" class="icon" />
-    </button>
     {shouldShowMetaLine ? (
       <div class="meta-line meta-line--items">
         {articleMetaSettings.showDate ? (
@@ -126,6 +147,8 @@ const shouldShowMetaLine = articleMetaSettings.showDate
       </div>
     ) : null}
   </div>
+
+  {hasToc ? <ArticleToc headings={tocHeadings} variant="inline" /> : null}
 
   <div class="prose">
     <slot />
@@ -164,6 +187,7 @@ const shouldShowMetaLine = articleMetaSettings.showDate
   />
 
   <script>
+    import '../scripts/article-toc';
     import { initArticleLightbox, initCodeCopyButtons } from '../scripts/lightbox';
 
     initCodeCopyButtons();

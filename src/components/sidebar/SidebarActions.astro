@@ -16,7 +16,6 @@ const {
   homeHref,
   rssHref,
   adminOverviewHref,
-  showReaderToggle = false,
   showRssLink = false,
   showThemeToggle = false,
   showAdminEntry = false
@@ -27,7 +26,6 @@ const {
   homeHref: string;
   rssHref: string;
   adminOverviewHref: string;
-  showReaderToggle?: boolean;
   showRssLink?: boolean;
   showThemeToggle?: boolean;
   showAdminEntry?: boolean;
@@ -79,20 +77,6 @@ const publicNavItems = navItems.map((item) => ({
         </ul>
       </div>
     </details>
-  ) : null}
-
-  {showReaderToggle ? (
-    <button
-      id="reader-toggle"
-      class="icon-button reader-toggle sidebar-action--rail-hidden"
-      type="button"
-      aria-label="阅读模式"
-      aria-pressed="false"
-      data-tooltip="阅读模式"
-    >
-      <UiIcon name="book-open" class="icon icon-book-open" />
-      <UiIcon name="book-closed" class="icon icon-book-closed" />
-    </button>
   ) : null}
 
   {showRssLink ? (

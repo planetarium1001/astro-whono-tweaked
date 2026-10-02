@@ -1,0 +1,81 @@
+---
+// 文章目录：同一份 render().headings 渲染两种形态——
+// rail（宽屏常驻 .shell 第 4 列）、inline（窄屏正文顶部折叠列表）。
+// 样式见 styles/components/article-toc.css，交互见 scripts/article-toc.ts。
+import '../styles/components/article-toc.css';
+import UiIcon from './UiIcon.astro';
+
+interface TocHeadingInput {
+  depth: number;
+  slug: string;
+  text?: string;
+}
+
+interface Props {
+  headings?: TocHeadingInput[];
+  variant?: 'rail' | 'inline';
+  label?: string;
+}
+
+const { headings = [], variant = 'inline', label = '本文目录' } = Astro.props as Props;
+
+const items = headings
+  .filter((heading) => (heading.depth === 2 || heading.depth === 3) && heading.slug)
+  .map((heading) => ({
+    depth: heading.depth,
+    slug: heading.slug,
+    text: (heading.text ?? '').trim()
+  }))
+  .filter((item) => item.text.length > 0);
+
+const isRail = variant === 'rail';
+---
+
+{items.length === 0 ? null : isRail ? (
+  <nav
+    class="article-toc article-toc--rail"
+    aria-labelledby="article-toc-rail-title"
+    data-article-toc
+    data-toc-variant="rail"
+  >
+    <div class="article-toc__rail-head">
+      <p class="article-toc__title" id="article-toc-rail-title">{label}</p>
+      <button
+        type="button"
+        class="article-toc__toggle"
+        data-toc-toggle
+        aria-expanded="true"
+        aria-controls="article-toc-rail-body"
+        aria-label="收起目录"
+        title="收起目录"
+      >
+        <UiIcon name="chevron-right" class="icon" />
+      </button>
+    </div>
+    <div class="article-toc__rail-body" id="article-toc-rail-body">
+      <ol class="article-toc__list">
+        {items.map((item) => (
+          <li class:list={['article-toc__item', `article-toc__item--h${item.depth}`]}>
+            <a class="article-toc__link" href={`#${item.slug}`} data-toc-target={item.slug}>{item.text}</a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </nav>
+) : (
+  <details class="article-toc article-toc--inline" data-article-toc data-toc-variant="inline">
+    <summary class="article-toc__summary">
+      <UiIcon name="list" class="article-toc__summary-icon" />
+      <span class="article-toc__summary-label">{label}</span>
+      <span class="article-toc__count">{items.length}</span>
+      <UiIcon name="chevron-down" class="article-toc__summary-chevron" />
+    </summary>
+    <ol class="article-toc__list">
+      {items.map((item) => (
+        <li class:list={['article-toc__item', `article-toc__item--h${item.depth}`]}>
+          <a class="article-toc__link" href={`#${item.slug}`} data-toc-target={item.slug}>{item.text}</a>
+        </li>
+      ))}
+    </ol>
+  </details>
+)}

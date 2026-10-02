@@ -36,7 +36,8 @@
    侧边栏与导航
 ================================ */
 .sidebar {
-  padding: 55px 24px;
+  /* 内边距与后台侧栏共用 token；内容宽度 = --sidebar - 2 * 内边距（引语最长行 182px） */
+  padding: var(--sidebar-padding-block) var(--sidebar-padding-inline);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -48,7 +49,7 @@
 
 .sidebar__title {
   font-family: var(--font-brand);
-  font-size: 28px;
+  font-size: 26px;
   letter-spacing: 0.5px;
   transition: transform 0.2s ease;
 }
@@ -67,11 +68,11 @@
 }
 
 .sidebar__quote {
-  max-width: 220px;
+  max-width: 188px;
   text-align: right;
   font-family: var(--font-brand);
   font-style: italic;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--muted);
 }
 
@@ -168,6 +169,8 @@
 
 .content__inner {
   max-width: var(--max);
+  /* 内容列比 --max 更宽时（大屏列表页）居中，避免正文块贴着分隔线 */
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -374,7 +377,7 @@ body.admin-page {
   );
   --admin-sidebar-height: 100vh;
   --admin-sidebar-dynamic-height: 100vh;
-  --admin-sidebar-padding: 55px 24px;
+  --admin-sidebar-padding: var(--sidebar-padding-block) var(--sidebar-padding-inline);
   --admin-sidebar-align: flex-end;
   --admin-sidebar-gap: 24px;
   --admin-sidebar-divider-block-start: 50px;
@@ -1178,108 +1181,75 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
   }
 }
 
-/* 阅读模式退出按钮（正文） */
-.reader-exit-anchor {
-  position: relative;
-}
-
-.reader-exit-anchor[data-reader-exit-inline] {
-  padding-right: 44px;
-}
-
-.reader-exit {
-  position: absolute;
-  right: 0;
-  top: 2px;
-  width: 38px;
-  height: 38px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.reader-exit[data-visible="true"] {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.reader-exit .icon {
-  width: 20px;
-  height: 20px;
-}
-
-/* 浮动动作按钮（回到顶部 / 阅读模式浮层） */
-.float-action {
-  --float-bottom: calc(16px + env(safe-area-inset-bottom));
-  --float-gap: 10px;
+/* 右下角常驻浮动按钮列（回到顶部 / 回到上次阅读位置 / 退出阅读）；
+   按钮按需出现，自下而上堆叠，显隐不影响底部按钮位置 */
+.float-stack {
+  /* 与左侧栏 .icon-button 同尺寸；移动端 36px 见下方 media query */
+  --float-button-size: 34px;
   position: fixed;
   right: calc(var(--pad-x) + env(safe-area-inset-right));
-  bottom: var(--float-bottom);
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  border: 0;
-  background: transparent;
-  color: var(--text);
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(8px);
-  transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   z-index: 6;
 }
 
-.float-action::before {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--panel);
-  pointer-events: none;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.float-action[data-visible="true"] {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-
-.float-action .icon {
-  width: 18px;
-  height: 18px;
+.float-stack__button {
   position: relative;
-  z-index: 1;
+  width: var(--float-button-size);
+  height: var(--float-button-size);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.18s ease, border-color 0.18s ease;
 }
 
-.scroll-top[data-stack="true"] {
-  bottom: calc(var(--float-bottom) + var(--float-gap) + 44px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .float-action {
-    transition: none;
-    transform: none;
-  }
-}
-
-/* 阅读模式：隐藏侧栏/导航/页脚，增强正文可读性 */
-body.immersive-page[data-reading="immersive"] .sidebar,
-body.immersive-page[data-reading="immersive"] .divider,
-body.immersive-page[data-reading="immersive"] .site-footer {
+.float-stack__button[hidden] {
   display: none;
 }
 
-body.immersive-page[data-reading="immersive"] .shell {
-  grid-template-columns: 1fr;
-  max-width: 960px;
+.float-stack__button:hover {
+  color: var(--text);
+  border-color: var(--muted);
 }
 
+.float-stack__button[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+.float-stack__button .icon {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 900px) {
+  .float-stack {
+    --float-button-size: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-stack__button {
+    transition: none;
+  }
+}
+
+/* 阅读模式：收起侧栏/导航/页脚，增强正文可读性 */
 body.immersive-page[data-reading="immersive"] .content {
   padding: 64px 40px;
 }
 
 body.immersive-page[data-reading="immersive"] .content__inner {
-  max-width: 860px;
   margin: 0 auto;
 }
 
@@ -1290,4 +1260,110 @@ body.immersive-page[data-reading="immersive"] .prose {
 
 body.immersive-page[data-reading="immersive"] .prose p {
   margin: 16px 0;
+}
+
+/* 窄屏：侧栏是顶部横条，用 max-height 收起（高度由 sidebar-reading.ts 量出） */
+@media (max-width: 900px) {
+  body.immersive-page .sidebar {
+    transition:
+      max-height 520ms cubic-bezier(0.22, 1, 0.36, 1),
+      padding 520ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 260ms ease,
+      transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0s;
+  }
+
+  /* 只在动画窗口内限高，静止态不设上限以免裁切顶栏 */
+  body[data-reading-anim] .sidebar {
+    max-height: var(--mobile-sidebar-height, 100vh);
+    overflow: hidden;
+  }
+
+  body.immersive-page[data-reading="immersive"] .sidebar {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    transform: translateY(-12px);
+    visibility: hidden;
+    pointer-events: none;
+    overflow: hidden;
+    /* visibility 延后到淡出结束，否则看不到淡出 */
+    transition:
+      max-height 520ms cubic-bezier(0.22, 1, 0.36, 1),
+      padding 520ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 200ms ease,
+      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 420ms;
+  }
+
+  body.immersive-page[data-reading="immersive"] .divider,
+  body.immersive-page[data-reading="immersive"] .site-footer {
+    display: none;
+  }
+}
+
+/* 桌面端：列宽收拢 + 淡出位移；时长与 sidebar-reading.ts 的 READING_ANIM_MS 对齐 */
+@media (min-width: 901px) {
+  body.immersive-page .shell {
+    transition:
+      grid-template-columns 520ms cubic-bezier(0.22, 1, 0.36, 1),
+      max-width 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  body.immersive-page .sidebar {
+    transition:
+      opacity 260ms ease,
+      transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0s;
+  }
+
+  body.immersive-page .content {
+    transition: padding 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  body.immersive-page .content__inner {
+    transition: max-width 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  body.immersive-page .site-footer {
+    transition: opacity 260ms ease, visibility 0s linear 0s;
+  }
+
+  /* 过渡期间裁剪侧栏，避免列宽收缩时内容外溢 */
+  body[data-reading-anim] .sidebar {
+    overflow: hidden;
+  }
+
+  body.immersive-page[data-reading="immersive"] .shell {
+    grid-template-columns: 0px 0px 1fr;
+  }
+
+  body.immersive-page[data-reading="immersive"] .sidebar {
+    opacity: 0;
+    transform: translateX(-18px);
+    visibility: hidden;
+    pointer-events: none;
+    overflow: hidden;
+    transition:
+      opacity 200ms ease,
+      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 420ms;
+  }
+
+  body.immersive-page[data-reading="immersive"] .site-footer {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.immersive-page .shell,
+  body.immersive-page .sidebar,
+  body.immersive-page[data-reading="immersive"] .sidebar,
+  body.immersive-page .content,
+  body.immersive-page .content__inner,
+  body.immersive-page .site-footer {
+    transition: none;
+  }
 }

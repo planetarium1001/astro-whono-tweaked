@@ -19,20 +19,21 @@ const {
   image,
   ogType = 'website',
   bodyClass,
-  allowReadingMode = true,
   deferGlobalStyles = false,
   activeNavId,
-  adminSidebarScope = 'default'
+  adminSidebarScope = 'default',
+  tocRail = false
 } = Astro.props as {
   title?: string;
   description?: string;
   image?: string;
   ogType?: string;
   bodyClass?: string;
-  allowReadingMode?: boolean;
   deferGlobalStyles?: boolean;
   activeNavId?: SidebarNavId;
   adminSidebarScope?: 'default' | 'page';
+  // 为 true 时预留第 4 列（文章右侧目录）并渲染 toc-rail 插槽；壳层宽度全局统一，不会移动左侧栏
+  tocRail?: boolean;
 };
 
 const { settings } = getThemeSettings();
@@ -75,10 +76,19 @@ const yearRange = footerShowCurrentYear && currentYear > footerStartYear
   ? `${footerStartYear}-${currentYear}`
   : `${footerStartYear}`;
 const base = import.meta.env.BASE_URL ?? '/';
+const pathname = Astro.url.pathname;
 const withBase = createWithBase(base);
 const faviconLinks = getSiteFaviconLinks(settings.site.favicon);
 const bodyClassNames = typeof bodyClass === 'string' ? bodyClass.split(/\s+/).filter(Boolean) : [];
 const isAdminPage = bodyClassNames.includes('admin-page');
+// 长阅读/列表页才输出浮动按钮列；构建期判路由，带 base 前缀部署也能命中
+const basePrefix = base.endsWith('/') ? base.slice(0, -1) : base;
+const routePath = basePrefix && pathname.startsWith(basePrefix)
+  ? pathname.slice(basePrefix.length) || '/'
+  : pathname;
+const showFloatStack = !isAdminPage && /^\/(?:archive|bits|essay|memo)(?:\/|$)/.test(routePath);
+// 阅读模式入口开关（Theme Console →「阅读模式入口」）
+const showReaderToggle = settings.ui.readingMode.showEntry;
 const isDev = import.meta.env.DEV;
 const isDevAdminPage = isAdminPage && isDev;
 const adminDevState = isAdminPage ? (isDev ? 'true' : 'false') : undefined;
@@ -209,13 +219,12 @@ const adminUiPrefsScriptHref = isDevAdminPage
     data-admin-dev={adminDevState}
   >
     <a class="skip-link" href="#content">跳到内容</a>
-    <div class="shell" data-sidebar-divider={sidebarDividerVariant}>
+    <div class="shell" data-sidebar-divider={sidebarDividerVariant} data-toc={tocRail ? 'true' : undefined}>
       <Sidebar
         siteTitle={brandTitle}
         activeNavId={activeNavId}
         isAdminContext={isAdminPage}
         isDev={isDev}
-        allowReadingMode={allowReadingMode}
         adminSidebarScope={isPageScopedAdminSidebar ? 'page' : 'default'}
       />
       <div class="divider" aria-hidden="true"></div>
@@ -225,19 +234,46 @@ const adminUiPrefsScriptHref = isDevAdminPage
           <footer class="site-footer">© {yearRange} {footerCopyright}</footer>
         </div>
       </main>
+      {tocRail ? <slot name="toc-rail" /> : null}
     </div>
-    <template id="scroll-top-template">
-      <button
-        type="button"
-        class="icon-button float-action scroll-top"
-        aria-label="回到顶部"
-        title="回到顶部"
-        aria-hidden="true"
-        tabindex="-1"
-      >
-        <UiIcon name="chevron-up" class="icon" />
-      </button>
-    </template>
+    {showFloatStack ? (
+      <div class="float-stack" data-float-stack>
+        {showReaderToggle ? (
+          <button
+            id="reader-toggle"
+            class="float-stack__button reader-toggle"
+            type="button"
+            aria-label="阅读模式"
+            aria-pressed="false"
+            title="阅读模式"
+            hidden
+          >
+            <UiIcon name="book-open" class="icon icon-book-open" />
+            <UiIcon name="book-closed" class="icon icon-book-closed" />
+          </button>
+        ) : null}
+        <button
+          id="resume-reading"
+          class="float-stack__button"
+          type="button"
+          aria-label="回到上次阅读位置"
+          title="回到上次阅读位置"
+          hidden
+        >
+          <UiIcon name="resume-reading" class="icon" />
+        </button>
+        <button
+          id="scroll-top"
+          class="float-stack__button"
+          type="button"
+          aria-label="回到顶部"
+          title="回到顶部"
+          aria-disabled="true"
+        >
+          <UiIcon name="chevron-up" class="icon" />
+        </button>
+      </div>
+    ) : null}
     <script>
       import '../scripts/sidebar-theme.ts';
       import '../scripts/sidebar-rail-nav.ts';

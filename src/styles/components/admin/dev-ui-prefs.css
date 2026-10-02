@@ -279,8 +279,9 @@ body.admin-page[data-admin-dev='true'] .admin-ui-prefs {
   --admin-ui-prefs-segment-text: var(--faint);
   --admin-ui-prefs-segment-hover-bg: color-mix(in srgb, var(--text) 8%, transparent);
   --admin-ui-prefs-segment-hover-text: var(--text);
-  --admin-ui-prefs-popover-inline-start: auto;
-  --admin-ui-prefs-popover-inline-end: 0;
+  /* 弹层比按钮左侧空间宽，按右缘对齐会顶出视口；改为自按钮左缘向右展开 */
+  --admin-ui-prefs-popover-inline-start: 0;
+  --admin-ui-prefs-popover-inline-end: auto;
   --admin-ui-prefs-popover-block-end: calc(100% + 8px);
   --admin-ui-prefs-popover-closed-transform: translateY(4px);
   --admin-ui-prefs-popover-open-transform: translateY(0);
@@ -324,6 +325,10 @@ body.admin-page[data-admin-dev='true'] .admin-ui-prefs__popover {
   display: grid;
   gap: 9px;
   width: min(292px, calc(100vw - 24px));
+  /* 向上展开，视口矮时顶部会被推出屏幕；限高并内部滚动 */
+  max-height: min(70vh, 600px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 12px;
   border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
   border-radius: 8px;

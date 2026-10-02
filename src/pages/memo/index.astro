@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import UiIcon from '../../components/UiIcon.astro';
 import Lightbox from '../../components/Lightbox.astro';
 import '../../styles/article.css';
 import '../../styles/memo.css';
@@ -79,20 +78,9 @@ const groups = buildMemoTocGroups(headings);
     />
   ) : null}
 
-  <div class="page-header reader-exit-anchor">
+  <div class="page-header">
     <h1 class="page-title">{memoTitle}</h1>
     {memoSubtitle ? <span class="page-subtitle">{memoSubtitle}</span> : null}
-    <button
-      id="reader-exit"
-      class="icon-button reader-exit"
-      type="button"
-      aria-label="退出阅读"
-      title="退出阅读"
-      aria-hidden="true"
-      tabindex="-1"
-    >
-      <UiIcon name="reader-exit" class="icon" />
-    </button>
   </div>
 
   <div class="intro prose">

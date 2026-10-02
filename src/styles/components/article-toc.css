@@ -1,0 +1,325 @@
+/* ArticleToc
+   负责文章目录：宽屏右侧常驻列（可收起）、窄屏正文顶部折叠列表、跳转高亮。
+*/
+
+.article-toc {
+  font-family: var(--font-copy);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.article-toc__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.article-toc__item--h3 {
+  padding-left: 14px;
+}
+
+.article-toc__link {
+  display: block;
+  padding: 3px 0 3px 10px;
+  border-left: 2px solid transparent;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.article-toc__link:hover {
+  color: var(--text);
+}
+
+.article-toc__link.is-active {
+  color: var(--text);
+  border-left-color: currentColor;
+}
+
+/* 窄屏：正文顶部的可折叠列表 */
+.article-toc--inline {
+  margin: 0 0 28px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.article-toc__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--text);
+}
+
+.article-toc__summary::-webkit-details-marker {
+  display: none;
+}
+
+.article-toc__summary-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+}
+
+.article-toc__summary-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.article-toc__count {
+  color: var(--faint);
+  font-size: 12px;
+}
+
+.article-toc__summary-chevron {
+  width: 14px;
+  height: 14px;
+  color: var(--muted);
+  transition: transform 0.2s ease;
+}
+
+.article-toc--inline[open] .article-toc__summary-chevron {
+  transform: rotate(180deg);
+}
+
+.article-toc--inline .article-toc__list {
+  padding-top: 10px;
+}
+
+/* 锚点跳转时给标题留出呼吸空间 */
+body.immersive-page .prose :is(h2, h3)[id] {
+  scroll-margin-top: 24px;
+}
+
+/* 跳转后脚本会聚焦目标标题（读屏定位），去掉浏览器默认焦点框 */
+body.immersive-page .prose :is(h2, h3)[id][tabindex]:focus,
+body.immersive-page .prose :is(h2, h3)[id][tabindex]:focus-visible {
+  outline: none;
+}
+
+:root {
+  --article-toc-inline-size: 260px;
+  /* 收起后只留把手宽度的窄轨，保证把手在壳层内可见 */
+  --article-toc-handle-column: 34px;
+  /* 实际列宽：收起/入场时收窄，栅格规则统一引用 */
+  --article-toc-column: var(--article-toc-inline-size);
+}
+
+/* 收起状态（article-toc.ts 切换并记忆）；data-toc-intro 是入场用的临时收起态 */
+:root[data-toc-collapsed='true'],
+:root[data-toc-intro='true'] {
+  --article-toc-column: var(--article-toc-handle-column);
+}
+
+:root[data-toc-collapsed='true'] .article-toc__rail-body {
+  display: none;
+}
+
+:root[data-toc-collapsed='true'] .article-toc__title,
+:root[data-toc-intro='true'] .article-toc__title {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 160ms ease, visibility 0s linear 160ms;
+}
+
+:root[data-toc-collapsed='true'] .article-toc--rail,
+:root[data-toc-intro='true'] .article-toc--rail {
+  padding: var(--sidebar-padding-block) 0 40px 4px;
+}
+
+/* 把手与「本文目录」同行并贴行右端（即壳层右缘），收起/展开/入场都不位移 */
+.article-toc__rail-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+/* flex:1 + min-width:0：列变窄时标题缩到 0 宽，不挤走把手，也不需硬切 */
+.article-toc__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+  color: var(--faint);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  transition: opacity 200ms ease, visibility 0s linear 0s;
+}
+
+.article-toc__toggle {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.article-toc__toggle:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.article-toc__toggle .icon {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root[data-toc-collapsed='true'] .article-toc__toggle .icon {
+  transform: rotate(180deg);
+}
+
+/* 目录是 .shell 的第 4 列（sticky）；壳层宽度全局统一，加列不移动左侧栏 */
+.article-toc--rail {
+  display: none;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  padding: var(--sidebar-padding-block) 0 40px 24px;
+  /* 过渡期间裁掉外溢，避免内容溢出到正文上 */
+  overflow: hidden;
+  transition: opacity 260ms ease, visibility 0s linear 0s;
+}
+
+/* 目录列表过长时在列内滚动，把手不受影响 */
+.article-toc__rail-body {
+  max-height: calc(100vh - var(--sidebar-padding-block) - 40px);
+  overflow-y: auto;
+  transition: opacity 240ms ease 120ms, visibility 0s linear 0s;
+}
+
+/* 入场态：目录区不可见，撤掉 data-toc-intro 后淡入 */
+:root[data-toc-intro='true'] .article-toc__rail-body {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* 中屏：仅阅读模式启用（左侧栏已收拢，腾出的宽度够放目录列） */
+@media (min-width: 1024px) {
+  body.immersive-page[data-reading='immersive'] .shell[data-toc='true'] {
+    grid-template-columns: 0px 0px minmax(0, 1fr) var(--article-toc-column);
+  }
+
+  body.immersive-page[data-reading='immersive'] .article-toc--rail {
+    display: block;
+  }
+
+  body.immersive-page[data-reading='immersive'] .article-toc--inline {
+    display: none;
+  }
+}
+
+/* 1024–1280：普通模式先把第 4 列占位成 0px，保证进出阅读模式时列数不变（3→4 无法插值） */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  body.immersive-page .shell[data-toc='true'] {
+    grid-template-columns:
+      var(--sidebar)
+      var(--layout-divider-inline-size)
+      minmax(0, 1fr)
+      0px;
+  }
+
+  body.immersive-page .shell[data-toc='true'][data-sidebar-divider='none'] {
+    grid-template-columns: var(--sidebar) 0 minmax(0, 1fr) 0px;
+  }
+}
+
+/* 宽屏：普通模式也常驻右侧目录（左侧栏 + 正文 + 目录都放得下） */
+@media (min-width: 1280px) {
+  body.immersive-page .shell[data-toc='true'] {
+    grid-template-columns:
+      var(--sidebar)
+      var(--layout-divider-inline-size)
+      minmax(0, 1fr)
+      var(--article-toc-column);
+  }
+
+  body.immersive-page .shell[data-toc='true'][data-sidebar-divider='none'] {
+    grid-template-columns: var(--sidebar) 0 minmax(0, 1fr) var(--article-toc-column);
+  }
+
+  body.immersive-page .article-toc--rail {
+    display: block;
+  }
+
+  .article-toc--inline {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .article-toc__link,
+  .article-toc__summary-chevron,
+  .article-toc--rail {
+    transition: none;
+  }
+}
+
+/* 目录跳转高亮：用暖白色带短暂标记目标章节（到下一个同级/更高级标题为止） */
+.prose {
+  position: relative;
+}
+
+.prose-flash {
+  position: absolute;
+  left: -12px;
+  right: -12px;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 8px;
+  background: var(--prose-flash-bg);
+  animation: prose-flash 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes prose-flash {
+  0% {
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  65% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 减少动效时不做渐隐，静态色带由脚本移除 */
+  .prose-flash {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* 跳转高亮底色：偏米白的暖色，两主题各一档透明度 */
+:root {
+  --prose-flash-bg: color-mix(in srgb, #e6d2a8 30%, transparent);
+}
+
+:root[data-theme='dark'] {
+  --prose-flash-bg: color-mix(in srgb, #efe1c2 15%, transparent);
+}

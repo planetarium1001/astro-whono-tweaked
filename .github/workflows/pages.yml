@@ -1,0 +1,79 @@
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # 只在主仓库部署：别人 fork 后 Pages 作业会跳过，不会因为没启用 Pages 而报错；
+    # 想在 fork 里部署自己的预览，把这里改成自己的仓库名即可。
+    if: github.repository == 'planetarium1001/astro-whono-tweaked'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve Node version
+        id: node
+        shell: bash
+        run: |
+          if [ -f .nvmrc ]; then
+            version="$(cat .nvmrc)"
+          else
+            version="22"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.node.outputs.version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 项目页部署在 /<repo>/ 子路径下：站点域名给 origin，子路径交给 base；
+      # 仓库名若是 <owner>.github.io（用户主页仓库），则部署在根路径
+      - name: Resolve site URL and base path
+        shell: bash
+        run: |
+          echo "SITE_URL=https://${GITHUB_REPOSITORY_OWNER}.github.io" >> "$GITHUB_ENV"
+          repo="${GITHUB_REPOSITORY#*/}"
+          owner_lc="$(printf '%s' "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          repo_lc="$(printf '%s' "${repo}" | tr '[:upper:]' '[:lower:]')"
+          if [ "${repo_lc}" = "${owner_lc}.github.io" ]; then
+            echo "ASTRO_WHONO_BASE_PATH=/" >> "$GITHUB_ENV"
+          else
+            echo "ASTRO_WHONO_BASE_PATH=/${repo}/" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
