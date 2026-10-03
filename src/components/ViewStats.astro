@@ -1,0 +1,54 @@
+---
+// 浏览数据槽位：只渲染位置与 DOM 契约，数字由 src/scripts/view-stats.ts 填入。
+// 未填值时保持 hidden（见 styles/components/view-stats.css），不占位。
+
+interface Props {
+  scope: string;
+  path: string;
+  route: string;
+  title?: string | undefined;
+  showPv: boolean;
+  pvLabel: string;
+  showUv: boolean;
+  uvLabel: string;
+  /** meta：文章元信息行内一项；footer：页面底部独占一行 */
+  variant?: 'meta' | 'footer';
+}
+
+const {
+  scope,
+  path,
+  route,
+  title,
+  showPv,
+  pvLabel,
+  showUv,
+  uvLabel,
+  variant = 'meta'
+} = Astro.props;
+
+const stats = [
+  showPv ? { key: 'pv', label: pvLabel } : null,
+  showUv ? { key: 'uv', label: uvLabel } : null
+].filter((stat): stat is { key: string; label: string } => stat !== null);
+const Tag = variant === 'footer' ? 'div' : 'span';
+const className = variant === 'footer' ? 'view-stats view-stats--footer' : 'meta-line__item view-stats';
+---
+
+{stats.length > 0 ? (
+  <Tag
+    class={className}
+    data-view-stats
+    data-view-scope={scope}
+    data-view-path={path}
+    data-view-route={route}
+    data-view-title={title}
+  >
+    {stats.map((stat) => (
+      <span class="view-stats__item" data-view-stat={stat.key} hidden>
+        <span class="view-stats__label">{stat.label}</span>
+        <span class="view-stats__value" data-view-stat-value></span>
+      </span>
+    ))}
+  </Tag>
+) : null}

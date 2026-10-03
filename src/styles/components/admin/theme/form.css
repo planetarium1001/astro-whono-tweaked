@@ -337,6 +337,15 @@
   margin-top: 8px;
 }
 
+.admin-help--view-stats-preview {
+  margin-top: 8px;
+}
+
+/* 浏览数据：两行开关属于同一组，行距按表单网格收紧 */
+.admin-subgroup--view-stats .admin-toggle-row-group > .admin-toggle-row {
+  min-height: 28px;
+}
+
 .admin-help code {
   color: var(--muted);
   font-size: 13px;
@@ -1285,6 +1294,35 @@
 
 .admin-favicon-slot__preview[data-state='default'] img {
   opacity: 0.45;
+}
+
+/* 备案图标预览：与站点图标一致，预览框放在标签行内 */
+.admin-label--filings-icon {
+  align-items: center;
+}
+
+.admin-filings-icon__preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-content-bg);
+  overflow: hidden;
+}
+
+.admin-filings-icon__preview img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* 空值与加载失败只留虚框，不显示裂图 */
+.admin-filings-icon__preview[data-state='empty'],
+.admin-filings-icon__preview[data-state='error'] {
+  border-style: dashed;
 }
 
 .admin-favicon-line__divider {

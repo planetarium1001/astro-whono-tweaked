@@ -25,6 +25,7 @@ import {
   normalizeBitsAvatarPath as normalizeAdminBitsAvatarPath,
   normalizeHeroImageSrc as normalizeAdminHeroImageSrc,
   normalizeSiteFaviconPath as normalizeAdminSiteFaviconPath,
+  normalizeSiteFilingIconPath as normalizeAdminSiteFilingIconPath,
   type SiteFaviconSlot
 } from '../../utils/format';
 
@@ -35,7 +36,8 @@ export {
   getAdminSiteFaviconSizesFromPath,
   normalizeAdminBitsAvatarPath,
   normalizeAdminHeroImageSrc,
-  normalizeAdminSiteFaviconPath
+  normalizeAdminSiteFaviconPath,
+  normalizeAdminSiteFilingIconPath
 };
 
 export const ADMIN_SITE_FAVICON_SLOTS = ['svg', 'png', 'appleTouchIcon'] as const satisfies readonly SiteFaviconSlot[];
@@ -56,6 +58,14 @@ export const ADMIN_HERO_IMAGE_ALT_MAX_LENGTH = 120;
 
 export const ADMIN_ARTICLE_META_DATE_LABEL_DEFAULT = '发布于：';
 export const ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH = 20;
+
+export const ADMIN_FILINGS_NUMBER_MAX_LENGTH = 40;
+export const ADMIN_ICP_FILING_HOSTS = ['beian.miit.gov.cn'] as const;
+export const ADMIN_POLICE_FILING_HOSTS = ['beian.mps.gov.cn', 'beian.gov.cn'] as const;
+
+export const ADMIN_VIEW_STATS_PV_LABEL_DEFAULT = '浏览';
+export const ADMIN_VIEW_STATS_UV_LABEL_DEFAULT = '访客';
+export const ADMIN_VIEW_STATS_LABEL_MAX_LENGTH = 8;
 
 export const ADMIN_SIDEBAR_DIVIDER_VARIANTS = [
   'default',
@@ -409,7 +419,12 @@ export const canonicalizeAdminThemeSettings = (
   const bitsPage = isRecord(page.bits) ? page.bits : {};
   const bitsDefaultAuthor = isRecord(bitsPage.defaultAuthor) ? bitsPage.defaultAuthor : {};
   const rawPresetOrder = isRecord(socialLinks.presetOrder) ? socialLinks.presetOrder : {};
+  const rawFilings = isRecord(site.filings) ? site.filings : {};
+  const rawFilingsIcp = isRecord(rawFilings.icp) ? rawFilings.icp : {};
+  const rawFilingsPolice = isRecord(rawFilings.police) ? rawFilings.police : {};
   const rawUiArticleMeta: LooseRecord = isRecord(ui.articleMeta) ? ui.articleMeta : {};
+  const rawUiFloatStack: LooseRecord = isRecord(ui.floatStack) ? ui.floatStack : {};
+  const rawUiViewStats: LooseRecord = isRecord(ui.viewStats) ? ui.viewStats : {};
   const rawUiSidebarActions: LooseRecord = isRecord(ui.sidebarActions) ? ui.sidebarActions : {};
   const rawUiLayout: LooseRecord = isRecord(ui.layout) ? ui.layout : {};
   const rawUiTypography: LooseRecord = isRecord(ui.typography) ? ui.typography : {};
@@ -483,6 +498,15 @@ export const canonicalizeAdminThemeSettings = (
   })();
 
   const rawFavicon = isRecord(site.favicon) ? site.favicon : {};
+  // 图标与 favicon 同策略：合法路径归一化，非法值保留原文交给校验报错
+  const canonicalFilingsIcon = (): string | null => {
+    const rawValue = rawFilingsPolice.icon;
+    if (rawValue === null || rawValue === undefined) return null;
+
+    const normalized = normalizeAdminSiteFilingIconPath(rawValue);
+    return normalized === undefined ? (normalizeTrimmed(rawValue) || null) : normalized;
+  };
+
   const canonicalFaviconSlot = (slot: SiteFaviconSlot): string | null => {
     const rawValue = rawFavicon[slot];
     if (rawValue === null || rawValue === undefined) return null;
@@ -511,6 +535,17 @@ export const canonicalizeAdminThemeSettings = (
           adminOverview.hiddenMessage,
           ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT
         )
+      },
+      filings: {
+        icp: {
+          number: normalizeOptionalSingleLine(String(rawFilingsIcp.number ?? '')),
+          link: normalizeOptionalSingleLine(String(rawFilingsIcp.link ?? ''))
+        },
+        police: {
+          number: normalizeOptionalSingleLine(String(rawFilingsPolice.number ?? '')),
+          link: normalizeOptionalSingleLine(String(rawFilingsPolice.link ?? '')),
+          icon: canonicalFilingsIcon()
+        }
       },
       favicon: {
         svg: canonicalFaviconSlot('svg'),
@@ -583,6 +618,22 @@ export const canonicalizeAdminThemeSettings = (
       readingMode: {
         showEntry: Boolean(isRecord(ui.readingMode) ? ui.readingMode.showEntry : false)
       },
+      floatStack: {
+        showResumeReading: typeof rawUiFloatStack.showResumeReading === 'boolean'
+          ? rawUiFloatStack.showResumeReading
+          : true,
+        showScrollTop: typeof rawUiFloatStack.showScrollTop === 'boolean'
+          ? rawUiFloatStack.showScrollTop
+          : true
+      },
+      viewStats: {
+        showPv: typeof rawUiViewStats.showPv === 'boolean' ? rawUiViewStats.showPv : false,
+        pvLabel: normalizeSingleLine(rawUiViewStats.pvLabel, ADMIN_VIEW_STATS_PV_LABEL_DEFAULT),
+        showUv: typeof rawUiViewStats.showUv === 'boolean' ? rawUiViewStats.showUv : false,
+        uvLabel: normalizeSingleLine(rawUiViewStats.uvLabel, ADMIN_VIEW_STATS_UV_LABEL_DEFAULT),
+        onArticleMeta: typeof rawUiViewStats.onArticleMeta === 'boolean' ? rawUiViewStats.onArticleMeta : true,
+        onIndexPages: typeof rawUiViewStats.onIndexPages === 'boolean' ? rawUiViewStats.onIndexPages : true
+      },
       sidebarActions: {
         showRssLink: typeof rawUiSidebarActions.showRssLink === 'boolean' ? rawUiSidebarActions.showRssLink : true,
         showThemeToggle: typeof rawUiSidebarActions.showThemeToggle === 'boolean'
@@ -627,6 +678,10 @@ export const createAdminWritableThemeSettingsGroups = (
     footer: {
       ...settings.site.footer
     },
+    filings: {
+      icp: { ...settings.site.filings.icp },
+      police: { ...settings.site.filings.police }
+    },
     adminOverview: {
       ...settings.site.adminOverview
     },
@@ -668,6 +723,8 @@ export const createAdminWritableThemeSettingsGroups = (
   ui: {
     codeBlock: { ...settings.ui.codeBlock },
     readingMode: { ...settings.ui.readingMode },
+    floatStack: { ...settings.ui.floatStack },
+    viewStats: { ...settings.ui.viewStats },
     sidebarActions: { ...settings.ui.sidebarActions },
     articleMeta: { ...settings.ui.articleMeta },
     layout: { ...settings.ui.layout },
@@ -720,6 +777,42 @@ export const validateAdminThemeSettings = (
     pushIssue('site.footer.copyright', '页脚版权行只允许单行文本');
   } else if (settings.site.footer.copyright.length > ADMIN_FOOTER_COPYRIGHT_MAX_LENGTH) {
     pushIssue('site.footer.copyright', `页脚版权行不能超过 ${ADMIN_FOOTER_COPYRIGHT_MAX_LENGTH} 个字符`);
+  }
+
+  for (const [path, label, value] of [
+    ['site.filings.icp.number', '工信部备案号', settings.site.filings?.icp?.number],
+    ['site.filings.police.number', '公安备案号', settings.site.filings?.police?.number]
+  ] as const) {
+    if (value === null) continue;
+    if (typeof value !== 'string') {
+      pushIssue(path, `备案信息里的“${label}”必须是字符串`);
+    } else if (value.includes('\n') || value.includes('\r')) {
+      pushIssue(path, `备案信息里的“${label}”只允许单行文本`);
+    } else if (value.length > ADMIN_FILINGS_NUMBER_MAX_LENGTH) {
+      pushIssue(path, `备案信息里的“${label}”不能超过 ${ADMIN_FILINGS_NUMBER_MAX_LENGTH} 个字符`);
+    }
+  }
+
+  for (const [path, label, value, hosts] of [
+    ['site.filings.icp.link', '工信部备案链接', settings.site.filings?.icp?.link, ADMIN_ICP_FILING_HOSTS],
+    ['site.filings.police.link', '公安备案链接', settings.site.filings?.police?.link, ADMIN_POLICE_FILING_HOSTS]
+  ] as const) {
+    if (value === null) continue;
+    if (typeof value !== 'string' || !isAdminAllowedHttpsUrl(value, hosts)) {
+      pushIssue(path, `备案信息里的“${label}”只允许 ${hosts.map((host) => `https://${host}`).join(' 或 ')} 的地址`);
+    }
+  }
+
+  const filingsIcon = settings.site.filings?.police?.icon ?? null;
+  if (filingsIcon !== null) {
+    if (normalizeAdminSiteFilingIconPath(filingsIcon) === undefined) {
+      pushIssue('site.filings.police.icon', '公安备案图标只允许 https 图片地址或 public/**（或 / 开头）的图片路径');
+    } else if (!/^https:\/\//i.test(filingsIcon) && options.localFileExists) {
+      const localFilePath = `public${filingsIcon}`;
+      if (!options.localFileExists(localFilePath)) {
+        pushIssue('site.filings.police.icon', `公安备案图标指向的本地文件不存在：${localFilePath}`);
+      }
+    }
   }
 
   if (typeof settings.site.adminOverview?.publicVisible !== 'boolean') {
@@ -1038,6 +1131,38 @@ export const validateAdminThemeSettings = (
     pushIssue('ui.sidebarActions.showAdminEntry', '侧栏图标里的“显示 /admin/ 入口”必须是布尔值');
   }
 
+  if (typeof settings.ui?.floatStack?.showResumeReading !== 'boolean') {
+    pushIssue('ui.floatStack.showResumeReading', '浮动操作列里的“回到上次阅读位置”必须是布尔值');
+  }
+
+  if (typeof settings.ui?.floatStack?.showScrollTop !== 'boolean') {
+    pushIssue('ui.floatStack.showScrollTop', '浮动操作列里的“回到顶部”必须是布尔值');
+  }
+
+  for (const [path, label, value] of [
+    ['ui.viewStats.pvLabel', '浏览量前缀', settings.ui?.viewStats?.pvLabel],
+    ['ui.viewStats.uvLabel', '访客数前缀', settings.ui?.viewStats?.uvLabel]
+  ] as const) {
+    if (typeof value !== 'string') {
+      pushIssue(path, `浏览数据里的“${label}”必须是字符串`);
+    } else if (value.includes('\n') || value.includes('\r')) {
+      pushIssue(path, `浏览数据里的“${label}”只允许单行文本`);
+    } else if (value.length > ADMIN_VIEW_STATS_LABEL_MAX_LENGTH) {
+      pushIssue(path, `浏览数据里的“${label}”不能超过 ${ADMIN_VIEW_STATS_LABEL_MAX_LENGTH} 个字符`);
+    }
+  }
+
+  for (const [path, label, value] of [
+    ['ui.viewStats.showPv', '显示浏览量', settings.ui?.viewStats?.showPv],
+    ['ui.viewStats.showUv', '显示访客数', settings.ui?.viewStats?.showUv],
+    ['ui.viewStats.onArticleMeta', '显示在文章元信息行', settings.ui?.viewStats?.onArticleMeta],
+    ['ui.viewStats.onIndexPages', '显示在归档 / 絮语 / 随笔 / 小记等页面底部', settings.ui?.viewStats?.onIndexPages]
+  ] as const) {
+    if (typeof value !== 'boolean') {
+      pushIssue(path, `浏览数据里的“${label}”必须是布尔值`);
+    }
+  }
+
   if (!isAdminSidebarDividerVariant(settings.ui?.layout?.sidebarDivider ?? '')) {
     pushIssue('ui.layout.sidebarDivider', '侧栏分隔线只允许 默认 / 弱化 / 隐藏');
   }
@@ -1248,6 +1373,21 @@ const fillAdminThemeSettingsSiteCompatibilityDefaults = (
     }
   }
 
+  const canonicalFilings = canonicalSite.filings;
+  if (isRecord(canonicalFilings)) {
+    const rawFilings = next.filings;
+    if (rawFilings === undefined) {
+      next = { ...next, filings: canonicalFilings };
+    } else if (isRecord(rawFilings)) {
+      const mergeEntry = (key: 'icp' | 'police'): LooseRecord => {
+        const canonicalEntry = isRecord(canonicalFilings[key]) ? canonicalFilings[key] : {};
+        const rawEntry = isRecord(rawFilings[key]) ? rawFilings[key] : {};
+        return { ...canonicalEntry, ...rawEntry };
+      };
+      next = { ...next, filings: { icp: mergeEntry('icp'), police: mergeEntry('police') } };
+    }
+  }
+
   const canonicalFavicon = canonicalSite.favicon;
   if (isRecord(canonicalFavicon)) {
     const rawFavicon = next.favicon;
@@ -1267,6 +1407,11 @@ const fillAdminThemeSettingsSiteCompatibilityDefaults = (
 /* ui.* 分组兼容回填的字段表：新增分组只需在此登记，不再复制合并块。 */
 const UI_COMPATIBILITY_GROUP_FIELDS: ReadonlyArray<readonly [string, readonly string[]]> = [
   ['sidebarActions', ['showRssLink', 'showThemeToggle', 'showAdminEntry']],
+  ['floatStack', ['showResumeReading', 'showScrollTop']],
+  [
+    'viewStats',
+    ['showPv', 'pvLabel', 'showUv', 'uvLabel', 'onArticleMeta', 'onIndexPages']
+  ],
   ['typography', ['readable', 'copy', 'mono', 'brand']]
 ];
 

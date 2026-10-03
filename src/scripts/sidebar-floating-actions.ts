@@ -56,7 +56,8 @@ const pruneStore = (store: Record<string, SavedPosition>) => {
 
 const initFloatingStack = () => {
   const stack = document.querySelector<HTMLElement>('[data-float-stack]');
-  if (!stack || !stackButton) return;
+  // 两个按钮都由「浮动操作列」设置单独控制，只剩一个也要照常工作
+  if (!stack || (!stackButton && !resumeButton)) return;
 
   const pageKey = `${window.location.pathname}${window.location.search}`;
   const headings = Array.from(document.querySelectorAll<HTMLElement>('.prose :is(h2, h3)[id]'));
@@ -159,6 +160,7 @@ const initFloatingStack = () => {
   };
 
   const syncScrollTopButton = () => {
+    if (!stackButton) return;
     // 一屏看完时没有回到顶部可言，直接隐藏
     const scrollable = maxScroll() > 48;
     stackButton.hidden = !scrollable;
@@ -173,8 +175,8 @@ const initFloatingStack = () => {
     syncScrollTopButton();
   };
 
-  stackButton.addEventListener('click', () => {
-    if (stackButton.getAttribute('aria-disabled') === 'true') return;
+  stackButton?.addEventListener('click', () => {
+    if (stackButton?.getAttribute('aria-disabled') === 'true') return;
     pushCurrentPosition();
     scrollToY(0);
     syncAll();

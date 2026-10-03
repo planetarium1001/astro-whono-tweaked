@@ -169,6 +169,17 @@ body {
   font-size: 16px;
 }
 
+/* 同 global.css 的 html：首屏即固定滚动条槽位，避免样式表异步到位后再跳一次 */
+html {
+  scrollbar-gutter: stable;
+}
+
+@supports not (scrollbar-gutter: stable) {
+  html {
+    overflow-y: scroll;
+  }
+}
+
 img {
   max-width: 100%;
   height: auto;
@@ -236,10 +247,43 @@ a {
   font-family: var(--font-brand);
   font-size: 26px;
   letter-spacing: 0.5px;
+  display: block;
+  width: 100%;
+  text-align: right;
+  transform-origin: right center;
+}
+
+.sidebar__title-text {
+  display: block;
+}
+
+.whono-block {
+  display: block;
+}
+
+.whono-inline {
+  display: inline;
+}
+
+.whono-left {
+  text-align: left;
+}
+
+.whono-right {
+  text-align: right;
+}
+
+.whono-center {
+  text-align: center;
+}
+
+.whono-nowrap {
+  white-space: nowrap;
 }
 
 .sidebar__quote {
   max-width: 188px;
+  width: 100%;
   text-align: right;
   font-family: var(--font-brand);
   font-style: italic;
@@ -544,6 +588,8 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
     order: 1;
     flex: 1 1 auto;
     font-size: 24px;
+    width: auto;
+    text-align: left;
   }
 
   .sidebar__quote {

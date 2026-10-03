@@ -23,12 +23,17 @@ type ValidationContext = {
   inputSiteFooterStartYear: HTMLInputElement;
   inputSiteFooterShowCurrentYear: HTMLInputElement;
   inputSiteFooterCopyright: HTMLInputElement;
+  inputSiteFilingsIcpNumber: HTMLInputElement;
+  inputSiteFilingsIcpLink: HTMLInputElement;
+  inputSiteFilingsPoliceNumber: HTMLInputElement;
+  inputSiteFilingsPoliceLink: HTMLInputElement;
+  inputSiteFilingsPoliceIcon: HTMLInputElement;
   inputSiteAdminOverviewPublicVisible: HTMLInputElement;
   inputSiteAdminOverviewHiddenMessage: HTMLInputElement;
   inputSiteSocialGithub: HTMLInputElement;
   inputSiteSocialX: HTMLInputElement;
   inputSiteSocialEmail: HTMLInputElement;
-  inputShellBrandTitle: HTMLInputElement;
+  inputShellBrandTitle: HTMLTextAreaElement;
   inputShellQuote: HTMLTextAreaElement;
   inputHomeIntroLead: HTMLTextAreaElement;
   inputHomeShowIntroLead: HTMLInputElement;
@@ -53,6 +58,14 @@ type ValidationContext = {
   inputArticleMetaShowTags: HTMLInputElement;
   inputArticleMetaShowWordCount: HTMLInputElement;
   inputArticleMetaShowReadingTime: HTMLInputElement;
+  inputFloatStackShowResumeReading: HTMLInputElement;
+  inputFloatStackShowScrollTop: HTMLInputElement;
+  inputViewStatsShowPv: HTMLInputElement;
+  inputViewStatsPvLabel: HTMLInputElement;
+  inputViewStatsShowUv: HTMLInputElement;
+  inputViewStatsUvLabel: HTMLInputElement;
+  inputViewStatsOnArticleMeta: HTMLInputElement;
+  inputViewStatsOnIndexPages: HTMLInputElement;
   inputSidebarActionsShowRssLink: HTMLInputElement;
   inputSidebarActionsShowThemeToggle: HTMLInputElement;
   inputSidebarActionsShowAdminEntry: HTMLInputElement;
@@ -91,6 +104,11 @@ export const createValidation = ({
   inputSiteFooterStartYear,
   inputSiteFooterShowCurrentYear,
   inputSiteFooterCopyright,
+  inputSiteFilingsIcpNumber,
+  inputSiteFilingsIcpLink,
+  inputSiteFilingsPoliceNumber,
+  inputSiteFilingsPoliceLink,
+  inputSiteFilingsPoliceIcon,
   inputSiteAdminOverviewPublicVisible,
   inputSiteAdminOverviewHiddenMessage,
   inputSiteSocialGithub,
@@ -121,6 +139,14 @@ export const createValidation = ({
   inputArticleMetaShowTags,
   inputArticleMetaShowWordCount,
   inputArticleMetaShowReadingTime,
+  inputFloatStackShowResumeReading,
+  inputFloatStackShowScrollTop,
+  inputViewStatsShowPv,
+  inputViewStatsPvLabel,
+  inputViewStatsShowUv,
+  inputViewStatsUvLabel,
+  inputViewStatsOnArticleMeta,
+  inputViewStatsOnIndexPages,
   inputSidebarActionsShowRssLink,
   inputSidebarActionsShowThemeToggle,
   inputSidebarActionsShowAdminEntry,
@@ -193,6 +219,16 @@ export const createValidation = ({
         return () => inputSiteFooterStartYear;
       case 'site.footer.showCurrentYear':
         return () => inputSiteFooterShowCurrentYear;
+      case 'site.filings.icp.number':
+        return () => inputSiteFilingsIcpNumber;
+      case 'site.filings.icp.link':
+        return () => inputSiteFilingsIcpLink;
+      case 'site.filings.police.number':
+        return () => inputSiteFilingsPoliceNumber;
+      case 'site.filings.police.link':
+        return () => inputSiteFilingsPoliceLink;
+      case 'site.filings.police.icon':
+        return () => inputSiteFilingsPoliceIcon;
       case 'site.footer.copyright':
         return () => inputSiteFooterCopyright;
       case 'site.adminOverview.publicVisible':
@@ -240,6 +276,22 @@ export const createValidation = ({
         return () => inputPageBitsAuthorName;
       case 'page.bits.defaultAuthor.avatar':
         return () => inputPageBitsAuthorAvatar;
+      case 'ui.viewStats.showPv':
+        return () => inputViewStatsShowPv;
+      case 'ui.viewStats.pvLabel':
+        return () => inputViewStatsPvLabel;
+      case 'ui.viewStats.showUv':
+        return () => inputViewStatsShowUv;
+      case 'ui.viewStats.uvLabel':
+        return () => inputViewStatsUvLabel;
+      case 'ui.viewStats.onArticleMeta':
+        return () => inputViewStatsOnArticleMeta;
+      case 'ui.viewStats.onIndexPages':
+        return () => inputViewStatsOnIndexPages;
+      case 'ui.floatStack.showResumeReading':
+        return () => inputFloatStackShowResumeReading;
+      case 'ui.floatStack.showScrollTop':
+        return () => inputFloatStackShowScrollTop;
       case 'ui.sidebarActions.showRssLink':
         return () => inputSidebarActionsShowRssLink;
       case 'ui.sidebarActions.showThemeToggle':

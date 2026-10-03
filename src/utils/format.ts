@@ -160,6 +160,43 @@ export function getSiteFaviconLocalFilePath(value: string): string {
   return `public${value}`;
 }
 
+const SITE_FILING_ICON_EXT_RE = /\.(?:png|jpe?g|webp|svg|gif)$/i;
+
+/** 公安备案图标：允许 https 外链（平台提供的图标地址）或 public 下的相对图片路径 */
+export function normalizeSiteFilingIconPath(value: unknown): string | null | undefined {
+  if (value === null) return null;
+  if (typeof value !== 'string') return undefined;
+
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  if (/^https:\/\//i.test(trimmed)) {
+    try {
+      const parsed = new URL(trimmed);
+      return parsed.protocol === 'https:' ? parsed.toString() : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  const normalized = trimmed.replace(/\\/g, '/').replace(/^\.\/+/, '');
+  if (!normalized || normalized.startsWith('//') || /^[A-Za-z]+:/.test(normalized)) return undefined;
+  if (hasInvalidLocalImagePathSegment(normalized)) return undefined;
+
+  const publicPath = normalized.startsWith('public/')
+    ? `/${normalized.slice('public/'.length)}`
+    : normalized.startsWith('/')
+      ? normalized
+      : `/${normalized}`;
+  if (publicPath === '/') return undefined;
+
+  return SITE_FILING_ICON_EXT_RE.test(publicPath) ? publicPath : undefined;
+}
+
+export function getSiteFilingIconLocalFilePath(value: string): string {
+  return `public${value}`;
+}
+
 /* 图标尺寸不进 settings：上传时把 WxH 编进文件名，渲染期从路径解析 sizes，保持 schema 只存路径。 */
 export function getSiteFaviconSizesFromPath(value: string): string | null {
   const baseName = value.split('/').pop() ?? '';

@@ -6,6 +6,8 @@ import { asThemeFontIdForRole, type ThemeFontId } from './fonts/registry';
 import {
   getHeroImageLocalFilePath,
   getSiteFaviconLocalFilePath,
+  getSiteFilingIconLocalFilePath,
+  normalizeSiteFilingIconPath,
   getSiteFaviconSizesFromPath,
   normalizeBitsAvatarPath,
   normalizeHeroImageSrc,
@@ -40,7 +42,13 @@ import {
   getAdminThemeSettingsGroupFileName,
   getAdminThemeSettingsMismatchPaths,
   getAdminSocialOrderIssues,
+  ADMIN_FILINGS_NUMBER_MAX_LENGTH,
+  ADMIN_ICP_FILING_HOSTS,
+  ADMIN_POLICE_FILING_HOSTS,
   ADMIN_SIDEBAR_DIVIDER_DEFAULT,
+  ADMIN_VIEW_STATS_LABEL_MAX_LENGTH,
+  ADMIN_VIEW_STATS_PV_LABEL_DEFAULT,
+  ADMIN_VIEW_STATS_UV_LABEL_DEFAULT,
   ADMIN_TYPOGRAPHY_DEFAULT,
   isAdminNavOrderValue,
   isAdminSocialOrderValue,
@@ -142,11 +150,24 @@ export interface SiteFaviconLink {
   sizes?: string;
 }
 
+export interface SiteFilingSettings {
+  number: string | null;
+  link: string | null;
+}
+
+export interface SiteFilingsSettings {
+  icp: SiteFilingSettings;
+  police: SiteFilingSettings & {
+    icon: string | null;
+  };
+}
+
 export interface SiteSettings {
   title: string;
   description: string;
   defaultLocale: string;
   footer: SiteFooterSettings;
+  filings: SiteFilingsSettings;
   adminOverview: SiteAdminOverviewSettings;
   favicon: SiteFaviconSettings;
   socialLinks: SiteSocialLinks;
@@ -216,6 +237,20 @@ export interface TypographySettings {
   brand: ThemeFontId;
 }
 
+export interface FloatStackSettings {
+  showResumeReading: boolean;
+  showScrollTop: boolean;
+}
+
+export interface ViewStatsSettings {
+  showPv: boolean;
+  pvLabel: string;
+  showUv: boolean;
+  uvLabel: string;
+  onArticleMeta: boolean;
+  onIndexPages: boolean;
+}
+
 export interface UiSettings {
   codeBlock: {
     showLineNumbers: boolean;
@@ -223,6 +258,8 @@ export interface UiSettings {
   readingMode: {
     showEntry: boolean;
   };
+  floatStack: FloatStackSettings;
+  viewStats: ViewStatsSettings;
   sidebarActions: SidebarActionsSettings;
   articleMeta: ArticleMetaSettings;
   layout: {
@@ -247,6 +284,11 @@ export interface ThemeSettingsSources {
     footerStartYear: SettingSource;
     footerShowCurrentYear: SettingSource;
     footerCopyright: SettingSource;
+    filingsIcpNumber: SettingSource;
+    filingsIcpLink: SettingSource;
+    filingsPoliceNumber: SettingSource;
+    filingsPoliceLink: SettingSource;
+    filingsPoliceIcon: SettingSource;
     adminOverviewPublicVisible: SettingSource;
     adminOverviewHiddenMessage: SettingSource;
     faviconSvg: SettingSource;
@@ -292,6 +334,14 @@ export interface ThemeSettingsSources {
   ui: {
     codeBlockShowLineNumbers: SettingSource;
     readingModeShowEntry: SettingSource;
+    floatStackShowResumeReading: SettingSource;
+    floatStackShowScrollTop: SettingSource;
+    viewStatsShowPv: SettingSource;
+    viewStatsPvLabel: SettingSource;
+    viewStatsShowUv: SettingSource;
+    viewStatsUvLabel: SettingSource;
+    viewStatsOnArticleMeta: SettingSource;
+    viewStatsOnIndexPages: SettingSource;
     sidebarActionsShowRssLink: SettingSource;
     sidebarActionsShowThemeToggle: SettingSource;
     sidebarActionsShowAdminEntry: SettingSource;
@@ -472,6 +522,10 @@ const DEFAULT_SITE: SiteSettings = {
     showCurrentYear: LEGACY_FOOTER_SHOW_CURRENT_YEAR,
     copyright: LEGACY_FOOTER_COPYRIGHT
   },
+  filings: {
+    icp: { number: null, link: null },
+    police: { number: null, link: null, icon: null }
+  },
   adminOverview: {
     publicVisible: true,
     hiddenMessage: ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT
@@ -541,6 +595,18 @@ const DEFAULT_UI: UiSettings = {
   },
   readingMode: {
     showEntry: true
+  },
+  floatStack: {
+    showResumeReading: true,
+    showScrollTop: true
+  },
+  viewStats: {
+    showPv: false,
+    pvLabel: ADMIN_VIEW_STATS_PV_LABEL_DEFAULT,
+    showUv: false,
+    uvLabel: ADMIN_VIEW_STATS_UV_LABEL_DEFAULT,
+    onArticleMeta: true,
+    onIndexPages: true
   },
   sidebarActions: {
     showRssLink: true,
@@ -1158,6 +1224,9 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
 
   const siteFooterJson = isRecord(siteJson?.footer) ? siteJson.footer : undefined;
   const siteAdminOverviewJson = isRecord(siteJson?.adminOverview) ? siteJson.adminOverview : undefined;
+  const siteFilingsJson = isRecord(siteJson?.filings) ? siteJson.filings : undefined;
+  const siteFilingsIcpJson = isRecord(siteFilingsJson?.icp) ? siteFilingsJson.icp : undefined;
+  const siteFilingsPoliceJson = isRecord(siteFilingsJson?.police) ? siteFilingsJson.police : undefined;
   const siteFaviconJson = isRecord(siteJson?.favicon) ? siteJson.favicon : undefined;
   const siteSocialLinksJson = isRecord(siteJson?.socialLinks) ? siteJson.socialLinks : undefined;
   const siteSocialPresetOrderJson = isRecord(siteSocialLinksJson?.presetOrder) ? siteSocialLinksJson.presetOrder : undefined;
@@ -1207,6 +1276,31 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     asSingleLineString(siteAdminOverviewJson?.hiddenMessage, ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH),
     undefined,
     DEFAULT_SITE.adminOverview.hiddenMessage
+  );
+  const filingsIcpNumber = resolveValue<string | null>(
+    asNullableSingleLineString(siteFilingsIcpJson?.number, ADMIN_FILINGS_NUMBER_MAX_LENGTH),
+    undefined,
+    DEFAULT_SITE.filings.icp.number
+  );
+  const filingsIcpLink = resolveValue<string | null>(
+    asHttpsUrl(siteFilingsIcpJson?.link, ADMIN_ICP_FILING_HOSTS),
+    undefined,
+    DEFAULT_SITE.filings.icp.link
+  );
+  const filingsPoliceNumber = resolveValue<string | null>(
+    asNullableSingleLineString(siteFilingsPoliceJson?.number, ADMIN_FILINGS_NUMBER_MAX_LENGTH),
+    undefined,
+    DEFAULT_SITE.filings.police.number
+  );
+  const filingsPoliceLink = resolveValue<string | null>(
+    asHttpsUrl(siteFilingsPoliceJson?.link, ADMIN_POLICE_FILING_HOSTS),
+    undefined,
+    DEFAULT_SITE.filings.police.link
+  );
+  const filingsPoliceIcon = resolveValue<string | null>(
+    normalizeSiteFilingIconPath(siteFilingsPoliceJson?.icon),
+    undefined,
+    DEFAULT_SITE.filings.police.icon
   );
   const faviconSvg = resolveValue<string | null>(
     asSiteFaviconPath('svg', siteFaviconJson?.svg),
@@ -1379,6 +1473,8 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
 
   const uiCodeBlock = isRecord(uiJson?.codeBlock) ? uiJson.codeBlock : undefined;
   const uiReadingMode = isRecord(uiJson?.readingMode) ? uiJson.readingMode : undefined;
+  const uiFloatStack = isRecord(uiJson?.floatStack) ? uiJson.floatStack : undefined;
+  const uiViewStats = isRecord(uiJson?.viewStats) ? uiJson.viewStats : undefined;
   const uiSidebarActions = isRecord(uiJson?.sidebarActions) ? uiJson.sidebarActions : undefined;
   const uiArticleMeta = isRecord(uiJson?.articleMeta) ? uiJson.articleMeta : undefined;
   const uiLayout = isRecord(uiJson?.layout) ? uiJson.layout : undefined;
@@ -1393,6 +1489,46 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     asBoolean(uiReadingMode?.showEntry),
     DEFAULT_UI.readingMode.showEntry,
     DEFAULT_UI.readingMode.showEntry
+  );
+  const showResumeReading = resolveValue(
+    asBoolean(uiFloatStack?.showResumeReading),
+    DEFAULT_UI.floatStack.showResumeReading,
+    DEFAULT_UI.floatStack.showResumeReading
+  );
+  const showScrollTop = resolveValue(
+    asBoolean(uiFloatStack?.showScrollTop),
+    DEFAULT_UI.floatStack.showScrollTop,
+    DEFAULT_UI.floatStack.showScrollTop
+  );
+  const showViewStatsPv = resolveValue(
+    asBoolean(uiViewStats?.showPv),
+    DEFAULT_UI.viewStats.showPv,
+    DEFAULT_UI.viewStats.showPv
+  );
+  const viewStatsPvLabel = resolveValue(
+    asTrimmedSingleLineString(uiViewStats?.pvLabel, ADMIN_VIEW_STATS_LABEL_MAX_LENGTH),
+    undefined,
+    DEFAULT_UI.viewStats.pvLabel
+  );
+  const showViewStatsUv = resolveValue(
+    asBoolean(uiViewStats?.showUv),
+    DEFAULT_UI.viewStats.showUv,
+    DEFAULT_UI.viewStats.showUv
+  );
+  const viewStatsUvLabel = resolveValue(
+    asTrimmedSingleLineString(uiViewStats?.uvLabel, ADMIN_VIEW_STATS_LABEL_MAX_LENGTH),
+    undefined,
+    DEFAULT_UI.viewStats.uvLabel
+  );
+  const viewStatsOnArticleMeta = resolveValue(
+    asBoolean(uiViewStats?.onArticleMeta),
+    DEFAULT_UI.viewStats.onArticleMeta,
+    DEFAULT_UI.viewStats.onArticleMeta
+  );
+  const viewStatsOnIndexPages = resolveValue(
+    asBoolean(uiViewStats?.onIndexPages),
+    DEFAULT_UI.viewStats.onIndexPages,
+    DEFAULT_UI.viewStats.onIndexPages
   );
   const showRssLink = resolveValue(
     asBoolean(uiSidebarActions?.showRssLink),
@@ -1496,6 +1632,17 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
           publicVisible: adminOverviewPublicVisible.value,
           hiddenMessage: adminOverviewHiddenMessage.value
         },
+        filings: {
+          icp: {
+            number: filingsIcpNumber.value,
+            link: filingsIcpLink.value
+          },
+          police: {
+            number: filingsPoliceNumber.value,
+            link: filingsPoliceLink.value,
+            icon: filingsPoliceIcon.value
+          }
+        },
         favicon: {
           svg: faviconSvg.value,
           png: faviconPng.value,
@@ -1558,6 +1705,18 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
         readingMode: {
           showEntry: showReadingEntry.value
         },
+        floatStack: {
+          showResumeReading: showResumeReading.value,
+          showScrollTop: showScrollTop.value
+        },
+        viewStats: {
+          showPv: showViewStatsPv.value,
+          pvLabel: viewStatsPvLabel.value,
+          showUv: showViewStatsUv.value,
+          uvLabel: viewStatsUvLabel.value,
+          onArticleMeta: viewStatsOnArticleMeta.value,
+          onIndexPages: viewStatsOnIndexPages.value
+        },
         sidebarActions: {
           showRssLink: showRssLink.value,
           showThemeToggle: showThemeToggle.value,
@@ -1591,6 +1750,11 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
         footerCopyright: footerCopyright.source,
         adminOverviewPublicVisible: adminOverviewPublicVisible.source,
         adminOverviewHiddenMessage: adminOverviewHiddenMessage.source,
+        filingsIcpNumber: filingsIcpNumber.source,
+        filingsIcpLink: filingsIcpLink.source,
+        filingsPoliceNumber: filingsPoliceNumber.source,
+        filingsPoliceLink: filingsPoliceLink.source,
+        filingsPoliceIcon: filingsPoliceIcon.source,
         faviconSvg: faviconSvg.source,
         faviconPng: faviconPng.source,
         faviconAppleTouchIcon: faviconAppleTouchIcon.source,
@@ -1634,6 +1798,14 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
       ui: {
         codeBlockShowLineNumbers: showLineNumbers.source,
         readingModeShowEntry: showReadingEntry.source,
+        floatStackShowResumeReading: showResumeReading.source,
+        floatStackShowScrollTop: showScrollTop.source,
+        viewStatsShowPv: showViewStatsPv.source,
+        viewStatsPvLabel: viewStatsPvLabel.source,
+        viewStatsShowUv: showViewStatsUv.source,
+        viewStatsUvLabel: viewStatsUvLabel.source,
+        viewStatsOnArticleMeta: viewStatsOnArticleMeta.source,
+        viewStatsOnIndexPages: viewStatsOnIndexPages.source,
         sidebarActionsShowRssLink: showRssLink.source,
         sidebarActionsShowThemeToggle: showThemeToggle.source,
         sidebarActionsShowAdminEntry: showAdminEntry.source,
@@ -1691,6 +1863,10 @@ const buildEditableThemeSettingsSnapshot = (
       adminOverview: {
         ...resolved.settings.site.adminOverview
       },
+      filings: {
+        icp: { ...resolved.settings.site.filings.icp },
+        police: { ...resolved.settings.site.filings.police }
+      },
       favicon: {
         ...resolved.settings.site.favicon
       },
@@ -1727,6 +1903,8 @@ const buildEditableThemeSettingsSnapshot = (
     ui: {
       codeBlock: { ...resolved.settings.ui.codeBlock },
       readingMode: { ...resolved.settings.ui.readingMode },
+      floatStack: { ...resolved.settings.ui.floatStack },
+      viewStats: { ...resolved.settings.ui.viewStats },
       sidebarActions: { ...resolved.settings.ui.sidebarActions },
       articleMeta: { ...resolved.settings.ui.articleMeta },
       layout: { ...resolved.settings.ui.layout },
@@ -1805,6 +1983,21 @@ export const getSiteFaviconLinks = (favicon: SiteFaviconSettings): SiteFaviconLi
     links.push({ rel: 'apple-touch-icon', sizes: '180x180', href: 'apple-touch-icon.png' });
   }
   return links;
+};
+
+/**
+ * 备案图标：https 外链原样返回；public 相对路径在文件存在时才返回，
+ * 避免配置错误时输出裂图（与 favicon 的处理一致）。
+ */
+export const getSiteFilingIcon = (
+  icon: string | null
+): { href: string; external: boolean } | null => {
+  if (!icon) return null;
+  if (/^https:\/\//i.test(icon)) return { href: icon, external: true };
+
+  const projectRoot = process.env.ASTRO_WHONO_INTERNAL_TEST_PROJECT_ROOT?.trim() || process.cwd();
+  const exists = existsSync(join(projectRoot, ...getSiteFilingIconLocalFilePath(icon).split('/')));
+  return exists ? { href: icon, external: false } : null;
 };
 
 export const getSidebarHref = (id: SidebarNavId): string => SIDEBAR_HREFS[id];

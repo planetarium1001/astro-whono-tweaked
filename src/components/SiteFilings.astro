@@ -1,0 +1,49 @@
+---
+// 备案信息（ICP / 公安联网备案）：渲染在页脚最底部，两项都为空时整块不输出。
+// 号码与链接规则见 lib/filings.ts；图标允许 https 外链或 public 相对路径，文件缺失时不输出。
+import { createWithBase } from '../utils/format';
+import { resolveIcpFilingLink, resolvePoliceFilingLink } from '../lib/filings';
+import { getSiteFilingIcon, type SiteFilingsSettings } from '../lib/theme-settings';
+
+interface Props {
+  filings: SiteFilingsSettings;
+}
+
+const { filings } = Astro.props;
+const base = import.meta.env.BASE_URL ?? '/';
+const withBase = createWithBase(base);
+
+const icpNumber = filings.icp.number;
+const policeNumber = filings.police.number;
+const icpHref = resolveIcpFilingLink(filings.icp.link);
+const policeHref = resolvePoliceFilingLink(policeNumber, filings.police.link);
+const policeIcon = getSiteFilingIcon(filings.police.icon);
+const policeIconSrc = policeIcon
+  ? (policeIcon.external ? policeIcon.href : withBase(policeIcon.href))
+  : null;
+---
+
+{icpNumber || policeNumber ? (
+  <div class="site-footer__filings">
+    {icpNumber ? (
+      <a class="site-footer__filing" href={icpHref} target="_blank" rel="noreferrer">{icpNumber}</a>
+    ) : null}
+    {policeNumber ? (
+      policeHref ? (
+        <a class="site-footer__filing" href={policeHref} target="_blank" rel="noreferrer">
+          {policeIconSrc ? (
+            <img class="site-footer__filing-icon" src={policeIconSrc} width="16" height="16" alt="" />
+          ) : null}
+          {policeNumber}
+        </a>
+      ) : (
+        <span class="site-footer__filing">
+          {policeIconSrc ? (
+            <img class="site-footer__filing-icon" src={policeIconSrc} width="16" height="16" alt="" />
+          ) : null}
+          {policeNumber}
+        </span>
+      )
+    ) : null}
+  </div>
+) : null}

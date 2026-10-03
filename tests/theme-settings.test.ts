@@ -131,6 +131,88 @@ describe('theme-settings revision semantics', () => {
     expect(state.ok).toBe(true);
   });
 
+  it('keeps the console unlocked when site.json lacks the filings group', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const sitePath = path.join(settingsDir, 'site.json');
+    const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, unknown>;
+    delete siteJson.filings;
+    await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+
+    const resolved = getThemeSettings();
+    const state = getEditableThemeSettingsState(resolved);
+
+    expect(resolved.settings.site.filings).toEqual({
+      icp: { number: null, link: null },
+      police: { number: null, link: null, icon: null }
+    });
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(state.ok).toBe(true);
+  });
+
+  it('keeps the console unlocked when site.json lacks newer filing fields', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const sitePath = path.join(settingsDir, 'site.json');
+    const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, unknown>;
+    // 断言的字段先删掉，避免依赖本地保存值
+    delete ((siteJson.filings as Record<string, unknown>).police as Record<string, unknown>).icon;
+    delete ((siteJson.filings as Record<string, unknown>).icp as Record<string, unknown>).link;
+    await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+
+    const resolved = getThemeSettings();
+    const state = getEditableThemeSettingsState(resolved);
+
+    expect(resolved.settings.site.filings).toMatchObject({
+      icp: { link: null },
+      police: { icon: null }
+    });
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(state.ok).toBe(true);
+  });
+
+  it('keeps the console unlocked when ui.json lacks newer float stack fields', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, unknown>;
+    const floatStack = uiJson.floatStack as Record<string, unknown>;
+    // 断言的字段先删掉，避免依赖本地保存值
+    delete floatStack.showResumeReading;
+    delete floatStack.showScrollTop;
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}\n`, 'utf8');
+
+    const resolved = getThemeSettings();
+    const state = getEditableThemeSettingsState(resolved);
+
+    expect(resolved.settings.ui.floatStack).toEqual({
+      showResumeReading: true,
+      showScrollTop: true
+    });
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(state.ok).toBe(true);
+  });
+
+  it('keeps the console unlocked when ui.json lacks newer view stats fields', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const uiPath = path.join(settingsDir, 'ui.json');
+    const uiJson = JSON.parse(await readFile(uiPath, 'utf8')) as Record<string, unknown>;
+    const viewStats = uiJson.viewStats as Record<string, unknown>;
+    // 断言的字段先删掉，避免依赖本地保存值
+    delete viewStats.showPv;
+    delete viewStats.pvLabel;
+    delete viewStats.onIndexPages;
+    await writeFile(uiPath, `${JSON.stringify(uiJson, null, 2)}\n`, 'utf8');
+
+    const resolved = getThemeSettings();
+    const state = getEditableThemeSettingsState(resolved);
+
+    expect(resolved.settings.ui.viewStats).toMatchObject({
+      showPv: false,
+      pvLabel: '浏览',
+      onIndexPages: true
+    });
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(state.ok).toBe(true);
+  });
+
   it('locks the console when ui.json carries an invalid typography font id', async () => {
     const settingsDir = await createTempSettingsFixture();
     const uiPath = path.join(settingsDir, 'ui.json');

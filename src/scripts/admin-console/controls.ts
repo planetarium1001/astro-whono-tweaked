@@ -36,6 +36,13 @@ export type AdminThemeControls = RequiredElements<{
   bootstrapEl: HTMLElement | null;
   articleMetaPreviewValueEl: HTMLElement | null;
   footerPreviewValueEl: HTMLElement | null;
+  inputSiteFilingsIcpNumber: HTMLInputElement | null;
+  inputSiteFilingsIcpLink: HTMLInputElement | null;
+  inputSiteFilingsPoliceNumber: HTMLInputElement | null;
+  inputSiteFilingsPoliceLink: HTMLInputElement | null;
+  inputSiteFilingsPoliceIcon: HTMLInputElement | null;
+  filingsPreviewValueEl: HTMLElement | null;
+  filingsIconPreviewEl: HTMLElement | null;
   socialCustomList: HTMLElement | null;
   socialCustomHead: HTMLElement | null;
   socialCustomCountEl: HTMLElement | null;
@@ -59,7 +66,7 @@ export type AdminThemeControls = RequiredElements<{
   inputSiteSocialX: HTMLInputElement | null;
   inputSiteSocialEmailOrder: HTMLInputElement | null;
   inputSiteSocialEmail: HTMLInputElement | null;
-  inputShellBrandTitle: HTMLInputElement | null;
+  inputShellBrandTitle: HTMLTextAreaElement | null;
   inputShellQuote: HTMLTextAreaElement | null;
   inputHomeShowIntroLead: HTMLInputElement | null;
   inputHomeShowIntroMore: HTMLInputElement | null;
@@ -92,6 +99,16 @@ export type AdminThemeControls = RequiredElements<{
   inputHeroImageAlt: HTMLInputElement | null;
   inputCodeLineNumbers: HTMLInputElement | null;
   inputReadingEntry: HTMLInputElement | null;
+  inputFloatStackShowResumeReading: HTMLInputElement | null;
+  inputFloatStackShowScrollTop: HTMLInputElement | null;
+  inputViewStatsShowPv: HTMLInputElement | null;
+  inputViewStatsPvLabel: HTMLInputElement | null;
+  inputViewStatsShowUv: HTMLInputElement | null;
+  inputViewStatsUvLabel: HTMLInputElement | null;
+  inputViewStatsOnArticleMeta: HTMLInputElement | null;
+  inputViewStatsOnIndexPages: HTMLInputElement | null;
+  viewStatsPreviewMetaEl: HTMLElement | null;
+  viewStatsPreviewFooterEl: HTMLElement | null;
   inputSidebarActionsShowRssLink: HTMLInputElement | null;
   inputSidebarActionsShowThemeToggle: HTMLInputElement | null;
   inputSidebarActionsShowAdminEntry: HTMLInputElement | null;
@@ -127,6 +144,13 @@ export const queryAdminThemeControls = (): AdminThemeControls | null => {
     bootstrapEl: byId<HTMLElement>('admin-bootstrap'),
     articleMetaPreviewValueEl: byId<HTMLElement>('article-meta-preview-value'),
     footerPreviewValueEl: byId<HTMLElement>('site-footer-preview-value'),
+    inputSiteFilingsIcpNumber: byId<HTMLInputElement>('site-filings-icp-number'),
+    inputSiteFilingsIcpLink: byId<HTMLInputElement>('site-filings-icp-link'),
+    inputSiteFilingsPoliceNumber: byId<HTMLInputElement>('site-filings-police-number'),
+    inputSiteFilingsPoliceLink: byId<HTMLInputElement>('site-filings-police-link'),
+    inputSiteFilingsPoliceIcon: byId<HTMLInputElement>('site-filings-police-icon'),
+    filingsPreviewValueEl: byId<HTMLElement>('filings-preview-value'),
+    filingsIconPreviewEl: byId<HTMLElement>('filings-icon-preview'),
     socialCustomList: byId<HTMLElement>('site-social-custom-list'),
     socialCustomHead: byId<HTMLElement>('site-social-custom-head'),
     socialCustomCountEl: byId<HTMLElement>('site-social-custom-count'),
@@ -149,7 +173,7 @@ export const queryAdminThemeControls = (): AdminThemeControls | null => {
     inputSiteSocialX: byId<HTMLInputElement>('site-social-x'),
     inputSiteSocialEmailOrder: byId<HTMLInputElement>('site-social-email-order'),
     inputSiteSocialEmail: byId<HTMLInputElement>('site-social-email'),
-    inputShellBrandTitle: byId<HTMLInputElement>('shell-brand-title'),
+    inputShellBrandTitle: byId<HTMLTextAreaElement>('shell-brand-title'),
     inputShellQuote: byId<HTMLTextAreaElement>('shell-quote'),
     inputHomeShowIntroLead: byId<HTMLInputElement>('home-show-intro-lead'),
     inputHomeShowIntroMore: byId<HTMLInputElement>('home-show-intro-more'),
@@ -182,6 +206,16 @@ export const queryAdminThemeControls = (): AdminThemeControls | null => {
     inputHeroImageAlt: byId<HTMLInputElement>('home-hero-image-alt'),
     inputCodeLineNumbers: byId<HTMLInputElement>('ui-code-line-numbers'),
     inputReadingEntry: byId<HTMLInputElement>('ui-reading-entry'),
+    inputFloatStackShowResumeReading: byId<HTMLInputElement>('ui-float-stack-show-resume-reading'),
+    inputFloatStackShowScrollTop: byId<HTMLInputElement>('ui-float-stack-show-scroll-top'),
+    inputViewStatsShowPv: byId<HTMLInputElement>('ui-view-stats-show-pv'),
+    inputViewStatsPvLabel: byId<HTMLInputElement>('ui-view-stats-pv-label'),
+    inputViewStatsShowUv: byId<HTMLInputElement>('ui-view-stats-show-uv'),
+    inputViewStatsUvLabel: byId<HTMLInputElement>('ui-view-stats-uv-label'),
+    inputViewStatsOnArticleMeta: byId<HTMLInputElement>('ui-view-stats-on-article-meta'),
+    inputViewStatsOnIndexPages: byId<HTMLInputElement>('ui-view-stats-on-index-pages'),
+    viewStatsPreviewMetaEl: byId<HTMLElement>('view-stats-preview-meta'),
+    viewStatsPreviewFooterEl: byId<HTMLElement>('view-stats-preview-footer'),
     inputSidebarActionsShowRssLink: byId<HTMLInputElement>('ui-sidebar-actions-show-rss-link'),
     inputSidebarActionsShowThemeToggle: byId<HTMLInputElement>('ui-sidebar-actions-show-theme-toggle'),
     inputSidebarActionsShowAdminEntry: byId<HTMLInputElement>('ui-sidebar-actions-show-admin-entry'),

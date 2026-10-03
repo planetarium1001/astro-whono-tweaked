@@ -1,7 +1,10 @@
 ---
 import AdminIcon from './AdminIcon.astro';
 import AdminSiteSocialSection from './AdminSiteSocialSection.astro';
-import { ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH } from '../../lib/admin-console/theme-shared';
+import {
+  ADMIN_FILINGS_NUMBER_MAX_LENGTH,
+  ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH
+} from '../../lib/admin-console/theme-shared';
 
 interface Props {
   footerStartYearMin: number;
@@ -140,6 +143,83 @@ const { footerStartYearMin, footerStartYearMax, socialCustomLimit } = Astro.prop
       <p class="admin-help">
         建议上传 256x256 的正方形 PNG（边长 16-512px，不超过 256KB）；SVG 图标请直接替换 <code>public/favicon.svg</code>。
       </p>
+    </div>
+  </div>
+
+  <div class="admin-subgroup">
+    <p class="admin-subtitle">
+      <span class="admin-subtitle__main">备案信息</span>
+      <span class="admin-subtitle__hint">（国内建站必填，显示在页脚版权之上）</span>
+    </p>
+    <div class="admin-grid">
+      <label class="admin-field">
+        <span class="admin-label">
+          <span class="admin-label__main">工信部备案号</span>
+          <span class="admin-label__hint">（链接到工信部备案系统）</span>
+        </span>
+        <input
+          class="admin-field__control"
+          id="site-filings-icp-number"
+          type="text"
+          maxlength={ADMIN_FILINGS_NUMBER_MAX_LENGTH}
+          autocomplete="off"
+          placeholder="皖ICP备12345678号-1"
+        />
+      </label>
+      <label class="admin-field">
+        <span class="admin-label">
+          <span class="admin-label__main">公安备案号</span>
+          <span class="admin-label__hint">（链接编号自动取号内数字）</span>
+        </span>
+        <input
+          class="admin-field__control"
+          id="site-filings-police-number"
+          type="text"
+          maxlength={ADMIN_FILINGS_NUMBER_MAX_LENGTH}
+          autocomplete="off"
+          placeholder="皖公网安备12345678901234号"
+        />
+      </label>
+      <label class="admin-field">
+        <span class="admin-label">
+          <span class="admin-label__main">工信部备案链接</span>
+          <span class="admin-label__hint">（留空用备案系统首页）</span>
+        </span>
+        <input class="admin-field__control" id="site-filings-icp-link" type="text" autocomplete="off" />
+      </label>
+      <label class="admin-field">
+        <span class="admin-label">
+          <span class="admin-label__main">公安备案链接</span>
+          <span class="admin-label__hint">（可选，平台给出的地址优先）</span>
+        </span>
+        <input class="admin-field__control" id="site-filings-police-link" type="text" autocomplete="off" />
+      </label>
+      <label class="admin-field">
+        <span class="admin-label admin-label--filings-icon">
+          <span
+            class="admin-filings-icon__preview"
+            id="filings-icon-preview"
+            data-state="empty"
+            aria-hidden="true"
+          >
+            <img alt="" loading="lazy" decoding="async" data-filings-icon-preview-img hidden />
+          </span>
+          <span class="admin-label__main">公安备案图标</span>
+          <span class="admin-label__hint">（相对路径或 https；留空只显示文字）</span>
+        </span>
+        <input
+          class="admin-field__control"
+          id="site-filings-police-icon"
+          type="text"
+          autocomplete="off"
+          placeholder="images/beian.png"
+        />
+      </label>
+      <div class="admin-field admin-field--full">
+        <p class="admin-help">
+          预览：<code id="filings-preview-value">皖ICP备12345678号-1 · 皖公网安备12345678901234号</code>
+        </p>
+      </div>
     </div>
   </div>
 

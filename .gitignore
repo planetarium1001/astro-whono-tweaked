@@ -24,6 +24,14 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Deploy CLIs
+.netlify/
+.vercel/
+
+# Patch leftovers
+*.orig
+*.rej
+
 # Misc
 *.tsbuildinfo
 .trash/

@@ -9,6 +9,7 @@
 @import "./components/layout.css";
 @import "./components/lists.css";
 @import "./components/entry-tags.css";
+@import "./components/view-stats.css";
 
 @font-face {
   font-family: "LXGW WenKai Lite";
@@ -200,6 +201,15 @@ body {
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* 固定滚动条槽位：页面高度变化时可用宽度不变，避免壳层重新居中导致整页横跳 */
+  scrollbar-gutter: stable;
+}
+
+/* 老版本 Safari 无 scrollbar-gutter：退化为常驻滚动条，宽度同样保持稳定 */
+@supports not (scrollbar-gutter: stable) {
+  html {
+    overflow-y: scroll;
+  }
 }
 
 time,

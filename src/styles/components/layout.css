@@ -52,6 +52,12 @@
   font-size: 26px;
   letter-spacing: 0.5px;
   transition: transform 0.2s ease;
+  /* 占满内容宽并右对齐（与原先 flex-end + 内容宽度的外观一致），
+     站点名的逐行对齐才有可用宽度；缩放锚在右端，与 .nav a 一致 */
+  display: block;
+  width: 100%;
+  text-align: right;
+  transform-origin: right center;
 }
 
 .sidebar__title:hover {
@@ -60,7 +66,32 @@
 }
 
 .sidebar__title-text {
+  display: block;
+}
+
+/* 设置富文本可用的排版工具类（白名单放行这些 class 或等价 style） */
+.whono-block {
+  display: block;
+}
+
+.whono-inline {
   display: inline;
+}
+
+.whono-left {
+  text-align: left;
+}
+
+.whono-right {
+  text-align: right;
+}
+
+.whono-center {
+  text-align: center;
+}
+
+.whono-nowrap {
+  white-space: nowrap;
 }
 
 .sidebar__title--admin-rail {
@@ -69,6 +100,7 @@
 
 .sidebar__quote {
   max-width: 188px;
+  width: 100%;
   text-align: right;
   font-family: var(--font-brand);
   font-style: italic;
@@ -185,6 +217,32 @@
   font-size: 12px;
   color: var(--faint);
   margin-top: auto;
+}
+
+/* 备案信息：页脚最底部的一行；号码链接与图标都不抢视觉 */
+.site-footer__filings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  margin-top: 6px;
+}
+
+.site-footer__filing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--faint);
+}
+
+.site-footer__filing:hover {
+  color: var(--muted);
+}
+
+.site-footer__filing-icon {
+  width: var(--site-footer-filing-icon-size, 16px);
+  height: var(--site-footer-filing-icon-size, 16px);
 }
 
 /* ===============================
@@ -384,7 +442,7 @@ body.admin-page {
   --admin-sidebar-divider-block-end: 50px;
   --admin-sidebar-site-title-display: initial;
   --admin-sidebar-rail-title-display: none;
-  --admin-sidebar-title-text-display: inline;
+  --admin-sidebar-title-text-display: block;
   --admin-sidebar-quote-display: block;
   --admin-sidebar-nav-display: flex;
   --admin-sidebar-public-nav-display: none;
@@ -855,6 +913,9 @@ body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
     order: 1;
     flex: 1 1 auto;
     font-size: 24px;
+    /* 窄屏是横向顶栏：按内容宽度、左对齐，避免挤掉右侧动作图标 */
+    width: auto;
+    text-align: left;
   }
 
   :where(body:not(.admin-page)) .sidebar__quote {

@@ -18,9 +18,10 @@
 ## 预览
 
 <p align="center">
-  <img src="public/preview-light.png" width="49%" alt="浅色预览" />
-  <img src="public/preview-dark.png" width="49%" alt="深色预览" />
+  <img src="docs/images/preview-light.png" width="49%" alt="浅色预览" />
+  <img src="docs/images/preview-dark.png" width="49%" alt="深色预览" />
 </p>
+
 
 
 ## 特性

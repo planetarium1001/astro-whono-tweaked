@@ -266,15 +266,18 @@ const createLightboxController = (options: LightboxOptions): LightboxController 
     scrollState.bodyWidth = body.style.width;
     scrollState.bodyPaddingRight = body.style.paddingRight;
     scrollState.docOverflow = doc.style.overflow;
-    const scrollbarWidth = window.innerWidth - doc.clientWidth;
-    if (scrollbarWidth > 0) {
-      body.style.paddingRight = `${scrollbarWidth}px`;
-    }
+    // 只有锁定后真的变宽才补 padding：scrollbar-gutter 保留槽位时差值为 0，
+    // 部分引擎在 overflow: hidden 下撤销槽位，差值即滚动条宽度。
+    const widthBeforeLock = doc.clientWidth;
     body.style.overflow = 'hidden';
     body.style.position = 'fixed';
     body.style.top = `-${scrollState.top}px`;
     body.style.width = '100%';
     doc.style.overflow = 'hidden';
+    const scrollbarWidth = doc.clientWidth - widthBeforeLock;
+    if (scrollbarWidth > 0) {
+      body.style.paddingRight = `${scrollbarWidth}px`;
+    }
     scrollLocked = true;
   };
 

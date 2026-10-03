@@ -42,12 +42,23 @@ export const bindAdminThemeFieldEvents = ({
     inputSiteFooterStartYear,
     inputSiteFooterShowCurrentYear,
     inputSiteFooterCopyright,
+    inputSiteFilingsIcpNumber,
+    inputSiteFilingsIcpLink,
+    inputSiteFilingsPoliceNumber,
+    inputSiteFilingsPoliceLink,
+    inputSiteFilingsPoliceIcon,
     inputSiteAdminOverviewPublicVisible,
     inputArticleMetaDateLabel,
     inputArticleMetaShowDate,
     inputArticleMetaShowTags,
     inputArticleMetaShowWordCount,
     inputArticleMetaShowReadingTime,
+    inputViewStatsPvLabel,
+    inputViewStatsShowPv,
+    inputViewStatsUvLabel,
+    inputViewStatsShowUv,
+    inputViewStatsOnArticleMeta,
+    inputViewStatsOnIndexPages,
     inputHomeIntroMore,
     inputHomeShowIntroMore,
     inputHomeIntroMoreLinkPrimary,
@@ -57,12 +68,14 @@ export const bindAdminThemeFieldEvents = ({
   } = controls;
   const {
     refreshArticleMetaPreview,
+    refreshViewStatsPreview,
     refreshHomeIntroPreview,
     syncAdminOverviewControls,
     syncSidebarActionControls,
     syncHomeIntroLinkControls,
     syncHeroControls,
     refreshFooterPreview,
+    refreshFilingsPreview,
     syncFooterYearControls
   } = formCodec;
 
@@ -82,6 +95,16 @@ export const bindAdminThemeFieldEvents = ({
     refreshFooterPreview();
   });
   inputSiteFooterCopyright.addEventListener('input', refreshFooterPreview);
+  for (const input of [
+    inputSiteFilingsIcpNumber,
+    inputSiteFilingsIcpLink,
+    inputSiteFilingsPoliceNumber,
+    inputSiteFilingsPoliceLink,
+    inputSiteFilingsPoliceIcon
+  ]) {
+    input.addEventListener('input', refreshFilingsPreview);
+    input.addEventListener('change', refreshFilingsPreview);
+  }
   inputSiteAdminOverviewPublicVisible.addEventListener('change', () => {
     syncAdminOverviewControls();
     syncSidebarActionControls();
@@ -91,6 +114,12 @@ export const bindAdminThemeFieldEvents = ({
   inputArticleMetaShowTags.addEventListener('change', refreshArticleMetaPreview);
   inputArticleMetaShowWordCount.addEventListener('change', refreshArticleMetaPreview);
   inputArticleMetaShowReadingTime.addEventListener('change', refreshArticleMetaPreview);
+  inputViewStatsPvLabel.addEventListener('input', refreshViewStatsPreview);
+  inputViewStatsUvLabel.addEventListener('input', refreshViewStatsPreview);
+  inputViewStatsShowPv.addEventListener('change', refreshViewStatsPreview);
+  inputViewStatsShowUv.addEventListener('change', refreshViewStatsPreview);
+  inputViewStatsOnArticleMeta.addEventListener('change', refreshViewStatsPreview);
+  inputViewStatsOnIndexPages.addEventListener('change', refreshViewStatsPreview);
   inputHomeIntroMore.addEventListener('input', refreshHomeIntroPreview);
   inputHomeShowIntroMore.addEventListener('change', refreshHomeIntroPreview);
   inputHomeIntroMoreLinkPrimary.addEventListener('change', () => {

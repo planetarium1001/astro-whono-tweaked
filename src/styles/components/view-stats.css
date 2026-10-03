@@ -1,0 +1,46 @@
+/* ViewStats
+   浏览数据（PV / UV）槽位：文章元信息行内一项，或内页页脚独占一行。
+   数字由 src/scripts/view-stats.ts 填入；没有可见槽位时整组不占位。 */
+
+.view-stats {
+  font-family: var(--font-copy);
+  font-size: 13px;
+  color: var(--faint);
+}
+
+/* 没有可见槽位时整组不渲染（:has 不支持的浏览器只留一点外边距） */
+.view-stats:not(:has(.view-stats__item:not([hidden]))) {
+  display: none;
+}
+
+.view-stats__item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+}
+
+/* 上面的 display 会盖掉 [hidden] 的 UA 规则，这里还原 */
+.view-stats__item[hidden] {
+  display: none;
+}
+
+/* 前一个槽位不可见时不输出分隔符 */
+.view-stats__item:not([hidden]) + .view-stats__item:not([hidden])::before {
+  content: "·";
+  margin: 0 0.45em;
+  color: var(--faint);
+}
+
+.view-stats__value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 内页页脚：版权之上的居中一行 */
+.view-stats--footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 6px;
+  font-size: 12px;
+}

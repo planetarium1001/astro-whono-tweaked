@@ -29,17 +29,21 @@ const { navIdOrder } = Astro.props;
       <label class="admin-field">
         <span class="admin-label">
           <span class="admin-label__main">侧栏站点名</span>
-          <span class="admin-label__hint">（显示在左侧站点标题）</span>
+          <span class="admin-label__hint">（支持换行与少量 HTML）</span>
         </span>
-        <input class="admin-field__control" id="shell-brand-title" type="text" autocomplete="off" />
+        <textarea class="admin-field__control" id="shell-brand-title" rows="2"></textarea>
       </label>
       <label class="admin-field">
         <span class="admin-label">
           <span class="admin-label__main">侧栏引用文案</span>
-          <span class="admin-label__hint">（支持换行显示）</span>
+          <span class="admin-label__hint">（支持换行与少量 HTML）</span>
         </span>
         <textarea class="admin-field__control" id="shell-quote" rows="4"></textarea>
       </label>
+      <p class="admin-help">
+        对齐：<code>class="whono-left|whono-right|whono-center"</code>或<code>style="text-align:right"</code><br />
+        字体与配色始终跟随主题
+      </p>
       <div class="admin-field admin-field--sidebar-divider">
         <span class="admin-label">
           <span class="admin-label__main">侧栏分隔线</span>
@@ -69,15 +73,6 @@ const { navIdOrder } = Astro.props;
           <span class="admin-subtitle__hint">（选择底部显示的图标）</span>
         </p>
         <div class="admin-sidebar-icon-grid" role="group" aria-label="侧栏图标显隐">
-          <label class="admin-sidebar-icon-toggle" for="ui-reading-entry" title="显示阅读模式入口">
-            <input id="ui-reading-entry" type="checkbox" aria-label="显示阅读模式入口" title="显示阅读模式入口" />
-            <span
-              class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-sidebar-icon-toggle__button"
-              aria-hidden="true"
-            >
-              <UiIcon name="book-open" size={18} strokeWidth={2} />
-            </span>
-          </label>
           <label class="admin-sidebar-icon-toggle" for="ui-sidebar-actions-show-rss-link" title="显示 RSS 入口">
             <input
               id="ui-sidebar-actions-show-rss-link"

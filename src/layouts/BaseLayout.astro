@@ -1,5 +1,7 @@
 ---
 import Sidebar from '../components/Sidebar.astro';
+import SiteFilings from '../components/SiteFilings.astro';
+import ViewStats from '../components/ViewStats.astro';
 import UiIcon from '../components/UiIcon.astro';
 import globalStylesHref from '../styles/global.css?url';
 import { hasSiteUrl } from '../../site.config.mjs';
@@ -87,8 +89,23 @@ const routePath = basePrefix && pathname.startsWith(basePrefix)
   ? pathname.slice(basePrefix.length) || '/'
   : pathname;
 const showFloatStack = !isAdminPage && /^\/(?:archive|bits|essay|memo)(?:\/|$)/.test(routePath);
-// 阅读模式入口开关（Theme Console →「阅读模式入口」）
+// 阅读模式入口开关（Theme Console →「浮动操作列」）
 const showReaderToggle = settings.ui.readingMode.showEntry;
+// 同组的另外两个按钮开关
+const showResumeReadingButton = settings.ui.floatStack.showResumeReading;
+const showScrollTopButton = settings.ui.floatStack.showScrollTop;
+const hasFloatButtons = showReaderToggle || showResumeReadingButton || showScrollTopButton;
+// 浏览数据（PV / UV）：文章详情页在元信息行（ArticleLayout），其余页面在页脚；
+// 数字由用户脚本填，未填值时不占位。
+const viewStats = settings.ui.viewStats;
+const showViewStatsSlots = viewStats.showPv || viewStats.showUv;
+const isArticlePage = bodyClassNames.includes('article-page');
+const showIndexViewStats = showViewStatsSlots
+  && viewStats.onIndexPages
+  && !isAdminPage
+  && !isArticlePage;
+const viewStatsScope = routePath === '/' ? 'home' : (routePath.split('/')[1] || 'other');
+const showViewStatsScript = showViewStatsSlots && !isAdminPage;
 const isDev = import.meta.env.DEV;
 const isDevAdminPage = isAdminPage && isDev;
 const adminDevState = isAdminPage ? (isDev ? 'true' : 'false') : undefined;
@@ -231,12 +248,28 @@ const adminUiPrefsScriptHref = isDevAdminPage
       <main id="content" class="content" tabindex="-1">
         <div class="content__inner">
           <slot />
-          <footer class="site-footer">© {yearRange} {footerCopyright}</footer>
+          <footer class="site-footer">
+            {showIndexViewStats ? (
+              <ViewStats
+                variant="footer"
+                scope={viewStatsScope}
+                path={pathname}
+                route={routePath}
+                title={title}
+                showPv={viewStats.showPv}
+                pvLabel={viewStats.pvLabel}
+                showUv={viewStats.showUv}
+                uvLabel={viewStats.uvLabel}
+              />
+            ) : null}
+            © {yearRange} {footerCopyright}
+            <SiteFilings filings={settings.site.filings} />
+          </footer>
         </div>
       </main>
       {tocRail ? <slot name="toc-rail" /> : null}
     </div>
-    {showFloatStack ? (
+    {showFloatStack && hasFloatButtons ? (
       <div class="float-stack" data-float-stack>
         {showReaderToggle ? (
           <button
@@ -252,26 +285,30 @@ const adminUiPrefsScriptHref = isDevAdminPage
             <UiIcon name="book-closed" class="icon icon-book-closed" />
           </button>
         ) : null}
-        <button
-          id="resume-reading"
-          class="float-stack__button"
-          type="button"
-          aria-label="回到上次阅读位置"
-          title="回到上次阅读位置"
-          hidden
-        >
-          <UiIcon name="resume-reading" class="icon" />
-        </button>
-        <button
-          id="scroll-top"
-          class="float-stack__button"
-          type="button"
-          aria-label="回到顶部"
-          title="回到顶部"
-          aria-disabled="true"
-        >
-          <UiIcon name="chevron-up" class="icon" />
-        </button>
+        {showResumeReadingButton ? (
+          <button
+            id="resume-reading"
+            class="float-stack__button"
+            type="button"
+            aria-label="回到上次阅读位置"
+            title="回到上次阅读位置"
+            hidden
+          >
+            <UiIcon name="resume-reading" class="icon" />
+          </button>
+        ) : null}
+        {showScrollTopButton ? (
+          <button
+            id="scroll-top"
+            class="float-stack__button"
+            type="button"
+            aria-label="回到顶部"
+            title="回到顶部"
+            aria-disabled="true"
+          >
+            <UiIcon name="chevron-up" class="icon" />
+          </button>
+        ) : null}
       </div>
     ) : null}
     <script>
@@ -280,6 +317,14 @@ const adminUiPrefsScriptHref = isDevAdminPage
       import '../scripts/sidebar-floating-actions.ts';
       import '../scripts/sidebar-reading.ts';
     </script>
+    {showViewStatsScript ? (
+      <script>
+        import '../scripts/view-stats';
+        import { dispatchViewStatsReady } from '../lib/view-stats';
+
+        dispatchViewStatsReady();
+      </script>
+    ) : null}
     {adminSidebarNavModeScriptHref ? (
       <script is:inline type="module" src={adminSidebarNavModeScriptHref}></script>
     ) : null}

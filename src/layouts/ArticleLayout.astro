@@ -1,16 +1,17 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import ArticleToc from '../components/ArticleToc.astro';
+import ViewStats from '../components/ViewStats.astro';
 import Lightbox from '../components/Lightbox.astro';
 import '../styles/article.css';
-import { getEssayDerivedText, type EssayEntry } from '../lib/content';
+import { getEssayDerivedText, getEssaySlug, type EssayEntry } from '../lib/content';
 import { containsMarkdownMath } from '../lib/markdown-math';
 import {
   MARKDOWN_MATH_STYLESHEET_DATA_ATTR,
   MARKDOWN_MATH_STYLESHEET_HREF,
   MARKDOWN_MATH_STYLESHEET_ID
 } from '../lib/markdown-math-styles';
-import type { ArticleMetaSettings, SidebarNavId } from '../lib/theme-settings';
+import type { ArticleMetaSettings, SidebarNavId, ViewStatsSettings } from '../lib/theme-settings';
 import { formatISODateUtc } from '../utils/format';
 import { truncateText } from '../utils/excerpt';
 
@@ -24,6 +25,7 @@ const {
   prev,
   next,
   articleMetaSettings,
+  viewStatsSettings,
   visibleTags = [],
   headings = []
 } = Astro.props as {
@@ -31,6 +33,7 @@ const {
   prev: ArticleNeighborLink | null;
   next: ArticleNeighborLink | null;
   articleMetaSettings: ArticleMetaSettings;
+  viewStatsSettings: ViewStatsSettings;
   visibleTags?: string[];
   headings?: { depth: number; slug: string; text?: string }[];
 };
@@ -64,10 +67,14 @@ const articleReadingStats = articleMetaSettings.showWordCount || articleMetaSett
     })()
   : { wordCount: 0, readingMinutes: 0 };
 const numberFormatter = new Intl.NumberFormat('zh-CN');
+// 浏览数据槽位由用户脚本填值，未填值时整组不占位
+const viewStats = viewStatsSettings;
+const showViewStatsInMeta = viewStats.onArticleMeta && (viewStats.showPv || viewStats.showUv);
 const shouldShowMetaLine = articleMetaSettings.showDate
   || (articleMetaSettings.showTags && visibleTags.length > 0)
   || articleMetaSettings.showWordCount
-  || articleMetaSettings.showReadingTime;
+  || articleMetaSettings.showReadingTime
+  || showViewStatsInMeta;
 
 ---
 
@@ -143,6 +150,18 @@ const shouldShowMetaLine = articleMetaSettings.showDate
           <span class="meta-line__item meta-line__item--desktop-meta">
             约 {numberFormatter.format(articleReadingStats.readingMinutes)} 分钟
           </span>
+        ) : null}
+        {showViewStatsInMeta ? (
+          <ViewStats
+            scope="article"
+            path={Astro.url.pathname}
+            route={`/archive/${getEssaySlug(entry)}/`}
+            title={entry.data.title}
+            showPv={viewStats.showPv}
+            pvLabel={viewStats.pvLabel}
+            showUv={viewStats.showUv}
+            uvLabel={viewStats.uvLabel}
+          />
         ) : null}
       </div>
     ) : null}

@@ -11,6 +11,7 @@ import {
   isAdminRoutePathActive
 } from '../lib/admin-console/routes';
 import { createWithBase } from '../utils/format';
+import { renderSettingHtml, toSettingPlainText } from '../lib/setting-html';
 import { getSidebarHref, getThemeSettings, type SidebarNavId } from '../lib/theme-settings';
 
 const {
@@ -61,7 +62,12 @@ const showAdminEntry = !hidePublicSidebarActionsInDevAdmin
 const isPageScopedAdminSidebar = isAdminContext && adminSidebarScope === 'page';
 const showAdminRouteRail = isAdminContext && isDev;
 const showAdminNavPanels = isDev && !isPageScopedAdminSidebar;
-const siteTitleLabel = `${siteTitle} 首页`;
+// 站点名与引用文案走白名单 HTML（lib/setting-html.ts）：
+// 白名单外的标签转义为文本；读屏标签用剥掉标签的纯文本。
+const siteTitleHtml = renderSettingHtml(siteTitle);
+const quoteHtml = renderSettingHtml(quote);
+const siteTitlePlain = toSettingPlainText(siteTitle) || 'Whono';
+const siteTitleLabel = `${siteTitlePlain} 首页`;
 const adminOverviewRoute = getAdminRoute('overview');
 const adminRailTitleLabel = adminOverviewRoute.description;
 const isAdminOverviewActive = pathname === adminOverviewHref;
@@ -79,7 +85,7 @@ const adminSidebarRoutes = ADMIN_ROUTES.map((route) => {
 
 <aside id="site-sidebar" class="sidebar">
   <a class="sidebar__title sidebar__title--site" href={homeHref} aria-label={siteTitleLabel}>
-    <span class="sidebar__title-text">{siteTitle}</span>
+    <div class="sidebar__title-text" set:html={siteTitleHtml} />
   </a>
 
   {isAdminContext ? (
@@ -94,13 +100,7 @@ const adminSidebarRoutes = ADMIN_ROUTES.map((route) => {
     </a>
   ) : null}
 
-  <div class="sidebar__quote">
-    {quote.split('\n').map((line) => (
-      <>
-        {line}<br />
-      </>
-    ))}
-  </div>
+  <div class="sidebar__quote" set:html={quoteHtml} />
 
   {showAdminNavPanels ? (
     <div class="sidebar-nav-panels" data-admin-sidebar-nav>

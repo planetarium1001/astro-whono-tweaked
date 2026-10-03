@@ -5,6 +5,18 @@
   "readingMode": {
     "showEntry": true
   },
+  "floatStack": {
+    "showResumeReading": true,
+    "showScrollTop": true
+  },
+  "viewStats": {
+    "showPv": true,
+    "pvLabel": "浏览",
+    "showUv": true,
+    "uvLabel": "访客",
+    "onArticleMeta": true,
+    "onIndexPages": true
+  },
   "sidebarActions": {
     "showRssLink": true,
     "showThemeToggle": true,

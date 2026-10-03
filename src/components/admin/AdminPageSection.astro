@@ -1,7 +1,8 @@
 ---
 import AdminIcon from './AdminIcon.astro';
 import AdminHelpTip from './AdminHelpTip.astro';
-import { ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH } from '../../lib/admin-console/theme-shared';
+import UiIcon from '../UiIcon.astro';
+import { ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH, ADMIN_VIEW_STATS_LABEL_MAX_LENGTH } from '../../lib/admin-console/theme-shared';
 
 interface Props {
   pageTitleMaxLength: number;
@@ -215,6 +216,114 @@ const {
     <p class="admin-help admin-help--article-meta-preview">
       预览：<code id="article-meta-preview-value" class="admin-help__preview-value">{'发布于：2026-03-18 · #Astro\u00A0\u00A0#写作 · 共 2,416 字 · 约 6 分钟'}</code>
     </p>
+  </div>
+
+  <div class="admin-subgroup admin-subgroup--view-stats">
+    <p class="admin-subtitle">
+      <span class="admin-subtitle__main">浏览数据</span>
+      <span class="admin-subtitle__hint">（PV / UV ，默认关闭，由自定义脚本提供）</span>
+    </p>
+    <div class="admin-toggle-row-group">
+      <div class="admin-toggle-row admin-toggle-row--with-inline-field">
+        <label class="admin-toggle-row admin-toggle-row--compact" for="ui-view-stats-show-pv">
+          <input id="ui-view-stats-show-pv" type="checkbox" />
+          <span>显示浏览量</span>
+        </label>
+        <span class="admin-toggle-row__sep" aria-hidden="true">|</span>
+        <label class="admin-inline-field" for="ui-view-stats-pv-label">
+          <span class="admin-inline-field__label">前缀：</span>
+          <input
+            id="ui-view-stats-pv-label"
+            class="admin-inline-field__input"
+            type="text"
+            maxlength={ADMIN_VIEW_STATS_LABEL_MAX_LENGTH}
+            autocomplete="off"
+            placeholder="浏览"
+          />
+        </label>
+      </div>
+      <div class="admin-toggle-row admin-toggle-row--with-inline-field">
+        <label class="admin-toggle-row admin-toggle-row--compact" for="ui-view-stats-show-uv">
+          <input id="ui-view-stats-show-uv" type="checkbox" />
+          <span>显示访客数</span>
+        </label>
+        <span class="admin-toggle-row__sep" aria-hidden="true">|</span>
+        <label class="admin-inline-field" for="ui-view-stats-uv-label">
+          <span class="admin-inline-field__label">前缀：</span>
+          <input
+            id="ui-view-stats-uv-label"
+            class="admin-inline-field__input"
+            type="text"
+            maxlength={ADMIN_VIEW_STATS_LABEL_MAX_LENGTH}
+            autocomplete="off"
+            placeholder="访客"
+          />
+        </label>
+      </div>
+    </div>
+    <div class="admin-toggle-row-group">
+      <label class="admin-toggle-row">
+        <input id="ui-view-stats-on-article-meta" type="checkbox" />
+        <span>显示在文章元信息行</span>
+      </label>
+      <label class="admin-toggle-row">
+        <input id="ui-view-stats-on-index-pages" type="checkbox" />
+        <span>显示在归档 / 絮语 / 随笔 / 小记等页面底部</span>
+      </label>
+    </div>
+    <p class="admin-help admin-help--view-stats-preview">
+      预览（文章元信息行）：<code id="view-stats-preview-meta" class="admin-help__preview-value">浏览 1,234 · 访客 456</code><br />
+      预览（页面底部）：<code id="view-stats-preview-footer" class="admin-help__preview-value">浏览 1,234 · 访客 456</code>
+    </p>
+    <p class="admin-help">
+      数据由 <code>src/scripts/view-stats.ts</code> 接入，空值时不显示。
+    </p>
+  </div>
+
+  <div class="admin-subgroup">
+    <p class="admin-subtitle">
+      <span class="admin-subtitle__main">浮动操作列</span>
+      <span class="admin-subtitle__hint">（选择右下角显示的图标；阅读模式仅文章与小记页可用）</span>
+    </p>
+    <div class="admin-sidebar-icon-grid" role="group" aria-label="浮动操作列按钮显隐">
+      <label class="admin-sidebar-icon-toggle" for="ui-reading-entry" title="显示阅读模式入口">
+        <input id="ui-reading-entry" type="checkbox" aria-label="显示阅读模式入口" title="显示阅读模式入口" />
+        <span
+          class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-sidebar-icon-toggle__button"
+          aria-hidden="true"
+        >
+          <UiIcon name="book-open" size={18} strokeWidth={2} />
+        </span>
+      </label>
+      <label class="admin-sidebar-icon-toggle" for="ui-float-stack-show-resume-reading" title="显示「回到上次阅读位置」">
+        <input
+          id="ui-float-stack-show-resume-reading"
+          type="checkbox"
+          aria-label="显示回到上次阅读位置"
+          title="显示「回到上次阅读位置」"
+        />
+        <span
+          class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-sidebar-icon-toggle__button"
+          aria-hidden="true"
+        >
+          <UiIcon name="resume-reading" size={18} strokeWidth={2} />
+        </span>
+      </label>
+      <label class="admin-sidebar-icon-toggle" for="ui-float-stack-show-scroll-top" title="显示「回到顶部」">
+        <input
+          id="ui-float-stack-show-scroll-top"
+          type="checkbox"
+          aria-label="显示回到顶部"
+          title="显示「回到顶部」"
+        />
+        <span
+          class="admin-btn admin-btn--tool admin-btn--compact admin-btn--icon admin-sidebar-icon-toggle__button"
+          aria-hidden="true"
+        >
+          <UiIcon name="chevron-up" size={18} strokeWidth={2} />
+        </span>
+      </label>
+    </div>
   </div>
 
   <div class="admin-subgroup">

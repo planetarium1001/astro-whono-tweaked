@@ -17,8 +17,8 @@ A minimal two-column Astro theme for personal writing and lightweight publishing
 ## Preview
 
 <p align="center">
-  <img src="public/preview-light.png" width="49%" alt="Light preview" />
-  <img src="public/preview-dark.png" width="49%" alt="Dark preview" />
+  <img src="docs/images/preview-light.png" width="49%" alt="Light preview" />
+  <img src="docs/images/preview-dark.png" width="49%" alt="Dark preview" />
 </p>
 
 

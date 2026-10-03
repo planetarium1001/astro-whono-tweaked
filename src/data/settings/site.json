@@ -7,6 +7,17 @@
     "showCurrentYear": true,
     "copyright": "Whono · Theme Demo · by cxro"
   },
+  "filings": {
+    "icp": {
+      "number": null,
+      "link": null
+    },
+    "police": {
+      "number": null,
+      "link": null,
+      "icon": null
+    }
+  },
   "adminOverview": {
     "publicVisible": true,
     "hiddenMessage": "作者暂未公开此页面。"

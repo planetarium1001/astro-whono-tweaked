@@ -9,7 +9,13 @@ import type {
   TypographyRole,
   TypographySettings
 } from '@/lib/theme-settings';
-import { normalizeHeroImageSrc as normalizeHeroImageSrcValue, normalizeSiteFaviconPath, type SiteFaviconSlot } from '@/utils/format';
+import {
+  createWithBase,
+  normalizeHeroImageSrc as normalizeHeroImageSrcValue,
+  normalizeSiteFaviconPath,
+  normalizeSiteFilingIconPath,
+  type SiteFaviconSlot
+} from '@/utils/format';
 import {
   ADMIN_ARTICLE_META_DATE_LABEL_DEFAULT,
   ADMIN_HERO_IMAGE_ALT_DEFAULT,
@@ -22,6 +28,8 @@ import {
   ADMIN_SIDEBAR_DIVIDER_DEFAULT,
   ADMIN_SOCIAL_PRESET_ORDER_DEFAULT,
   ADMIN_TYPOGRAPHY_DEFAULT,
+  ADMIN_VIEW_STATS_PV_LABEL_DEFAULT,
+  ADMIN_VIEW_STATS_UV_LABEL_DEFAULT,
   canonicalizeAdminThemeSettings,
   isAdminHomeIntroLinkKey,
   isAdminNavId,
@@ -35,6 +43,9 @@ export type EditableNavItem = EditableSettings['shell']['nav'][number];
 export type SocialPresetOrder = Record<SiteSocialPresetId, number>;
 
 type Query = <T extends Element>(parent: ParentNode, selector: string) => T | null;
+
+const base = import.meta.env.BASE_URL ?? '/';
+const withBase = createWithBase(base);
 
 type FormCodecContext = {
   footerStartYearMax: number;
@@ -57,6 +68,13 @@ type FormCodecContext = {
   inputSiteFooterStartYear: HTMLInputElement;
   inputSiteFooterShowCurrentYear: HTMLInputElement;
   inputSiteFooterCopyright: HTMLInputElement;
+  inputSiteFilingsIcpNumber: HTMLInputElement;
+  inputSiteFilingsIcpLink: HTMLInputElement;
+  inputSiteFilingsPoliceNumber: HTMLInputElement;
+  inputSiteFilingsPoliceLink: HTMLInputElement;
+  inputSiteFilingsPoliceIcon: HTMLInputElement;
+  filingsPreviewValueEl: HTMLElement;
+  filingsIconPreviewEl: HTMLElement;
   inputSiteAdminOverviewPublicVisible: HTMLInputElement;
   inputSiteAdminOverviewHiddenMessage: HTMLInputElement;
   inputSiteFaviconSvg: HTMLInputElement;
@@ -68,7 +86,7 @@ type FormCodecContext = {
   inputSiteSocialX: HTMLInputElement;
   inputSiteSocialEmailOrder: HTMLInputElement;
   inputSiteSocialEmail: HTMLInputElement;
-  inputShellBrandTitle: HTMLInputElement;
+  inputShellBrandTitle: HTMLTextAreaElement;
   inputShellQuote: HTMLTextAreaElement;
   inputHomeShowIntroLead: HTMLInputElement;
   inputHomeShowIntroMore: HTMLInputElement;
@@ -99,6 +117,16 @@ type FormCodecContext = {
   inputHeroImageAlt: HTMLInputElement;
   inputCodeLineNumbers: HTMLInputElement;
   inputReadingEntry: HTMLInputElement;
+  inputFloatStackShowResumeReading: HTMLInputElement;
+  inputFloatStackShowScrollTop: HTMLInputElement;
+  inputViewStatsShowPv: HTMLInputElement;
+  inputViewStatsPvLabel: HTMLInputElement;
+  inputViewStatsShowUv: HTMLInputElement;
+  inputViewStatsUvLabel: HTMLInputElement;
+  inputViewStatsOnArticleMeta: HTMLInputElement;
+  inputViewStatsOnIndexPages: HTMLInputElement;
+  viewStatsPreviewMetaEl: HTMLElement;
+  viewStatsPreviewFooterEl: HTMLElement;
   inputSidebarActionsShowRssLink: HTMLInputElement;
   inputSidebarActionsShowThemeToggle: HTMLInputElement;
   inputSidebarActionsShowAdminEntry: HTMLInputElement;
@@ -177,6 +205,13 @@ export const createFormCodec = ({
   inputSiteFooterStartYear,
   inputSiteFooterShowCurrentYear,
   inputSiteFooterCopyright,
+  inputSiteFilingsIcpNumber,
+  inputSiteFilingsIcpLink,
+  inputSiteFilingsPoliceNumber,
+  inputSiteFilingsPoliceLink,
+  inputSiteFilingsPoliceIcon,
+  filingsPreviewValueEl,
+  filingsIconPreviewEl,
   inputSiteAdminOverviewPublicVisible,
   inputSiteAdminOverviewHiddenMessage,
   inputSiteFaviconSvg,
@@ -219,6 +254,16 @@ export const createFormCodec = ({
   inputHeroImageAlt,
   inputCodeLineNumbers,
   inputReadingEntry,
+  inputFloatStackShowResumeReading,
+  inputFloatStackShowScrollTop,
+  inputViewStatsShowPv,
+  inputViewStatsPvLabel,
+  inputViewStatsShowUv,
+  inputViewStatsUvLabel,
+  inputViewStatsOnArticleMeta,
+  inputViewStatsOnIndexPages,
+  viewStatsPreviewMetaEl,
+  viewStatsPreviewFooterEl,
   inputSidebarActionsShowRssLink,
   inputSidebarActionsShowThemeToggle,
   inputSidebarActionsShowAdminEntry,
@@ -346,6 +391,36 @@ export const createFormCodec = ({
     articleMetaPreviewValueEl.textContent = getArticleMetaPreviewText();
   };
 
+  const VIEW_STATS_PREVIEW_PV = '1,234';
+  const VIEW_STATS_PREVIEW_UV = '456';
+  const VIEW_STATS_PREVIEW_EMPTY = '当前不显示浏览数据';
+
+  const getViewStatsPreviewTexts = (): { meta: string; footer: string } => {
+    const segments: string[] = [];
+
+    if (inputViewStatsShowPv.checked) {
+      const pvLabel = normalizeSingleLine(inputViewStatsPvLabel.value, ADMIN_VIEW_STATS_PV_LABEL_DEFAULT);
+      segments.push(`${pvLabel} ${VIEW_STATS_PREVIEW_PV}`);
+    }
+
+    if (inputViewStatsShowUv.checked) {
+      const uvLabel = normalizeSingleLine(inputViewStatsUvLabel.value, ADMIN_VIEW_STATS_UV_LABEL_DEFAULT);
+      segments.push(`${uvLabel} ${VIEW_STATS_PREVIEW_UV}`);
+    }
+
+    const statsText = segments.join(' · ');
+    return {
+      meta: inputViewStatsOnArticleMeta.checked && statsText ? statsText : VIEW_STATS_PREVIEW_EMPTY,
+      footer: inputViewStatsOnIndexPages.checked && statsText ? statsText : VIEW_STATS_PREVIEW_EMPTY
+    };
+  };
+
+  const refreshViewStatsPreview = (): void => {
+    const { meta, footer } = getViewStatsPreviewTexts();
+    viewStatsPreviewMetaEl.textContent = meta;
+    viewStatsPreviewFooterEl.textContent = footer;
+  };
+
   const syncHomeIntroLinkControls = (): void => {
     const primary = getSelectedHomeIntroLink(inputHomeIntroMoreLinkPrimary, defaultPrimaryHomeIntroLink);
     const hasSecondary = Boolean(inputHomeIntroMoreLinkSecondaryEnabled.checked);
@@ -418,6 +493,59 @@ export const createFormCodec = ({
     return `页脚预览：© ${yearRange} ${copyright}`;
   };
 
+  const FILINGS_PREVIEW_EMPTY = '当前不显示备案信息';
+
+  const getFilingsPreviewText = (): string => {
+    const icpNumber = normalizeSingleLine(inputSiteFilingsIcpNumber.value);
+    const policeNumber = normalizeSingleLine(inputSiteFilingsPoliceNumber.value);
+    const segments = [icpNumber, policeNumber].filter(Boolean);
+    if (!segments.length) return FILINGS_PREVIEW_EMPTY;
+    return segments.join(' · ');
+  };
+
+  const FILINGS_ICON_PREVIEW_STATES = { empty: 'empty', custom: 'custom', error: 'error' } as const;
+  const filingsIconPreviewImg = filingsIconPreviewEl.querySelector<HTMLImageElement>(
+    '[data-filings-icon-preview-img]'
+  );
+
+  // 路径写错或外链 404 时退回虚框，避免裂图
+  filingsIconPreviewEl.addEventListener(
+    'error',
+    (event) => {
+      if (!(event.target instanceof HTMLImageElement)) return;
+      event.target.removeAttribute('src');
+      event.target.hidden = true;
+      filingsIconPreviewEl.dataset.state = FILINGS_ICON_PREVIEW_STATES.error;
+    },
+    true
+  );
+
+  // 相对路径补 base，https 外链原样使用；空值与非法值只留虚框
+  const refreshFilingsIconPreview = (): void => {
+    if (!filingsIconPreviewImg) return;
+
+    const normalized = normalizeSiteFilingIconPath(inputSiteFilingsPoliceIcon.value);
+    const src = typeof normalized === 'string' && normalized
+      ? (/^https:\/\//i.test(normalized) ? normalized : withBase(normalized))
+      : null;
+
+    if (!src) {
+      filingsIconPreviewImg.removeAttribute('src');
+      filingsIconPreviewImg.hidden = true;
+      filingsIconPreviewEl.dataset.state = FILINGS_ICON_PREVIEW_STATES.empty;
+      return;
+    }
+
+    filingsIconPreviewImg.hidden = false;
+    filingsIconPreviewImg.src = src;
+    filingsIconPreviewEl.dataset.state = FILINGS_ICON_PREVIEW_STATES.custom;
+  };
+
+  const refreshFilingsPreview = (): void => {
+    filingsPreviewValueEl.textContent = getFilingsPreviewText();
+    refreshFilingsIconPreview();
+  };
+
   const refreshFooterPreview = (): void => {
     footerPreviewValueEl.textContent = getFooterPreviewText().replace(/^页脚预览：/, '').trim();
   };
@@ -483,6 +611,17 @@ export const createFormCodec = ({
           showCurrentYear: Boolean(inputSiteFooterShowCurrentYear.checked),
           copyright: inputSiteFooterCopyright.value.trim()
         },
+        filings: {
+          icp: {
+            number: normalizeSingleLine(inputSiteFilingsIcpNumber.value) || null,
+            link: normalizeSingleLine(inputSiteFilingsIcpLink.value) || null
+          },
+          police: {
+            number: normalizeSingleLine(inputSiteFilingsPoliceNumber.value) || null,
+            link: normalizeSingleLine(inputSiteFilingsPoliceLink.value) || null,
+            icon: normalizeSingleLine(inputSiteFilingsPoliceIcon.value) || null
+          }
+        },
         adminOverview: {
           publicVisible: Boolean(inputSiteAdminOverviewPublicVisible.checked),
           hiddenMessage: normalizeSingleLine(
@@ -504,7 +643,7 @@ export const createFormCodec = ({
         }
       },
       shell: {
-        brandTitle: inputShellBrandTitle.value.trim(),
+        brandTitle: normalizeMultiline(inputShellBrandTitle.value).trim(),
         quote: normalizeMultiline(inputShellQuote.value).trim(),
         nav
       },
@@ -551,6 +690,18 @@ export const createFormCodec = ({
         readingMode: {
           showEntry: Boolean(inputReadingEntry.checked)
         },
+        floatStack: {
+          showResumeReading: Boolean(inputFloatStackShowResumeReading.checked),
+          showScrollTop: Boolean(inputFloatStackShowScrollTop.checked)
+        },
+        viewStats: {
+          showPv: Boolean(inputViewStatsShowPv.checked),
+          pvLabel: normalizeSingleLine(inputViewStatsPvLabel.value, ADMIN_VIEW_STATS_PV_LABEL_DEFAULT),
+          showUv: Boolean(inputViewStatsShowUv.checked),
+          uvLabel: normalizeSingleLine(inputViewStatsUvLabel.value, ADMIN_VIEW_STATS_UV_LABEL_DEFAULT),
+          onArticleMeta: Boolean(inputViewStatsOnArticleMeta.checked),
+          onIndexPages: Boolean(inputViewStatsOnIndexPages.checked)
+        },
         sidebarActions: {
           showRssLink: Boolean(inputSidebarActionsShowRssLink.checked),
           showThemeToggle: Boolean(inputSidebarActionsShowThemeToggle.checked),
@@ -583,6 +734,11 @@ export const createFormCodec = ({
     inputSiteFooterStartYear.value = String(settings.site.footer?.startYear ?? '');
     inputSiteFooterShowCurrentYear.checked = Boolean(settings.site.footer?.showCurrentYear);
     inputSiteFooterCopyright.value = settings.site.footer?.copyright || '';
+    inputSiteFilingsIcpNumber.value = settings.site.filings?.icp?.number || '';
+    inputSiteFilingsIcpLink.value = settings.site.filings?.icp?.link || '';
+    inputSiteFilingsPoliceNumber.value = settings.site.filings?.police?.number || '';
+    inputSiteFilingsPoliceLink.value = settings.site.filings?.police?.link || '';
+    inputSiteFilingsPoliceIcon.value = settings.site.filings?.police?.icon || '';
     inputSiteAdminOverviewPublicVisible.checked = settings.site.adminOverview?.publicVisible !== false;
     inputSiteAdminOverviewHiddenMessage.value =
       settings.site.adminOverview?.hiddenMessage || ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT;
@@ -637,6 +793,14 @@ export const createFormCodec = ({
     syncFooterYearControls();
     inputCodeLineNumbers.checked = Boolean(settings.ui?.codeBlock?.showLineNumbers);
     inputReadingEntry.checked = Boolean(settings.ui?.readingMode?.showEntry);
+    inputFloatStackShowResumeReading.checked = settings.ui?.floatStack?.showResumeReading !== false;
+    inputFloatStackShowScrollTop.checked = settings.ui?.floatStack?.showScrollTop !== false;
+    inputViewStatsShowPv.checked = Boolean(settings.ui?.viewStats?.showPv);
+    inputViewStatsPvLabel.value = settings.ui?.viewStats?.pvLabel ?? ADMIN_VIEW_STATS_PV_LABEL_DEFAULT;
+    inputViewStatsShowUv.checked = Boolean(settings.ui?.viewStats?.showUv);
+    inputViewStatsUvLabel.value = settings.ui?.viewStats?.uvLabel ?? ADMIN_VIEW_STATS_UV_LABEL_DEFAULT;
+    inputViewStatsOnArticleMeta.checked = settings.ui?.viewStats?.onArticleMeta !== false;
+    inputViewStatsOnIndexPages.checked = settings.ui?.viewStats?.onIndexPages !== false;
     inputSidebarActionsShowRssLink.checked = settings.ui?.sidebarActions?.showRssLink !== false;
     inputSidebarActionsShowThemeToggle.checked = settings.ui?.sidebarActions?.showThemeToggle !== false;
     inputSidebarActionsShowAdminEntry.checked = Boolean(settings.ui?.sidebarActions?.showAdminEntry);
@@ -649,7 +813,9 @@ export const createFormCodec = ({
     applySidebarDividerVariant(settings.ui?.layout?.sidebarDivider || ADMIN_SIDEBAR_DIVIDER_DEFAULT);
     applyTypographySettings(settings.ui?.typography);
     refreshFooterPreview();
+    refreshFilingsPreview();
     refreshArticleMetaPreview();
+    refreshViewStatsPreview();
 
     const navMap = new Map<SidebarNavId, EditableNavItem>(settings.shell.nav.map((item) => [item.id, item]));
     getNavRows().forEach((row, index) => {
@@ -673,12 +839,14 @@ export const createFormCodec = ({
     applySettings,
     collectHomeIntroLinks,
     refreshArticleMetaPreview,
+    refreshViewStatsPreview,
     refreshHomeIntroPreview,
     syncAdminOverviewControls,
     syncSidebarActionControls,
     syncHomeIntroLinkControls,
     syncHeroControls,
     refreshFooterPreview,
+    refreshFilingsPreview,
     syncFooterYearControls
   };
 };
