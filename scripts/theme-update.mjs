@@ -35,7 +35,7 @@ const isSiteOwned = (filePath) =>
   SITE_OWNED_FILES.has(filePath)
   || SITE_OWNED_PREFIXES.some((prefix) => filePath.startsWith(prefix));
 
-const runGit = (args) => spawnSync('git', args, { cwd: ROOT, encoding: 'utf8' });
+const runGit = (args, encoding = 'utf8') => spawnSync('git', args, { cwd: ROOT, encoding });
 
 const git = (args, { allowFailure = false } = {}) => {
   const result = runGit(args);
@@ -57,15 +57,47 @@ const readManifest = () => {
   return manifest;
 };
 
-/** 取某个提交下的文件内容；文件不存在返回 null。 */
-const readBlob = (commit, filePath) => {
-  const result = runGit(['show', `${commit}:${filePath}`]);
+/** 取某个提交下的文件内容；文件不存在返回 null。二进制按 Buffer 取。 */
+const readBlob = (commit, filePath, binary = false) => {
+  const result = runGit(['show', `${commit}:${filePath}`], binary ? null : 'utf8');
   return result.status === 0 ? result.stdout : null;
 };
 
-const readWorktree = (filePath) => {
+const readWorktree = (filePath, binary = false) => {
   const absolute = path.join(ROOT, filePath);
-  return existsSync(absolute) ? readFileSync(absolute, 'utf8') : null;
+  return existsSync(absolute) ? readFileSync(absolute, binary ? null : 'utf8') : null;
+};
+
+/** git 的 numstat 用 -/- 标记二进制文件。 */
+const detectBinaryPaths = (baseCommit, headCommit) => {
+  const paths = new Set();
+  for (const line of git(['diff', '--numstat', baseCommit, headCommit]).split('\n')) {
+    const [added, deleted, ...rest] = line.trim().split(/\t/);
+    if (added === '-' && deleted === '-' && rest.length > 0) paths.add(rest.at(-1));
+  }
+  return paths;
+};
+
+/**
+ * 二进制文件无法做文本三方合并，只能整文件取舍：
+ * 一边未改动就取另一边，双方都改过则保留站点版本并报冲突，避免写入损坏内容。
+ */
+const mergeBinary = (base, ours, theirs) => {
+  const unchanged = (a, b) => a !== null && b !== null && a.equals(b);
+  if (ours === null) return { content: theirs, conflicted: false };
+  if (theirs === null) return { content: null, conflicted: false };
+  if (unchanged(ours, base)) return { content: theirs, conflicted: false };
+  if (unchanged(theirs, base)) return { content: ours, conflicted: false };
+  return { content: ours, conflicted: true };
+};
+
+/** 站点侧是否与基准一致；文本比对字符串，二进制比对字节。 */
+const isUnchangedFromBase = (ours, base, binary) => {
+  if (binary) {
+    if (ours === null || base === null) return ours === null && base === null;
+    return ours.equals(base);
+  }
+  return ours === base;
 };
 
 /** 三方合并；返回合并结果与是否冲突。无基准时退化为取主题版本。 */
@@ -118,6 +150,7 @@ const main = async () => {
       return { status, filePath: rest.at(-1) };
     });
 
+  const binaryPaths = detectBinaryPaths(baseCommit, headCommit);
   const summary = { updated: [], merged: [], conflicts: [], skipped: [], removed: [] };
   const scratchDir = mkdtempSync(path.join(tmpdir(), 'theme-update-'));
 
@@ -128,16 +161,19 @@ const main = async () => {
         continue;
       }
 
-      const base = readBlob(baseCommit, filePath);
-      const theirs = readBlob(headCommit, filePath);
-      const ours = readWorktree(filePath);
-      const { content, conflicted } = mergeFile(filePath, base, ours, theirs, scratchDir);
+      const binary = binaryPaths.has(filePath);
+      const base = readBlob(baseCommit, filePath, binary);
+      const theirs = readBlob(headCommit, filePath, binary);
+      const ours = readWorktree(filePath, binary);
+      const { content, conflicted } = binary
+        ? mergeBinary(base, ours, theirs)
+        : mergeFile(filePath, base, ours, theirs, scratchDir);
 
       if (conflicted) {
         summary.conflicts.push(filePath);
       } else if (content === null) {
         summary.removed.push(filePath);
-      } else if (ours === base) {
+      } else if (isUnchangedFromBase(ours, base, binary)) {
         summary.updated.push(filePath);
       } else {
         summary.merged.push(filePath);
