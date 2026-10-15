@@ -187,6 +187,11 @@ export interface SiteFilingsSettings {
 
 interface SiteSettings {
   title: string;
+  /**
+   * 窄屏顶栏标题；为空、缺失或全空白时为 null，由渲染层回落到 `title`。
+   * 与 `title` 同走白名单富文本渲染与纯文本提取。
+   */
+  titleNarrow: string | null;
   description: string;
   defaultLocale: string;
   /**
@@ -318,6 +323,7 @@ interface ThemeSettings {
 interface ThemeSettingsSources {
   site: {
     title: SettingSource;
+    titleNarrow: SettingSource;
     description: SettingSource;
     defaultLocale: SettingSource;
     footerStartYear: SettingSource;
@@ -517,8 +523,8 @@ const DEFAULT_PRESET_SOCIAL_ORDER: SiteSocialPresetOrder = {
   email: 3
 };
 const LEGACY_SOCIAL_LINKS: SiteSocialLinks = {
-  github: 'https://github.com/cxro/astro-whono',
-  x: 'https://twitter.com/yourname',
+  github: 'https://github.com/planetarium1001/astro-whono-tweaked',
+  x: null,
   email: 'Whono@linux.do',
   presetOrder: { ...DEFAULT_PRESET_SOCIAL_ORDER },
   custom: [],
@@ -563,6 +569,7 @@ const cloneThemeSettingsReadDiagnostics = (
 
 const DEFAULT_SITE: SiteSettings = {
   title: 'Whono',
+  titleNarrow: null,
   description: '一个 Astro 主题的展示站：轻量、可维护、可复用。',
   defaultLocale: 'zh-CN',
   titleMaxPercent: ADMIN_SITE_TITLE_PERCENT_DEFAULT,
@@ -1335,6 +1342,12 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     asNonEmptyString(legacySite.title),
     DEFAULT_SITE.title
   );
+  // 窄屏标题没有旧配置来源；空 / 全空白与非字符串一律视为未设置，回落 null 由渲染层接 `title`。
+  const titleNarrow = resolveValue<string | null>(
+    asNonEmptyString(siteJson?.titleNarrow),
+    undefined,
+    DEFAULT_SITE.titleNarrow
+  );
   const description = resolveValue(
     asNonEmptyString(siteJson?.description),
     asNonEmptyString(legacySite.description),
@@ -1734,6 +1747,7 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     settings: {
       site: {
         title: title.value,
+        titleNarrow: titleNarrow.value,
         description: description.value,
         defaultLocale: defaultLocale.value,
         titleMaxPercent: siteTitlePercent.value,
@@ -1868,6 +1882,7 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     sources: {
       site: {
         title: title.source,
+        titleNarrow: titleNarrow.source,
         description: description.source,
         defaultLocale: defaultLocale.source,
         footerStartYear: footerStartYear.source,
@@ -1982,6 +1997,7 @@ const buildEditableThemeSettingsSnapshot = (
   canonicalizeEditableThemeSettingsSnapshot({
     site: {
       title: resolved.settings.site.title,
+      titleNarrow: resolved.settings.site.titleNarrow,
       description: resolved.settings.site.description,
       defaultLocale: resolved.settings.site.defaultLocale,
       titleMaxPercent: resolved.settings.site.titleMaxPercent,

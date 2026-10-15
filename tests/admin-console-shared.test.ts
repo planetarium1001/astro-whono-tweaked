@@ -11,6 +11,7 @@ import {
   getAdminImageFieldPreviewSrc,
   getAdminRenderedImagePreviewSrc
 } from '../src/lib/admin-console/image-params';
+import { ADMIN_SITE_TITLE_MAX_LENGTH } from '../src/lib/admin-console/theme-shared';
 import { getEditableThemeSettingsPayload, type EditableThemeSettings } from '../src/lib/theme-settings';
 import {
   buildSearchHaystack,
@@ -477,5 +478,20 @@ describe('admin-console/shared：列表页 RSS 开关', () => {
       }
     };
     expect(validateAdminThemeSettings(broken).map((issue) => issue.path)).toContain('page.listRss.bits');
+  });
+
+  it('rejects a narrow site title beyond the length limit', () => {
+    const ok = getEditableThemeSettingsPayload().settings;
+    const tooLong = {
+      ...ok,
+      site: { ...ok.site, titleNarrow: 'a'.repeat(ADMIN_SITE_TITLE_MAX_LENGTH + 1) }
+    };
+    expect(validateAdminThemeSettings(tooLong).map((issue) => issue.path)).toContain('site.titleNarrow');
+
+    const atLimit = {
+      ...ok,
+      site: { ...ok.site, titleNarrow: 'a'.repeat(ADMIN_SITE_TITLE_MAX_LENGTH) }
+    };
+    expect(validateAdminThemeSettings(atLimit).map((issue) => issue.path)).not.toContain('site.titleNarrow');
   });
 });

@@ -4,8 +4,8 @@ subtitle: 一个极简的双栏 Astro 博客主题
 description: 强调可读性、内容优先与后台可视化的 Astro 主题，涵盖排版、图片与设置台。
 type: 开源
 date: 2026-03-01T00:00:00.000Z
-image: https://planetarium1001.github.io/astro-whono-tweaked/_astro/hero.DZf7jsGa_Ke6Kx.avif
-icon: https://planetarium1001.github.io/astro-whono-tweaked/_astro/hero.DZf7jsGa_Ke6Kx.avif
+image: images/pages/projects/whono-theme/cover.webp
+icon: images/pages/projects/whono-theme/cover.webp
 ---
 
 Whono 是一个以「内容优先、静态优先」为出发点的 Astro 主题。
@@ -20,6 +20,6 @@ Whono 是一个以「内容优先、静态优先」为出发点的 Astro 主题�
 
 Astro + Svelte islands，Markdown 管线使用 remark/rehype，代码高亮交给 Shiki。
 
-[仓库](https://github.com/cxro/astro-whono)
-[演示](https://astro.whono.me/)
+[仓库](https://github.com/planetarium1001/astro-whono-tweaked)
+[演示](https://planetarium1001.github.io/astro-whono-tweaked/)
 

@@ -23,7 +23,8 @@
 
 .divider {
   background: var(--border);
-  margin: 50px 0;
+  /* 贯通壳层上下；留白会让线在页面顶部与底部断开 */
+  margin: 0;
 }
 
 .shell[data-sidebar-divider='subtle'] .divider {
@@ -71,6 +72,11 @@
 
 .sidebar__title-text {
   display: block;
+}
+
+/* 窄屏专用标题（site.titleNarrow）：宽屏隐藏，900px 以下的窄屏壳层切换显示 */
+.sidebar__title--site-narrow {
+  display: none;
 }
 
 /* 设置富文本可用的排版工具类（白名单放行这些 class 或等价 style） */
@@ -1001,6 +1007,16 @@ body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
    * BaseLayout 以 --site-title-max-inline 写在 <html> 上。
    */
     max-width: var(--site-title-max-inline, 35%);
+  }
+
+  /* 窄屏顶栏只显示窄屏标题；宽屏标题隐藏 */
+  :where(body:not(.admin-page)) .sidebar__title--site {
+    display: none;
+  }
+
+  /* 与宽屏标题同一套可渲染宽度约束（见上方 .sidebar__title 的 max-width） */
+  :where(body:not(.admin-page)) .sidebar__title--site-narrow {
+    display: block;
   }
 
   :where(body:not(.admin-page)) .sidebar__quote {

@@ -186,6 +186,8 @@ const ADMIN_FOOTER_COPYRIGHT_MAX_LENGTH = 120;
 export const ADMIN_SITE_TITLE_PERCENT_DEFAULT = 35;
 export const ADMIN_SITE_TITLE_PERCENT_MIN = 10;
 export const ADMIN_SITE_TITLE_PERCENT_MAX = 100;
+/** 窄屏标题（`site.titleNarrow`）的长度上限；留空表示与站点标题一致。 */
+export const ADMIN_SITE_TITLE_MAX_LENGTH = 60;
 /**
  * 页面外缘间隙（内容盒到浏览器边缘的视觉距离，px）。
  * 默认与下限都是 32：再小会让右下角浮动列与正文的净空不足（几何下限 30），上限 160。
@@ -560,6 +562,8 @@ export const canonicalizeAdminThemeSettings = (
   return {
     site: {
       title: normalizeTrimmed(site.title),
+      /** 窄屏标题：空 / 全空白 / 非字符串一律归为 null，渲染期回落到站点标题。 */
+      titleNarrow: normalizeOptionalSingleLine(String(site.titleNarrow ?? '')),
       description: normalizeMultiline(String(site.description ?? '')).trim(),
       defaultLocale: normalizeTrimmed(site.defaultLocale),
       footer: {
@@ -730,6 +734,7 @@ export const createAdminWritableThemeSettingsGroups = (
 ): AdminWritableThemeSettingsGroups => ({
   site: {
     title: settings.site.title,
+    titleNarrow: settings.site.titleNarrow,
     description: settings.site.description,
     defaultLocale: settings.site.defaultLocale,
     titleMaxPercent: settings.site.titleMaxPercent,
@@ -820,6 +825,13 @@ export const validateAdminThemeSettings = (
   }
 
   if (!settings.site.title) pushIssue('site.title', '站点标题不能为空');
+  if (settings.site.titleNarrow !== null) {
+    if (typeof settings.site.titleNarrow !== 'string') {
+      pushIssue('site.titleNarrow', '窄屏标题必须是字符串');
+    } else if (settings.site.titleNarrow.length > ADMIN_SITE_TITLE_MAX_LENGTH) {
+      pushIssue('site.titleNarrow', `窄屏标题不能超过 ${ADMIN_SITE_TITLE_MAX_LENGTH} 个字符`);
+    }
+  }
   if (!settings.site.description) pushIssue('site.description', '站点描述不能为空');
   if (!settings.site.defaultLocale) {
     pushIssue('site.defaultLocale', '默认语言不能为空');
@@ -1453,6 +1465,11 @@ const fillAdminThemeSettingsSiteCompatibilityDefaults = (
   canonicalSite: LooseRecord
 ): LooseRecord => {
   let next = rawSite;
+
+  // 旧配置没有该键时按「未设置」补齐，避免读取期被静默修补判定锁住后台。
+  if (next.titleNarrow === undefined && canonicalSite.titleNarrow !== undefined) {
+    next = { ...next, titleNarrow: canonicalSite.titleNarrow };
+  }
 
   const canonicalAdminOverview = canonicalSite.adminOverview;
   if (isRecord(canonicalAdminOverview)) {

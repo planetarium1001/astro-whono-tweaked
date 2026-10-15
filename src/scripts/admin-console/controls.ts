@@ -49,6 +49,7 @@ export type AdminThemeControls = RequiredElements<{
   socialCustomAddBtn: HTMLButtonElement | null;
   socialCustomTemplate: HTMLTemplateElement | null;
   inputSiteTitle: HTMLInputElement | null;
+  inputSiteTitleNarrow: HTMLInputElement | null;
   inputSiteDescription: HTMLTextAreaElement | null;
   inputSiteDefaultLocale: HTMLInputElement | null;
   inputSiteTitleMaxPercent: HTMLInputElement | null;
@@ -166,6 +167,7 @@ export const queryAdminThemeControls = (): AdminThemeControls | null => {
     socialCustomAddBtn: byId<HTMLButtonElement>('site-social-custom-add'),
     socialCustomTemplate: byId<HTMLTemplateElement>('site-social-custom-row-template'),
     inputSiteTitle: byId<HTMLInputElement>('site-title'),
+    inputSiteTitleNarrow: byId<HTMLInputElement>('site-title-narrow'),
     inputSiteDescription: byId<HTMLTextAreaElement>('site-description'),
     inputSiteDefaultLocale: byId<HTMLInputElement>('site-default-locale'),
     inputSiteTitleMaxPercent: byId<HTMLInputElement>('site-title-max-percent'),

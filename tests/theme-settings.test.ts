@@ -388,4 +388,41 @@ describe('theme-settings revision semantics', () => {
       expect(getThemeSettings().settings.site.pageGapPx).toBe(32);
     }
   });
+
+  it('keeps the narrow title null when it is missing or blank', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const sitePath = path.join(settingsDir, 'site.json');
+
+    const writeNarrowTitle = async (value: unknown) => {
+      const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, unknown>;
+      if (value === undefined) {
+        delete siteJson.titleNarrow;
+      } else {
+        siteJson.titleNarrow = value;
+      }
+      await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+      resetThemeSettingsCache();
+    };
+
+    // 缺失、null 与全空白都回落到宽屏标题，解析结果统一为 null
+    for (const value of [undefined, null, '', '   ']) {
+      await writeNarrowTitle(value);
+      expect(getThemeSettings().settings.site.titleNarrow).toBeNull();
+    }
+  });
+
+  it('reads an explicit narrow title without locking the console', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const sitePath = path.join(settingsDir, 'site.json');
+    const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, unknown>;
+    siteJson.titleNarrow = '窄屏标题';
+    await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+    resetThemeSettingsCache();
+
+    const resolved = getThemeSettings();
+    expect(resolved.settings.site.titleNarrow).toBe('窄屏标题');
+    // 字段已接进可编辑快照，合法值不该被判成 schema-mismatch
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(getEditableThemeSettingsPayload().settings.site.titleNarrow).toBe('窄屏标题');
+  });
 });

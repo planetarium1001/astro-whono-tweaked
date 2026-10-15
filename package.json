@@ -1,16 +1,16 @@
 {
-  "name": "astro-whono",
+  "name": "astro-whono-tweaked",
   "version": "0.5.0",
   "private": true,
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cxro/astro-whono.git"
+    "url": "https://github.com/planetarium1001/astro-whono-tweaked.git"
   },
   "bugs": {
-    "url": "https://github.com/cxro/astro-whono/issues"
+    "url": "https://github.com/planetarium1001/astro-whono-tweaked/issues"
   },
-  "homepage": "https://astro.whono.me",
+  "homepage": "https://planetarium1001.github.io/astro-whono-tweaked/",
   "type": "module",
   "engines": {
     "node": ">=22.12.0"

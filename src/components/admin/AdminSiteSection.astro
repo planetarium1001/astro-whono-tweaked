@@ -8,6 +8,7 @@ import {
   ADMIN_SITE_PAGE_GAP_HINT,
   ADMIN_SITE_PAGE_GAP_MAX,
   ADMIN_SITE_PAGE_GAP_MIN,
+  ADMIN_SITE_TITLE_MAX_LENGTH,
   ADMIN_SITE_TITLE_PERCENT_DEFAULT,
   ADMIN_SITE_TITLE_PERCENT_MAX,
   ADMIN_SITE_TITLE_PERCENT_MIN
@@ -77,6 +78,19 @@ const filingFields: FilingField[] = [
         <span class="admin-label__hint">（默认值为 zh-CN）</span>
       </span>
       <input class="admin-field__control" id="site-default-locale" type="text" autocomplete="off" />
+    </label>
+    <label class="admin-field">
+      <span class="admin-label">
+        <span class="admin-label__main">窄屏标题</span>
+        <span class="admin-label__hint">（留空则与站点标题一致）</span>
+      </span>
+      <input
+        class="admin-field__control"
+        id="site-title-narrow"
+        type="text"
+        maxlength={ADMIN_SITE_TITLE_MAX_LENGTH}
+        autocomplete="off"
+      />
     </label>
     <label class="admin-field admin-field--full">
       <span class="admin-label">

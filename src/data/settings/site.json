@@ -1,13 +1,13 @@
 {
-  "title": "Astro Themes by Whono",
-  "description": "一个极简双栏 Astro 主题的展示站",
+  "title": "Astro Whono Tweaked",
+  "description": "一个极简双栏 Astro 主题的展示站，本仓库为 planetarium1001/astro-whono-tweaked。",
   "defaultLocale": "zh-CN",
   "titleMaxPercent": 35,
   "pageGapPx": 32,
   "footer": {
     "startYear": 2025,
     "showCurrentYear": true,
-    "copyright": "Whono · Theme Demo · by cxro"
+    "copyright": "Astro Whono Tweaked · Theme Demo"
   },
   "filings": {
     "icp": {
@@ -30,8 +30,8 @@
     "appleTouchIcon": null
   },
   "socialLinks": {
-    "github": "https://github.com/cxro/astro-whono",
-    "x": "https://twitter.com/yourname",
+    "github": "https://github.com/planetarium1001/astro-whono-tweaked",
+    "x": null,
     "email": "Astro@Whono.me",
     "presetOrder": {
       "github": 1,

@@ -8,6 +8,8 @@
   --admin-social-column-platform-width: 104px;
   --admin-social-column-icon-width: 64px;
   --admin-social-column-actions-width: 84px;
+  --admin-social-column-grip-width: 26px;
+  --admin-social-grip-icon-size: 14px;
   --admin-social-row-padding-inline: var(--admin-row-table-padding-inline);
   --admin-social-header-font-size: var(--admin-text-xs);
   --admin-social-field-font-size: var(--admin-text-base);
@@ -69,7 +71,8 @@
     var(--admin-social-column-platform-width)
     var(--admin-social-column-icon-width)
     minmax(0, 1fr)
-    var(--admin-social-column-actions-width);
+    var(--admin-social-column-actions-width)
+    var(--admin-social-column-grip-width);
   align-items: center;
 }
 
@@ -104,6 +107,10 @@
 
 .admin-social-header__actions {
   grid-column: 5;
+}
+
+.admin-social-header__grip {
+  grid-column: 6;
 }
 
 .admin-social-row {
@@ -354,6 +361,59 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+/* 拖动锚点：仅此处可发起拖拽，预设行与自定义行共用。 */
+.admin-social-grip {
+  grid-column: 6;
+  justify-self: center;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--admin-social-column-grip-width);
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--faint);
+  cursor: grab;
+}
+
+.admin-social-grip:hover {
+  color: var(--muted);
+}
+
+.admin-social-grip:focus-visible {
+  outline: none;
+  box-shadow: var(--admin-focus-shadow);
+  color: var(--text);
+}
+
+.admin-social-grip:active,
+.admin-social-row[data-drag-sort-dragging='true'] .admin-social-grip {
+  cursor: grabbing;
+}
+
+.admin-social-grip__icon {
+  display: block;
+  width: var(--admin-social-grip-icon-size);
+  height: var(--admin-social-grip-icon-size);
+  pointer-events: none;
+}
+
+/* 拖动中的行与目标插入位置。 */
+.admin-social-row[data-drag-sort-dragging='true'] {
+  opacity: 0.5;
+}
+
+.admin-social-row[data-drag-sort-over='before'] {
+  box-shadow: inset 0 2px 0 var(--admin-focus-border);
+}
+
+.admin-social-row[data-drag-sort-over='after'] {
+  box-shadow: inset 0 -2px 0 var(--admin-focus-border);
 }
 
 @container admin-theme-form (max-width: 560px) {

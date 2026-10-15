@@ -16,12 +16,14 @@ import { getSidebarHref, getThemeSettings, type SidebarNavId } from '../lib/them
 
 const {
   siteTitle = 'Whono',
+  siteTitleNarrow = siteTitle,
   activeNavId,
   isAdminContext = false,
   isDev = false,
   adminSidebarScope = 'default'
 } = Astro.props as {
   siteTitle?: string;
+  siteTitleNarrow?: string;
   activeNavId?: SidebarNavId;
   isAdminContext?: boolean;
   isDev?: boolean;
@@ -64,7 +66,9 @@ const showAdminRouteRail = isAdminContext && isDev;
 const showAdminNavPanels = isDev && !isPageScopedAdminSidebar;
 // 站点名与引用文案走白名单 HTML（lib/setting-html.ts）：
 // 白名单外的标签转义为文本；读屏标签用剥掉标签的纯文本。
+// 宽屏 / 窄屏标题同走这套渲染与提取；aria-label 固定用宽屏标题的纯文本作为规范化站点名。
 const siteTitleHtml = renderSettingHtml(siteTitle);
+const siteTitleNarrowHtml = renderSettingHtml(siteTitleNarrow || siteTitle);
 const quoteHtml = renderSettingHtml(quote);
 const siteTitlePlain = toSettingPlainText(siteTitle) || 'Whono';
 const siteTitleLabel = `${siteTitlePlain} 首页`;
@@ -86,6 +90,11 @@ const adminSidebarRoutes = ADMIN_ROUTES.map((route) => {
 <aside id="site-sidebar" class="sidebar">
   <a class="sidebar__title sidebar__title--site" href={homeHref} aria-label={siteTitleLabel}>
     <div class="sidebar__title-text" set:html={siteTitleHtml} />
+  </a>
+
+  {/* 窄屏顶栏专用标题；宽屏隐藏，900px 以下由窄屏壳层切换显示 */}
+  <a class="sidebar__title sidebar__title--site-narrow" href={homeHref} aria-label={siteTitleLabel}>
+    <div class="sidebar__title-text" set:html={siteTitleNarrowHtml} />
   </a>
 
   {isAdminContext ? (

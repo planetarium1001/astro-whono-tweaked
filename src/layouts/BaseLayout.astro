@@ -46,6 +46,8 @@ const {
 const { settings } = getThemeSettings();
 const siteTitle = settings.site.title;
 const brandTitle = settings.shell.brandTitle ?? siteTitle;
+/** 窄屏顶栏标题：未单独设置（site.titleNarrow 为空）时与宽屏标题一致。 */
+const siteTitleNarrow = settings.site.titleNarrow ?? brandTitle;
 const metaDescription = description ?? settings.site.description;
 const fullTitle = title ? `${title} | ${siteTitle}` : siteTitle;
 const htmlLang = settings.site.defaultLocale || 'zh-CN';
@@ -267,6 +269,7 @@ const adminUiPrefsScriptHref = isDevAdminPage
     <div class="shell" data-sidebar-divider={sidebarDividerVariant} data-toc={tocRail ? 'true' : undefined}>
       <Sidebar
         siteTitle={brandTitle}
+        siteTitleNarrow={siteTitleNarrow}
         activeNavId={activeNavId}
         isAdminContext={isAdminPage}
         isDev={isDev}

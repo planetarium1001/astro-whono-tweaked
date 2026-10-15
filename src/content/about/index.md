@@ -7,6 +7,10 @@
 
 示例内容覆盖站点介绍、友链列表、常见问题与联系说明，可按实际站点替换。
 
+## 致谢
+
+本主题基于 [cxro/astro-whono](https://github.com/cxro/astro-whono) 改造，本仓库为 [planetarium1001/astro-whono-tweaked](https://github.com/planetarium1001/astro-whono-tweaked)。排版风格的来源还包括 [elizen/elizen-blog](https://github.com/elizen/elizen-blog) 与 Hugo 主题 [yihui/hugo-ivy](https://github.com/yihui/hugo-ivy)。
+
 ## 朋友们
 
 :::friend{name="Astro" url="https://astro.build/" avatar="https://cdn.nodeimage.com/i/LAW2Al4JZrPhfTs7ObHbisPLGwWuR6x5.webp"}

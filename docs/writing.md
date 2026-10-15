@@ -98,7 +98,7 @@
 ```markdown
 项目正文的最后一段。
 
-[仓库](https://github.com/cxro/astro-whono) · [演示](https://example.com)
+[仓库](https://github.com/planetarium1001/astro-whono-tweaked) · [演示](https://example.com)
 ```
 
 规则：

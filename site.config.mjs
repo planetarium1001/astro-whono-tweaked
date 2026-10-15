@@ -17,11 +17,11 @@ if (
 
 export const site = {
   url: hasSiteUrl ? siteUrl : fallbackSiteUrl,
-  title: 'Astro Whono',
-  brandTitle: 'Astro Whono',
-  author: 'Astro Whono',
+  title: 'Astro Whono Tweaked',
+  brandTitle: 'Astro Whono Tweaked',
+  author: 'Planetarium',
   authorAvatar: 'author/avatar.webp',
-  description: '一个极简双栏 Astro 主题，用于个人写作与轻量内容发布。'
+  description: '基于 cxro/astro-whono 的极简双栏 Astro 主题模板，面向长文阅读做了增量改造。'
 };
 
 // 服务端分页已取消，这三个值是前端每页条目数：列表页写入

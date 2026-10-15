@@ -17,6 +17,7 @@ import {
   queryAll
 } from './controls';
 import { createAdminThemeController } from './controller';
+import { initDragSort } from './drag-sort';
 import { createAdminFaviconUploads } from './favicon-uploads';
 import { createFormCodec } from './form-codec';
 import { createAdminThemeImageFields } from './image-fields';
@@ -69,6 +70,7 @@ if (!root) {
       homeIntroMorePreviewEl: controls.homeIntroMorePreviewEl,
       homeIntroMoreLinkSecondaryGroupEl: controls.homeIntroMoreLinkSecondaryGroupEl,
       inputSiteTitle: controls.inputSiteTitle,
+      inputSiteTitleNarrow: controls.inputSiteTitleNarrow,
       inputSiteDescription: controls.inputSiteDescription,
       inputSiteDefaultLocale: controls.inputSiteDefaultLocale,
       inputSiteTitleMaxPercent: controls.inputSiteTitleMaxPercent,
@@ -172,6 +174,7 @@ if (!root) {
       footerStartYearMax,
       socialCustomAddBtn: controls.socialCustomAddBtn,
       inputSiteTitle: controls.inputSiteTitle,
+      inputSiteTitleNarrow: controls.inputSiteTitleNarrow,
       inputSiteDescription: controls.inputSiteDescription,
       inputSiteDefaultLocale: controls.inputSiteDefaultLocale,
       inputSiteTitleMaxPercent: controls.inputSiteTitleMaxPercent,
@@ -335,6 +338,27 @@ if (!root) {
       uiState
     });
     bindAdminThemeNavigationGuard({ uiState });
+
+    const navGrid = query<HTMLElement>(root, '.admin-nav-grid');
+    if (navGrid) {
+      initDragSort({
+        list: navGrid,
+        rowSelector: '.admin-nav-row',
+        handleSelector: '[data-drag-sort-handle]',
+        orderInputSelector: '[data-nav-field="order"]',
+        onReorder: controller.refreshDirty
+      });
+    }
+    if (controls.socialCustomList) {
+      initDragSort({
+        list: controls.socialCustomList,
+        rowSelector: '[data-social-preset-row], [data-social-custom-row]',
+        handleSelector: '[data-drag-sort-handle]',
+        orderInputSelector: '[data-social-preset-field="order"], [data-social-custom-field="order"]',
+        onReorder: controller.refreshDirty
+      });
+    }
+
     controller.start();
   }
 }
