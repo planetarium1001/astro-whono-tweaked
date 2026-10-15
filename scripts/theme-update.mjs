@@ -86,6 +86,8 @@ const mergeBinary = (base, ours, theirs) => {
   const unchanged = (a, b) => a !== null && b !== null && a.equals(b);
   if (ours === null) return { content: theirs, conflicted: false };
   if (theirs === null) return { content: null, conflicted: false };
+  // 基准不存在、或双方已是同一份内容（例如主题新增的资源提交站点已取过）视为无差异
+  if (unchanged(ours, theirs)) return { content: ours, conflicted: false };
   if (unchanged(ours, base)) return { content: theirs, conflicted: false };
   if (unchanged(theirs, base)) return { content: ours, conflicted: false };
   return { content: ours, conflicted: true };
