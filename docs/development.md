@@ -16,9 +16,10 @@ Node.js ≥ 22.12.0，版本基线写在 `.nvmrc`（当前 22.22.0）并与 `pac
 | `npm test` | Vitest 用例 |
 | `npm run verify` | check、test、build 与产物类校验依次执行 |
 | `npm run new:bit` | 生成一条动态草稿 |
+| `npm run theme:update` | 从主题仓库同步更新，见 [../README.md](../README.md) 的「同步主题更新」 |
 | `npm run font:charset`、`npm run font:subset`、`npm run font:build` | 字体字符集与子集 |
 
-构建期生成 RSS、canonical 与 sitemap 需要提供 `SITE_URL`，产物类守卫也依赖它。构建期环境变量见 [../README.md](../README.md) 的「站点常量」。
+构建期生成 RSS、canonical 与 sitemap 需要提供 `SITE_URL`，产物类守卫也依赖它。构建期环境变量见 [../README.md](../README.md) 的「构建期环境变量」。
 
 ## 校验脚本
 
@@ -48,7 +49,7 @@ Node.js ≥ 22.12.0，版本基线写在 `.nvmrc`（当前 22.22.0）并与 `pac
 
 仓库提交的是子集化后的 WOFF2 字体，按 latin / cjk-common / cjk-ext 三段切分，`global.css` 用 `unicode-range` 按需加载，clone 后无需额外步骤。
 
-字符集由 `src/content`、`src/pages`、`src/components`、`src/layouts`、`src/data/settings` 的文本与 `tools/charset-base.txt`（3500 常用字）共同生成，写入 `tools/charset-common.txt`，不要手改。`npm run font:charset` 只重算字符集，`npm run font:build` 等于 `font:charset` 加 `font:subset`；字符集哈希未变化时 `font:subset` 跳过重建。
+字符集由 `src/content`、`src/pages`、`src/components`、`src/layouts`、`src/data/settings`、`site.config.mjs` 的文本与 `tools/charset-base.txt`（3500 常用字）共同生成，写入 `tools/charset-common.txt`，不要手改。`npm run font:charset` 只重算字符集，`npm run font:build` 等于 `font:charset` 加 `font:subset`；`font:subset` 每次都会重建全部子集，并在成功后把字符集指纹写入 `tools/charset-common.sha256`，供 `check:font-charset` 校验 woff2 未过期。
 
 重新生成子集需要 Python 3 与 `pyftsubset`（`python -m pip install fonttools brotli zopfli`，并确保 Python Scripts 目录在 `PATH` 中），源字体放在 `tools/fonts-src/`。缺字时把字符补进 `tools/charset-base.txt` 后重跑，`check:font-charset` 会指出不一致。
 
@@ -76,7 +77,7 @@ Vitest 配置在 `vitest.config.ts`，用例位于 `tests/*.test.ts`，默认运
 - 标题段经 NFKC 归一化、转小写、空白与符号折叠为单个连字符，允许中文；超出长度上限时截断并追加稳定短哈希。
 - 标题段为空时回退为 `untitled`，命中 Windows 保留设备名时追加 `-entry`。
 
-构造逻辑集中在 `src/utils/slug-rules.ts` 的 `buildContentEntryId()`，后台新建、迁移脚本与该模块共用同一实现。`npm run new:bit` 按 `YYYY-MM-DD-HHMM` 生成动态草稿。博客详情的公开 slug 默认由条目 ID 去掉日期前缀得到，可用 frontmatter 的 `slug` 覆盖，取值须为小写 kebab-case（允许 CJK），且不得与 `/blog/` 下的静态路由冲突。
+构造逻辑集中在 `src/utils/slug-rules.ts` 的 `buildContentEntryId()`，后台写作页新建条目时调用它。`npm run new:bit` 按 `YYYY-MM-DD-HHMM` 生成动态草稿。博客详情的公开 slug 默认由条目 ID 去掉日期前缀得到，可用 frontmatter 的 `slug` 覆盖，取值须为小写 kebab-case（允许 CJK），且不得与 `/blog/` 下的静态路由冲突。
 
 ## CI
 

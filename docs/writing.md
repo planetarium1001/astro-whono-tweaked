@@ -32,7 +32,7 @@
 | `publishedAt` | 否 | 带时区的 ISO 8601 |
 | `updatedAt` | 否 | `YYYY-MM-DD` 或带时区的 ISO 8601，不得早于 `date` |
 | `slug` | 否 | 小写 kebab-case（允许 CJK），覆盖默认路径 |
-| `cover` | 否 | 分享图，用作详情页的 `og:image`，默认 `/og.svg` |
+| `cover` | 否 | 分享图，作为详情页的 `og:image`：相对路径会补上部署子路径并绝对化，也可以直接填完整 `https://` 地址；未填时用主题默认图 `/og-default.png` |
 | `badge` | 否 | 标题角标，纯文本 |
 
 `bits`：
@@ -120,13 +120,13 @@
 ### 图注
 
 ```html
-<figure class="figure--md figure--center">
+<figure class="figure figure--md figure--center">
   <img src="/images/blog/hello/a.webp" alt="示例">
   <figcaption>图注文字</figcaption>
 </figure>
 ```
 
-尺寸类 `figure--sm`、`figure--md`、`figure--lg`、`figure--full` 与对齐类 `figure--left`、`figure--center`、`figure--right` 可各取一个，省略时按居中默认排版。
+必须同时写 `figure` 基础类：样式选择器是 `figure.figure--*`，只写修饰类不会生效。尺寸类 `figure--sm`、`figure--md`、`figure--lg`、`figure--full` 与对齐类 `figure--left`、`figure--center`、`figure--right` 可各取一个，省略时按居中默认排版。
 
 ### 画廊
 
