@@ -6,6 +6,7 @@ import type { SidebarNavId } from '../../lib/theme-settings';
 import {
   ADMIN_NAV_ORNAMENT_DEFAULT,
   ADMIN_NAV_ORNAMENT_MAX_LENGTH,
+  ADMIN_SHELL_TITLE_NARROW_MAX_LENGTH,
   ADMIN_SIDEBAR_DIVIDER_OPTIONS
 } from '../../lib/admin-console/theme-shared';
 
@@ -32,6 +33,18 @@ const { navIdOrder } = Astro.props;
           <span class="admin-label__hint">（支持换行与少量 HTML）</span>
         </span>
         <textarea class="admin-field__control" id="shell-brand-title" rows="2"></textarea>
+      </label>
+      <label class="admin-field">
+        <span class="admin-label">
+          <span class="admin-label__main">窄屏标题</span>
+          <span class="admin-label__hint">（留空则与侧栏站点名一致；支持换行与少量 HTML）</span>
+        </span>
+        <textarea
+          class="admin-field__control"
+          id="shell-title-narrow"
+          rows="2"
+          maxlength={ADMIN_SHELL_TITLE_NARROW_MAX_LENGTH}
+        ></textarea>
       </label>
       <label class="admin-field">
         <span class="admin-label">

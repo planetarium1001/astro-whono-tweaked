@@ -391,38 +391,38 @@ describe('theme-settings revision semantics', () => {
 
   it('keeps the narrow title null when it is missing or blank', async () => {
     const settingsDir = await createTempSettingsFixture();
-    const sitePath = path.join(settingsDir, 'site.json');
+    const shellPath = path.join(settingsDir, 'shell.json');
 
     const writeNarrowTitle = async (value: unknown) => {
-      const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, unknown>;
+      const shellJson = JSON.parse(await readFile(shellPath, 'utf8')) as Record<string, unknown>;
       if (value === undefined) {
-        delete siteJson.titleNarrow;
+        delete shellJson.titleNarrow;
       } else {
-        siteJson.titleNarrow = value;
+        shellJson.titleNarrow = value;
       }
-      await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+      await writeFile(shellPath, `${JSON.stringify(shellJson, null, 2)}\n`, 'utf8');
       resetThemeSettingsCache();
     };
 
-    // 缺失、null 与全空白都回落到宽屏标题，解析结果统一为 null
+    // 缺失、null 与全空白都回落到侧栏站点名，解析结果统一为 null
     for (const value of [undefined, null, '', '   ']) {
       await writeNarrowTitle(value);
-      expect(getThemeSettings().settings.site.titleNarrow).toBeNull();
+      expect(getThemeSettings().settings.shell.titleNarrow).toBeNull();
     }
   });
 
   it('reads an explicit narrow title without locking the console', async () => {
     const settingsDir = await createTempSettingsFixture();
-    const sitePath = path.join(settingsDir, 'site.json');
-    const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, unknown>;
-    siteJson.titleNarrow = '窄屏标题';
-    await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+    const shellPath = path.join(settingsDir, 'shell.json');
+    const shellJson = JSON.parse(await readFile(shellPath, 'utf8')) as Record<string, unknown>;
+    shellJson.titleNarrow = '窄屏标题';
+    await writeFile(shellPath, `${JSON.stringify(shellJson, null, 2)}\n`, 'utf8');
     resetThemeSettingsCache();
 
     const resolved = getThemeSettings();
-    expect(resolved.settings.site.titleNarrow).toBe('窄屏标题');
+    expect(resolved.settings.shell.titleNarrow).toBe('窄屏标题');
     // 字段已接进可编辑快照，合法值不该被判成 schema-mismatch
     expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
-    expect(getEditableThemeSettingsPayload().settings.site.titleNarrow).toBe('窄屏标题');
+    expect(getEditableThemeSettingsPayload().settings.shell.titleNarrow).toBe('窄屏标题');
   });
 });

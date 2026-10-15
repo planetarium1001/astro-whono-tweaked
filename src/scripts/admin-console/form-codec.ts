@@ -65,7 +65,7 @@ type FormCodecContext = {
   homeIntroMorePreviewEl: HTMLElement;
   homeIntroMoreLinkSecondaryGroupEl: HTMLElement;
   inputSiteTitle: HTMLInputElement;
-  inputSiteTitleNarrow: HTMLInputElement;
+  inputShellTitleNarrow: HTMLInputElement;
   inputSiteDescription: HTMLTextAreaElement;
   inputSiteDefaultLocale: HTMLInputElement;
   inputSiteTitleMaxPercent: HTMLInputElement;
@@ -212,7 +212,7 @@ export const createFormCodec = ({
   homeIntroMorePreviewEl,
   homeIntroMoreLinkSecondaryGroupEl,
   inputSiteTitle,
-  inputSiteTitleNarrow,
+  inputShellTitleNarrow,
   inputSiteDescription,
   inputSiteDefaultLocale,
   inputSiteTitleMaxPercent,
@@ -638,8 +638,6 @@ export const createFormCodec = ({
     return {
       site: {
         title: inputSiteTitle.value.trim(),
-        /* 窄屏标题：留空表示与站点标题一致 */
-        titleNarrow: inputSiteTitleNarrow.value.trim() || null,
         description: normalizeMultiline(inputSiteDescription.value).trim(),
         defaultLocale: inputSiteDefaultLocale.value.trim(),
         /* 窄屏站点标题宽度百分比（与页面外缘间隙同一行） */
@@ -684,6 +682,8 @@ export const createFormCodec = ({
       },
       shell: {
         brandTitle: normalizeMultiline(inputShellBrandTitle.value).trim(),
+        /* 窄屏标题：与侧栏站点名同组，留空表示沿用侧栏站点名 */
+        titleNarrow: inputShellTitleNarrow.value.trim() || null,
         quote: normalizeMultiline(inputShellQuote.value).trim(),
         nav
       },
@@ -780,7 +780,7 @@ export const createFormCodec = ({
 
   const applySettings = (settings: EditableSettings): void => {
     inputSiteTitle.value = settings.site.title || '';
-    inputSiteTitleNarrow.value = settings.site.titleNarrow || '';
+    inputShellTitleNarrow.value = settings.shell.titleNarrow || '';
     inputSiteDescription.value = settings.site.description || '';
     inputSiteDefaultLocale.value = settings.site.defaultLocale || '';
     inputSiteTitleMaxPercent.value = String(settings.site.titleMaxPercent ?? ADMIN_SITE_TITLE_PERCENT_DEFAULT);

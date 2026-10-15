@@ -186,8 +186,8 @@ const ADMIN_FOOTER_COPYRIGHT_MAX_LENGTH = 120;
 export const ADMIN_SITE_TITLE_PERCENT_DEFAULT = 35;
 export const ADMIN_SITE_TITLE_PERCENT_MIN = 10;
 export const ADMIN_SITE_TITLE_PERCENT_MAX = 100;
-/** 窄屏标题（`site.titleNarrow`）的长度上限；留空表示与站点标题一致。 */
-export const ADMIN_SITE_TITLE_MAX_LENGTH = 60;
+/** 窄屏标题（`shell.titleNarrow`）的长度上限；留空表示与侧栏站点名一致。 */
+export const ADMIN_SHELL_TITLE_NARROW_MAX_LENGTH = 60;
 /**
  * 页面外缘间隙（内容盒到浏览器边缘的视觉距离，px）。
  * 默认与下限都是 32：再小会让右下角浮动列与正文的净空不足（几何下限 30），上限 160。
@@ -562,8 +562,6 @@ export const canonicalizeAdminThemeSettings = (
   return {
     site: {
       title: normalizeTrimmed(site.title),
-      /** 窄屏标题：空 / 全空白 / 非字符串一律归为 null，渲染期回落到站点标题。 */
-      titleNarrow: normalizeOptionalSingleLine(String(site.titleNarrow ?? '')),
       description: normalizeMultiline(String(site.description ?? '')).trim(),
       defaultLocale: normalizeTrimmed(site.defaultLocale),
       footer: {
@@ -622,6 +620,8 @@ export const canonicalizeAdminThemeSettings = (
     },
     shell: {
       brandTitle: normalizeTrimmed(shell.brandTitle),
+      /** 窄屏标题：空 / 全空白 / 非字符串一律归为 null，渲染期回落到侧栏站点名。 */
+      titleNarrow: normalizeTrimmed(shell.titleNarrow) || null,
       quote: normalizeMultiline(String(shell.quote ?? '')).trim(),
       nav: normalizedNav
     },
@@ -734,7 +734,6 @@ export const createAdminWritableThemeSettingsGroups = (
 ): AdminWritableThemeSettingsGroups => ({
   site: {
     title: settings.site.title,
-    titleNarrow: settings.site.titleNarrow,
     description: settings.site.description,
     defaultLocale: settings.site.defaultLocale,
     titleMaxPercent: settings.site.titleMaxPercent,
@@ -764,6 +763,7 @@ export const createAdminWritableThemeSettingsGroups = (
   },
   shell: {
     brandTitle: settings.shell.brandTitle,
+    titleNarrow: settings.shell.titleNarrow,
     quote: settings.shell.quote,
     nav: cloneNavItems(settings.shell.nav)
   },
@@ -825,13 +825,6 @@ export const validateAdminThemeSettings = (
   }
 
   if (!settings.site.title) pushIssue('site.title', '站点标题不能为空');
-  if (settings.site.titleNarrow !== null) {
-    if (typeof settings.site.titleNarrow !== 'string') {
-      pushIssue('site.titleNarrow', '窄屏标题必须是字符串');
-    } else if (settings.site.titleNarrow.length > ADMIN_SITE_TITLE_MAX_LENGTH) {
-      pushIssue('site.titleNarrow', `窄屏标题不能超过 ${ADMIN_SITE_TITLE_MAX_LENGTH} 个字符`);
-    }
-  }
   if (!settings.site.description) pushIssue('site.description', '站点描述不能为空');
   if (!settings.site.defaultLocale) {
     pushIssue('site.defaultLocale', '默认语言不能为空');
@@ -1067,6 +1060,13 @@ export const validateAdminThemeSettings = (
   });
 
   if (!settings.shell.brandTitle) pushIssue('shell.brandTitle', '侧栏站点名不能为空');
+  if (settings.shell.titleNarrow !== null) {
+    if (typeof settings.shell.titleNarrow !== 'string') {
+      pushIssue('shell.titleNarrow', '窄屏标题必须是字符串');
+    } else if (settings.shell.titleNarrow.length > ADMIN_SHELL_TITLE_NARROW_MAX_LENGTH) {
+      pushIssue('shell.titleNarrow', `窄屏标题不能超过 ${ADMIN_SHELL_TITLE_NARROW_MAX_LENGTH} 个字符`);
+    }
+  }
   if (!settings.shell.quote) pushIssue('shell.quote', '侧栏引用文案不能为空');
 
   if (!settings.home.introLead) {
@@ -1466,11 +1466,6 @@ const fillAdminThemeSettingsSiteCompatibilityDefaults = (
 ): LooseRecord => {
   let next = rawSite;
 
-  // 旧配置没有该键时按「未设置」补齐，避免读取期被静默修补判定锁住后台。
-  if (next.titleNarrow === undefined && canonicalSite.titleNarrow !== undefined) {
-    next = { ...next, titleNarrow: canonicalSite.titleNarrow };
-  }
-
   const canonicalAdminOverview = canonicalSite.adminOverview;
   if (isRecord(canonicalAdminOverview)) {
     const rawAdminOverview = next.adminOverview;
@@ -1530,6 +1525,20 @@ const UI_COMPATIBILITY_GROUP_FIELDS: ReadonlyArray<readonly [string, readonly st
   ['typography', ['readable', 'copy', 'mono', 'brand']]
 ];
 
+const fillAdminThemeSettingsShellCompatibilityDefaults = (
+  rawShell: LooseRecord,
+  canonicalShell: LooseRecord
+): LooseRecord => {
+  let next = rawShell;
+
+  // 旧配置没有该键时按「未设置」补齐，避免读取期被静默修补判定锁住后台。
+  if (next.titleNarrow === undefined && canonicalShell.titleNarrow !== undefined) {
+    next = { ...next, titleNarrow: canonicalShell.titleNarrow };
+  }
+
+  return next;
+};
+
 const fillAdminThemeSettingsUiCompatibilityDefaults = (
   rawUi: LooseRecord,
   canonicalUi: LooseRecord
@@ -1559,6 +1568,7 @@ export const fillAdminThemeSettingsGroupCompatibilityDefaults = (
 ): unknown => {
   if (!isRecord(rawGroup) || !isRecord(canonicalGroup)) return rawGroup;
   if (group === 'site') return fillAdminThemeSettingsSiteCompatibilityDefaults(rawGroup, canonicalGroup);
+  if (group === 'shell') return fillAdminThemeSettingsShellCompatibilityDefaults(rawGroup, canonicalGroup);
   if (group === 'ui') return fillAdminThemeSettingsUiCompatibilityDefaults(rawGroup, canonicalGroup);
   return rawGroup;
 };
@@ -1576,6 +1586,14 @@ export const fillAdminThemeSettingsCompatibilityDefaults = (
           site: fillAdminThemeSettingsSiteCompatibilityDefaults(
             settings.site,
             canonicalSettings.site as unknown as LooseRecord
+          )
+        }
+      : {}),
+    ...(isRecord(settings.shell)
+      ? {
+          shell: fillAdminThemeSettingsShellCompatibilityDefaults(
+            settings.shell,
+            canonicalSettings.shell as unknown as LooseRecord
           )
         }
       : {}),

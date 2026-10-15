@@ -187,11 +187,6 @@ export interface SiteFilingsSettings {
 
 interface SiteSettings {
   title: string;
-  /**
-   * 窄屏顶栏标题；为空、缺失或全空白时为 null，由渲染层回落到 `title`。
-   * 与 `title` 同走白名单富文本渲染与纯文本提取。
-   */
-  titleNarrow: string | null;
   description: string;
   defaultLocale: string;
   /**
@@ -214,6 +209,11 @@ interface SiteSettings {
 
 interface ShellSettings {
   brandTitle: string;
+  /**
+   * 窄屏顶栏标题；为空、缺失或全空白时为 null，由渲染层回落到 `brandTitle`。
+   * 与 `brandTitle` 同组，同走白名单富文本渲染与纯文本提取。
+   */
+  titleNarrow: string | null;
   quote: string;
   nav: SidebarNavItem[];
 }
@@ -323,7 +323,6 @@ interface ThemeSettings {
 interface ThemeSettingsSources {
   site: {
     title: SettingSource;
-    titleNarrow: SettingSource;
     description: SettingSource;
     defaultLocale: SettingSource;
     footerStartYear: SettingSource;
@@ -349,6 +348,7 @@ interface ThemeSettingsSources {
   };
   shell: {
     brandTitle: SettingSource;
+    titleNarrow: SettingSource;
     quote: SettingSource;
     nav: SettingSource;
   };
@@ -569,7 +569,6 @@ const cloneThemeSettingsReadDiagnostics = (
 
 const DEFAULT_SITE: SiteSettings = {
   title: 'Whono',
-  titleNarrow: null,
   description: '一个 Astro 主题的展示站：轻量、可维护、可复用。',
   defaultLocale: 'zh-CN',
   titleMaxPercent: ADMIN_SITE_TITLE_PERCENT_DEFAULT,
@@ -604,6 +603,7 @@ const DEFAULT_SITE: SiteSettings = {
 
 const DEFAULT_SHELL: ShellSettings = {
   brandTitle: 'Whono',
+  titleNarrow: null,
   quote: LEGACY_QUOTE,
   nav: cloneNavItems(LEGACY_NAV)
 };
@@ -1342,12 +1342,6 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     asNonEmptyString(legacySite.title),
     DEFAULT_SITE.title
   );
-  // 窄屏标题没有旧配置来源；空 / 全空白与非字符串一律视为未设置，回落 null 由渲染层接 `title`。
-  const titleNarrow = resolveValue<string | null>(
-    asNonEmptyString(siteJson?.titleNarrow),
-    undefined,
-    DEFAULT_SITE.titleNarrow
-  );
   const description = resolveValue(
     asNonEmptyString(siteJson?.description),
     asNonEmptyString(legacySite.description),
@@ -1473,6 +1467,13 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     asNonEmptyString(shellJson?.brandTitle),
     asNonEmptyString(legacySite.brandTitle),
     DEFAULT_SHELL.brandTitle
+  );
+  // 窄屏标题与侧栏站点名同组：空 / 全空白与非字符串视为未设置，回落 null 由渲染层接 `brandTitle`。
+  // siteJson 的同名键是旧位置，作为兼容来源保留。
+  const titleNarrow = resolveValue<string | null>(
+    asNonEmptyString(shellJson?.titleNarrow),
+    asNonEmptyString(siteJson?.titleNarrow),
+    DEFAULT_SHELL.titleNarrow
   );
   const quote = resolveValue(
     asNonEmptyString(shellJson?.quote),
@@ -1747,7 +1748,6 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     settings: {
       site: {
         title: title.value,
-        titleNarrow: titleNarrow.value,
         description: description.value,
         defaultLocale: defaultLocale.value,
         titleMaxPercent: siteTitlePercent.value,
@@ -1788,6 +1788,7 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
       },
       shell: {
         brandTitle: brandTitle.value,
+        titleNarrow: titleNarrow.value,
         quote: quote.value,
         nav: cloneNavItems(normalizedNav)
       },
@@ -1882,7 +1883,6 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     sources: {
       site: {
         title: title.source,
-        titleNarrow: titleNarrow.source,
         description: description.source,
         defaultLocale: defaultLocale.source,
         footerStartYear: footerStartYear.source,
@@ -1908,6 +1908,7 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
       },
       shell: {
         brandTitle: brandTitle.source,
+        titleNarrow: titleNarrow.source,
         quote: quote.source,
         nav: nav.source
       },
@@ -1997,7 +1998,6 @@ const buildEditableThemeSettingsSnapshot = (
   canonicalizeEditableThemeSettingsSnapshot({
     site: {
       title: resolved.settings.site.title,
-      titleNarrow: resolved.settings.site.titleNarrow,
       description: resolved.settings.site.description,
       defaultLocale: resolved.settings.site.defaultLocale,
       titleMaxPercent: resolved.settings.site.titleMaxPercent,
@@ -2025,6 +2025,7 @@ const buildEditableThemeSettingsSnapshot = (
     },
     shell: {
       brandTitle: resolved.settings.shell.brandTitle,
+      titleNarrow: resolved.settings.shell.titleNarrow,
       quote: resolved.settings.shell.quote,
       nav: cloneNavItems(resolved.settings.shell.nav)
     },

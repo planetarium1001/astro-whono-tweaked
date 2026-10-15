@@ -18,7 +18,7 @@ type ValidationContext = {
   footerStartYearMax: number;
   socialCustomAddBtn: HTMLButtonElement;
   inputSiteTitle: HTMLInputElement;
-  inputSiteTitleNarrow: HTMLInputElement;
+  inputShellTitleNarrow: HTMLInputElement;
   inputSiteDescription: HTMLTextAreaElement;
   inputSiteDefaultLocale: HTMLInputElement;
   inputSiteTitleMaxPercent: HTMLInputElement;
@@ -108,7 +108,7 @@ export const createValidation = ({
   footerStartYearMax,
   socialCustomAddBtn,
   inputSiteTitle,
-  inputSiteTitleNarrow,
+  inputShellTitleNarrow,
   inputSiteDescription,
   inputSiteDefaultLocale,
   inputSiteTitleMaxPercent,
@@ -231,8 +231,8 @@ export const createValidation = ({
     switch (path) {
       case 'site.title':
         return () => inputSiteTitle;
-      case 'site.titleNarrow':
-        return () => inputSiteTitleNarrow;
+      case 'shell.titleNarrow':
+        return () => inputShellTitleNarrow;
       case 'site.description':
         return () => inputSiteDescription;
       case 'site.defaultLocale':
