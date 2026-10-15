@@ -49,7 +49,9 @@ Node.js ≥ 22.12.0，版本基线写在 `.nvmrc`（当前 22.22.0）并与 `pac
 
 仓库提交的是子集化后的 WOFF2 字体，按 latin / cjk-common / cjk-ext 三段切分，`global.css` 用 `unicode-range` 按需加载，clone 后无需额外步骤。
 
-字符集由 `src/content`、`src/pages`、`src/components`、`src/layouts`、`src/data/settings`、`site.config.mjs` 的文本与 `tools/charset-base.txt`（3500 常用字）共同生成，写入 `tools/charset-common.txt`，不要手改。`npm run font:charset` 只重算字符集，`npm run font:build` 等于 `font:charset` 加 `font:subset`；`font:subset` 每次都会重建全部子集，并在成功后把字符集指纹写入 `tools/charset-common.sha256`，供 `check:font-charset` 校验 woff2 未过期。
+字符集由 `src/content`、`src/pages`、`src/components`、`src/layouts`、`src/data/settings`、`site.config.mjs` 的文本与 `tools/charset-base.txt`（3500 常用字）共同生成，写入 `tools/charset-common.txt`，不要手改。
+
+`npm run font:charset` 只重算字符集，`npm run font:build` 等于 `font:charset` 加 `font:subset`。`font:subset` 每次都会重建全部子集，成功后把字符集指纹写入 `tools/charset-common.sha256`，供 `check:font-charset` 校验 woff2 未过期。
 
 重新生成子集需要 Python 3 与 `pyftsubset`（`python -m pip install fonttools brotli zopfli`，并确保 Python Scripts 目录在 `PATH` 中），源字体放在 `tools/fonts-src/`。缺字时把字符补进 `tools/charset-base.txt` 后重跑，`check:font-charset` 会指出不一致。
 

@@ -2,13 +2,11 @@
 /**
  * 从主题仓库同步更新。
  *
- * 通过 theme.json 记录的主题仓库与基准提交，对主题拥有的文件做三方合并：
- * 站点未改动的文件直接取主题新版本，站点改过的文件用 git merge-file 合并。
- * 站点自己拥有的路径（内容、设置、图片、字体等）一律不覆盖，只在报告中列出。
+ * 按 theme.json 记录的仓库与基准提交对主题文件做三方合并：站点未改动的直接取新版，
+ * 站点改过的用 git merge-file 合并；站点自有路径不覆盖，只在报告中列出。
  *
- * 用法：
- *   npm run theme:update            执行合并并更新 theme.json 的基准提交
- *   npm run theme:update -- --check 只报告将要发生的变更，不写入
+ *   npm run theme:update            合并并更新 theme.json 的基准提交
+ *   npm run theme:update -- --check 只报告变更，不写入
  */
 
 import { spawnSync } from 'node:child_process';
@@ -21,11 +19,7 @@ const ROOT = process.cwd();
 const THEME_MANIFEST = path.join(ROOT, 'theme.json');
 const CHECK_ONLY = process.argv.includes('--check');
 
-/**
- * 站点自有路径：主题更新不覆盖这些文件。
- * 内容包括站点内容与内容派生资源，settings 与 README 是站点身份，
- * pages.yml 承载站点的部署配置，theme.json 由本脚本维护。
- */
+/** 站点自有路径：主题更新不覆盖这些文件，只在报告中列出。 */
 const SITE_OWNED_PREFIXES = [
   'src/content/',
   'src/data/settings/',

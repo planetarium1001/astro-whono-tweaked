@@ -78,7 +78,9 @@ API 位于 `src/pages/api/admin/`：
 
 列表页把筛选数据以 `data-*` 属性与内联 JSON 写入服务端输出的 HTML，客户端在此基础上工作，因此搜索、筛选与分页的取数口径只有服务端一处定义。
 
-`projects` 与 `devlog` 共用末尾链接组：`src/lib/trailing-links.ts` 的 `parseTrailingLinks` 按书写顺序取链接，`stripTrailingLinks` 供摘要派生与正文渲染剥离，`renderTrailingLinksHtml` 输出 `.trailing-links` 链接行。`src/lib/entry-body.ts` 在与站点一致的 markdown 处理器上渲染剥离后的正文并追加链接行，后台预览走同一套处理，链接不会重复出现。博客不使用这套机制。
+`projects` 与 `devlog` 共用末尾链接组，实现在 `src/lib/trailing-links.ts`：`parseTrailingLinks` 按书写顺序取链接，`stripTrailingLinks` 供摘要派生与正文渲染剥离，`renderTrailingLinksHtml` 输出 `.trailing-links` 链接行。
+
+`src/lib/entry-body.ts` 在与站点一致的 markdown 处理器上渲染剥离后的正文并追加链接行。后台预览走同一套处理，链接不会重复出现。博客不使用这套机制。
 
 ## 样式与设计 token
 
@@ -105,7 +107,11 @@ Markdown 管线在 `src/plugins/markdown-pipeline.mjs` 中组装，由 `astro.co
 - rehype 阶段处理原始 HTML 放行、白名单清洗（`sanitize-schema.mjs`）、KaTeX 渲染与代码块工具栏。
 - 代码高亮使用 Shiki，浅色与深色主题分别为 `github-light` 与 `github-dark`；数学边界由独立插件保护，避免公式被后续转换破坏。
 
-字体有两条路径。未选中 Astro Fonts API 的字体由 `public/fonts/` 提供自托管子集，`global.css` 用 `@font-face` 按 `unicode-range` 分段声明；`npm run font:charset` 从内容与模板汇总常用字符集写入 `tools/charset-common.txt`，`npm run font:subset` 依据该文件与 `tools/fonts-src/` 的源字体生成子集，字符集哈希未变化时跳过重建。选中注册表（`src/lib/fonts/registry.ts`）中的 Astro Fonts API 条目时，配置期只把被选中的条目注册进 `fonts[]`，由 Astro 在构建期下载自托管。
+字体有两条路径。
+
+未选中 Astro Fonts API 的字体由 `public/fonts/` 提供自托管子集，`global.css` 用 `@font-face` 按 `unicode-range` 分段声明。字符集由 `npm run font:charset` 从内容与模板汇总，写入 `tools/charset-common.txt`；`npm run font:subset` 依据该文件与 `tools/fonts-src/` 的源字体生成子集，成功后写入字符集指纹。
+
+选中注册表（`src/lib/fonts/registry.ts`）中的 Astro Fonts API 条目时，配置期只把被选中的条目注册进 `fonts[]`，由 Astro 在构建期下载自托管。
 
 图片以文件路径字符串引用，不经过 Astro 的图片优化管线；`src/assets/` 仅存放交给 `astro:assets` 处理的首页 Hero 图。内容配图存放在 `public/images/{collection}/{slug}/`，上传、重命名与引用校验由后台图片模块与 `npm run check:image-references` 共同保证。
 
