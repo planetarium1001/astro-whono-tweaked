@@ -76,6 +76,8 @@
 
 `about` 的 schema 不约束字段，正文写在 `src/content/about/index.md`。
 
+所有页面默认用 `/og-default.png` 作为分享图，文章详情页填了 `cover` 时以它覆盖。
+
 ## 图片路径
 
 图片文件放在 `public/` 下，建议按集合与条目分目录：`public/images/{collection}/{slug}/`。

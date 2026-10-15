@@ -101,11 +101,13 @@ const pathname = Astro.url.pathname;
 const withBase = createWithBase(base);
 // og:image 需要绝对地址：相对路径先补成 public 下的根路径、加上部署 base，再按站点 origin 绝对化。
 // 未配置 SITE_URL 时拿不到 origin，此时不输出 og:image，twitter card 回落到 summary。
+// 未传 image 的页面（首页、列表页、归档页）回落到主题默认图，文章详情页由 cover 覆盖。
+const DEFAULT_OG_IMAGE = '/og-default.png';
 const resolveOgImage = (value: string): string =>
   /^[a-z][a-z0-9+.-]*:\/\//i.test(value)
     ? value
     : new URL(withBase(value.startsWith('/') ? value : `/${value}`), Astro.site!).toString();
-const ogImage = (image && hasSiteUrl && Astro.site) ? resolveOgImage(image) : null;
+const ogImage = (hasSiteUrl && Astro.site) ? resolveOgImage(image || DEFAULT_OG_IMAGE) : null;
 const faviconLinks = getSiteFaviconLinks(settings.site.favicon);
 const bodyClassNames = typeof bodyClass === 'string' ? bodyClass.split(/\s+/).filter(Boolean) : [];
 const isAdminPage = bodyClassNames.includes('admin-page');

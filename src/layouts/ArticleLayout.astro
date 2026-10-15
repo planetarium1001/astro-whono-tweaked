@@ -57,9 +57,7 @@ const tagLinks = visibleTags.map((tag) => {
     href: isRoutableTagKey(key) ? withBase(`/blog/?tags=${encodeURIComponent(key)}`) : null
   };
 });
-const defaultImage = '/og-default.png';
 const coverImage = entry?.data?.cover ?? null;
-const ogImage = coverImage ?? defaultImage;
 const derivedText = getBlogDerivedText(entry);
 const rawDescription = entry?.data?.description?.trim?.() ?? '';
 const description = rawDescription || truncateText(derivedText.excerpt, 90);
@@ -94,7 +92,7 @@ const shouldShowMetaLine = articleMetaSettings.showDate
 <BaseLayout
   title={entry.data.title}
   description={description}
-  image={ogImage}
+  image={coverImage ?? undefined}
   ogType="article"
   bodyClass="article-page immersive-page"
   activeNavId={activeNavId}
