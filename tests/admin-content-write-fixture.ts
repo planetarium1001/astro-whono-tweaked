@@ -115,7 +115,7 @@ export const setupAdminContentWriteFixture = (): (() => string) => {
         '',
         'Project body',
         '',
-        // 仓库/演示等外链写在正文末尾的链接组里，frontmatter 不再有 tags/repo/demo
+        // 仓库/演示等外链写在正文末尾的链接组里，frontmatter 不写 tags/repo/demo
         '[仓库](https://example.com/repo)',
         '[演示](https://example.com/demo)',
         ''
@@ -136,7 +136,7 @@ export const setupAdminContentWriteFixture = (): (() => string) => {
         '',
         'Devlog body',
         '',
-        // 外链写在正文 markdown 里，frontmatter 不再有 links
+        // 外链写在正文 markdown 里，frontmatter 不写 links
         '[仓库](https://example.com/repo)',
         ''
       ].join('\n'),

@@ -284,7 +284,7 @@ describe('theme-settings revision semantics', () => {
     expect(resolved.settings.site.favicon.png).toBe('/favicon-32x32.png');
     expect(resolved.sources.site.faviconPng).toBe('new');
     expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
-    // 分组抑制：png 自定义后标签页图标组不再回退默认 SVG；触摸图标独立回退，保持主题默认。
+    // png 自定义后标签页图标组不回退默认 SVG；触摸图标独立回退。
     expect(getSiteFaviconLinks(resolved.settings.site.favicon)).toEqual([
       { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
       { rel: 'apple-touch-icon', sizes: '180x180', href: 'apple-touch-icon.png' }

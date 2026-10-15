@@ -1,6 +1,4 @@
-/* Admin Social
-   负责社交链接表格、预设/自定义行、图标预览与行内操作。
-*/
+/* 社交链接表格、预设/自定义行、图标预览与行内操作。 */
 
 .admin-social-panel {
   --admin-social-column-gap: 10px;

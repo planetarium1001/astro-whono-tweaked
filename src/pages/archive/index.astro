@@ -147,7 +147,7 @@ const tagPayload = { blog: blogTags, projects: projectTags, devlog: devlogTags, 
       dialogTitleId="archive-tag-dialog-title"
       searchAriaLabel={`搜索${pageTitleText}`}
       showRss={page.listRss.enabled !== false && page.listRss.archive !== false}
-      tagOptions={allTags.map((tag) => ({ ...tag, isActive: false }))}
+      tagOptions={allTags}
     />
   </div>
 

@@ -5,7 +5,13 @@ import {
   normalizeAdminSocialIconKey,
   isAdminSocialPresetId
 } from '@/lib/admin-console/theme-shared';
-import type { EditableCustomSocialItem, SocialPresetOrder } from './form-codec';
+import {
+  normalizeTrimmed,
+  parseInteger,
+  parseOrder,
+  type EditableCustomSocialItem,
+  type SocialPresetOrder
+} from './form-codec';
 import { sortSocialOrderItems, type SocialOrderItem } from './social-order';
 
 type Query = <T extends Element>(parent: ParentNode, selector: string) => T | null;
@@ -23,18 +29,6 @@ type SocialLinksContext = {
   inputSiteSocialXOrder: HTMLInputElement;
   inputSiteSocialEmailOrder: HTMLInputElement;
 };
-
-const parseOrder = (value: string | number | null | undefined, fallback: number): number => {
-  const next = Number.parseInt(String(value ?? '').trim(), 10);
-  return Number.isFinite(next) ? next : fallback;
-};
-
-const parseInteger = (value: string | number | null | undefined): number | null => {
-  const next = Number.parseInt(String(value ?? '').trim(), 10);
-  return Number.isFinite(next) ? next : null;
-};
-
-const normalizeTrimmed = (value: unknown): string => String(value ?? '').trim();
 
 export const createSocialLinks = ({
   query,

@@ -100,7 +100,7 @@ let frontmatter = $state<ContentInfoFrontmatter | null>(null);
 let issues = $state<AdminContentIssue[]>([]);
 let errors = $state<string[]>([]);
 
-const createEmptyFrontmatter = (): AdminBlogEditorValues => ({
+const createEmptyBlogFrontmatter = (): AdminBlogEditorValues => ({
   title: '',
   description: '',
   date: '',
@@ -148,14 +148,14 @@ const createEmptyInfoFrontmatter = (collection: ContentInfoCollection): ContentI
   if (collection === 'bits') return createEmptyBitsFrontmatter();
   if (collection === 'projects') return createEmptyProjectsFrontmatter();
   if (collection === 'devlog') return createEmptyDevlogFrontmatter();
-  return createEmptyFrontmatter();
+  return createEmptyBlogFrontmatter();
 };
 
 const createNewInfoFrontmatter = (collection: ContentInfoCollection): ContentInfoFrontmatter => {
   const now = new Date();
   const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   const empty = createEmptyInfoFrontmatter(collection);
-  // 新建一律先落成草稿（与 blog 既有行为一致）。
+  // 新建条目先落成草稿。
   return { ...empty, date, draft: true } as ContentInfoFrontmatter;
 };
 

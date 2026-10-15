@@ -1,6 +1,4 @@
-/* Admin Content Editor Page
-   承载 _edit 页面壳层、workspace 页头和文章信息入口；不承载 legacy 表单或 workspace 内部布局。
-*/
+/* _edit 页面壳层、workspace 页头与文章信息入口；不含 legacy 表单与 workspace 内部布局。 */
 
 .admin-content-edit-page {
   --admin-content-editor-min-inline-size: 1024px;

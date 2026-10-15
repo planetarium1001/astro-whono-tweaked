@@ -2,23 +2,21 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fixturePath, renderFixturePage } from './fixture-page';
+import { createFixturePageLoader, fixturePath } from './fixture-page';
 
 /**
  * 右侧目录把手的端到端客户端行为测试（真实页面 HTML + 真实 `article-toc.ts`）。
  *
- * 把手形变本身是 CSS，但状态机与 ARIA 同步在脚本里：只 grep 标记无法证明点击真的切换了
- * 状态、也无法证明重新载入时按 localStorage 恢复。收起状态写在 `<html data-toc-collapsed>`。
+ * 状态机与 ARIA 同步在脚本里，收起状态写在 `<html data-toc-collapsed>`。
  */
 
 const TOC_COLLAPSED_KEY = 'astro-whono:toc-collapsed';
 
-const loadPage = () => renderFixturePage('article-page.dev.html');
+const loadPage = createFixturePageLoader('article-page.dev.html');
 
 /**
- * 执行页面 `<head>` 里那段真实的内联脚本（按关键字挑选）。
- * 首绘前把 `data-toc-collapsed` / `data-toc-intro` 落到 `<html>` 是它的职责，
- * 而 `article-toc.ts` 的初始 ARIA 状态就是读这个属性 —— 跳过它等于测了一个不存在的初始态。
+ * 执行页面 `<head>` 里含指定关键字的内联脚本。
+ * `article-toc.ts` 的初始 ARIA 状态读它写到 `<html>` 上的属性。
  */
 const runInlineHeadScript = async (keyword: string) => {
   const html = await readFile(fixturePath('article-page.dev.html'), 'utf8');
@@ -131,8 +129,8 @@ describe('article-toc 目录把手客户端行为', () => {
     expect(isCollapsed()).toBe(false);
   });
 
-  it('目录把手与悬浮列按钮共用同一尺寸 token（视觉统一）', async () => {
-    // 单位层校验：源码里两处都必须引用 --rail-action-size，而不是各自的字面值。
+  it('目录把手与悬浮列按钮共用同一尺寸 token', async () => {
+    // 两处都必须引用 --rail-action-size，而不是各自的字面值。
     const [tocCss, layoutCss] = await Promise.all([
       readFile(path.join(process.cwd(), 'src', 'styles', 'components', 'article-toc.css'), 'utf8'),
       readFile(path.join(process.cwd(), 'src', 'styles', 'components', 'layout.css'), 'utf8')

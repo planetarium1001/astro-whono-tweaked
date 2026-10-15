@@ -371,7 +371,7 @@ describe('admin preview api', () => {
       expect(result.html).toContain(
         '<p class="trailing-links"><a href="https://example.com/repo">仓库</a><a href="https://example.com/demo">演示</a></p>'
       );
-      // 正文里不再重复渲染链接
+      // 正文里不重复渲染链接
       expect(result.html.match(/<a /g)).toHaveLength(2);
       expect(result.html).not.toContain('·');
     }

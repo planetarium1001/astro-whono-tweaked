@@ -1,6 +1,4 @@
-/* entry-tags.css
-   archive / blog 的标签入口、当前筛选状态与标签选择器。
- */
+/* archive / blog 的标签入口、当前筛选状态与标签选择器。 */
 
 .page-subtitle--entry-filters {
   display: inline-flex;
@@ -320,7 +318,7 @@
   z-index: 1;
 }
 
-/* 仅服务 <noscript> 回退块（.entry-tags-fallback）；活动 dialog 的工具栏已移至标题行。 */
+/* 仅服务 <noscript> 回退块（.entry-tags-fallback）；活动 dialog 不渲染该工具栏。 */
 .entry-tags-dialog__toolbar {
   min-width: 0;
 }
@@ -409,7 +407,7 @@
   font-family: var(--font-copy);
 }
 
-/* 标题行右侧：只剩「清除筛选」与关闭，+ / 已移到下面的预览行 */
+/* 标题行右侧：「清除筛选」与关闭；+ / 在下方预览行 */
 .entry-tags-dialog__actions {
   display: inline-flex;
   align-items: center;

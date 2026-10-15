@@ -13,8 +13,7 @@ import { collectTagScopedSummary } from '../src/lib/tags';
 /**
  * `/bits/` 卡片的三项结构契约：整卡可点开详情弹窗、标签可点筛选、正文与图片受高度限制。
  *
- * jsdom 不做布局，弹窗几何与截断样式只能读源码断言（与 layout-contract.test.ts 同样的做法）；
- * 灯箱索引基准则用真实脚本 + 与组件同构的 DOM 跑出来，避免只钉标记而漏掉索引错位。
+ * jsdom 不做布局，弹窗几何与截断样式读源码断言；灯箱索引用真实脚本加同构 DOM 跑出来。
  */
 
 const SRC = process.cwd();
@@ -196,7 +195,7 @@ describe('bits 卡片：正文截断与一行图片', () => {
   it('两条路径都只截在行边界，且与字符预算同口径', async () => {
     const [card, css] = await Promise.all([read(BIT_CARD), read(BIT_CARD_CSS)]);
 
-    // 可见行数：样式变量与视图模型常量必须一致，否则又会出现「判定完整渲染却被切一半」
+    // 可见行数：样式变量与视图模型常量必须一致。
     const lineBudget = /\.bit-card \{([^}]*)\}/g;
     const declaredLines = Array.from(css.matchAll(lineBudget))
       .map((match) => match[1]?.match(/--bit-card-body-lines:\s*(\d+)/)?.[1])
@@ -268,7 +267,7 @@ describe('bits 卡片：正文截断与一行图片', () => {
     expect(singleCap).toMatch(/max-height:\s*420px/);
     expect(singleCap).toMatch(/object-fit:\s*contain/);
 
-    // 2×4 栅格的死代码已清理（含后台预览面板）
+    // 2×4 栅格（wideIndex / bit-media-item--wide）不再使用
     for (const source of [card, css, bitsCss, previewPane]) {
       expect(source).not.toContain('wideIndex');
       expect(source).not.toContain('bit-media-item--wide');

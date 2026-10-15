@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /**
  * check-image-references：全站图片引用完整性校验，覆盖 Markdown `![]()`、HTML `src=`、
- * `<source srcset>` 以及 frontmatter 与设置文件里的 cover/icon/images[].src/avatar；
- * 跳过 `https://`、`http://`、`data:`、协议相对 `//` 与模板表达式 `${...}`。
+ * `<source srcset>` 与 frontmatter / 设置文件里的图片字段；跳过外链、`data:` 与模板表达式。
  * 用法：`node ./scripts/check-image-references.mjs`
  */
 

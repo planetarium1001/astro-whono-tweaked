@@ -136,11 +136,6 @@ type ContentEditorCreateInput = {
       collection: 'bits';
       frontmatter: Pick<AdminBitsEditorValues, 'date'>;
     }
-  | {
-      collection: 'about';
-      entryId?: never;
-      frontmatter?: never;
-    }
 );
 
 type ContentEditorCreateOutcome = Omit<ContentEditorRequestOutcome, 'revision'> & {

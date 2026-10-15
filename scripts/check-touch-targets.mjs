@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 /**
  * check-touch-targets：校验构建产物里交互元素的最终生效触控尺寸。
- * 取值由 CSS 规则顺序与同特异性覆盖决定，源文件的声明可能被更靠后的规则压回，
- * 因此必须解析 dist 产物：对每个选择器按声明顺序取最后一个 min-height / width / height，
- * 并解析 `var(--tap-min-h)` 之类的值。
+ * 取值受 CSS 规则顺序与同特异性覆盖影响，源文件声明不可信，必须解析 dist 产物。
  * 用法：`SITE_URL=... npm run build && node ./scripts/check-touch-targets.mjs`
  */
 

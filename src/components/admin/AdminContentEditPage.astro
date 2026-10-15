@@ -58,8 +58,7 @@ const selectedEntryEditorPayload = contentEditDevState?.payload ?? null;
 const editorRegistration = selectedEntryEditorPayload
   ? getAdminContentEditorPageRegistration(selectedEntryEditorPayload.collection)
   : null;
-// Keep Svelte islands behind DEV-only dynamic imports; static imports leak
-// editor chunks into the production build.
+// Svelte 岛只走 DEV 动态导入；静态导入会把编辑器 chunk 带进生产构建。
 let EditorIsland: AdminContentEditorIslandComponent | null = null;
 if (import.meta.env.DEV && editorRegistration) {
   const { loadAdminContentEditorIsland } = await import('./admin-content-editor-islands');

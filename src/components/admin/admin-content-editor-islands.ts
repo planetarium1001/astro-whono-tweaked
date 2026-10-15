@@ -3,14 +3,6 @@ import type { AdminContentEditorIslandKey } from './admin-content-editor-registr
 
 export type AdminContentEditorIslandComponent = AstroComponentFactory;
 
-export const ADMIN_CONTENT_EDITOR_ISLAND_KEYS = [
-  'blog',
-  'projects',
-  'bits',
-  'devlog',
-  'about'
-] as const satisfies readonly AdminContentEditorIslandKey[];
-
 export const loadAdminContentEditorIsland = async (
   island: AdminContentEditorIslandKey
 ): Promise<AdminContentEditorIslandComponent> => {

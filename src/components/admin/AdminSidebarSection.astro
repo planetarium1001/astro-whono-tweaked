@@ -1,6 +1,7 @@
 ---
 import AdminHelpTip from './AdminHelpTip.astro';
 import AdminIcon from './AdminIcon.astro';
+import AdminDragSortGripIcon from './AdminDragSortGripIcon.astro';
 import UiIcon from '../UiIcon.astro';
 import type { SidebarNavId } from '../../lib/theme-settings';
 import {
@@ -167,14 +168,7 @@ const { navIdOrder } = Astro.props;
                 aria-label={`拖动调整 ${id} 的排序位置`}
                 title="拖动排序（可用上下方向键移动）"
               >
-                <svg class="admin-nav-grip__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                  <circle cx="6" cy="4" r="1.3" fill="currentColor" />
-                  <circle cx="10" cy="4" r="1.3" fill="currentColor" />
-                  <circle cx="6" cy="8" r="1.3" fill="currentColor" />
-                  <circle cx="10" cy="8" r="1.3" fill="currentColor" />
-                  <circle cx="6" cy="12" r="1.3" fill="currentColor" />
-                  <circle cx="10" cy="12" r="1.3" fill="currentColor" />
-                </svg>
+                <AdminDragSortGripIcon class="admin-nav-grip__icon" />
               </span>
               <label class="admin-field admin-nav-field admin-nav-field--order">
                 <span class="admin-nav-cell-label">排序</span>

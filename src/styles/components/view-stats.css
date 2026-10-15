@@ -1,6 +1,5 @@
-/* ViewStats
-   浏览数据（PV / UV）槽位：文章元信息行内一项，或内页页脚独占一行。
-   数字由 src/scripts/view-stats.ts 填入；没有可见槽位时整组不占位。 */
+/* 浏览数据（PV / UV）槽位：文章元信息行内一项，或内页页脚独占一行；
+   数字由 src/scripts/view-stats.ts 填入，没有可见槽位时整组不占位。 */
 
 .view-stats {
   font-family: var(--font-copy);

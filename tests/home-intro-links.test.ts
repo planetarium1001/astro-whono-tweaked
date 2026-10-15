@@ -6,11 +6,10 @@ import {
 } from '../src/lib/admin-console/theme-shared';
 
 /**
- * 首页导语要能直达 tag，且 blog 与 archive 两个作用域都要有入口。
+ * 首页导语要能直达 tag，blog 与 archive 两个作用域都要有入口。
  *
- * 入口是「列表页 + `?picker=tag`」；参数是否真的打开选择器由 tests/entry-search-client.test.ts
- * 覆盖。这里守选项表与键集合：后台勾选项、`HomeIntroLinkKey` 联合类型、
- * `getAdminHomeIntroLinkOption` 的兜底三者一旦不同步，配置界面就会静默丢项。
+ * 入口是「列表页 + `?picker=tag`」；参数是否真的打开选择器由 entry-search-client 覆盖。
+ * 这里守选项表与键集合：后台勾选项、`HomeIntroLinkKey` 类型、兜底函数三者必须同步。
  */
 describe('首页导语 tag 入口的选项表', () => {
   it('归档与博客两个作用域都有 tag 直达入口', () => {

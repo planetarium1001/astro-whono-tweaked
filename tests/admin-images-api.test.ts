@@ -176,7 +176,7 @@ describe('admin images api', () => {
   it('lists field-scoped items in dev/test mode', async () => {
     const { GET } = await import('../src/pages/api/admin/images/list');
 
-    // public/bits/ 扁平池已废弃，动态配图落在 public/images/bits/<slug>/。
+    // 动态配图落在 public/images/bits/<slug>/。
     await mkdir(path.join(tempRoot, 'public', 'images', 'bits', 'demo'), { recursive: true });
     await writeFile(path.join(tempRoot, 'public', 'images', 'bits', 'demo', 'demo.png'), PNG_1X1);
 
@@ -616,7 +616,7 @@ describe('admin images api', () => {
     expect(payload.ok).toBe(true);
     expect(payload.result).toEqual(
       expect.objectContaining({
-        // 落点统一为 public/images/{collection}/{slug}/，正文图写绝对路径。
+        // 落点统一为 public/images/{collection}/{slug}/。
         src: '/images/blog/guide/hero-shot.png',
         path: 'public/images/blog/guide/hero-shot.png',
         fileName: 'hero-shot.png',
@@ -674,8 +674,8 @@ describe('admin images api', () => {
     expect(payload.ok).toBe(true);
     expect(payload.result).toEqual(
       expect.objectContaining({
-        // bits.images 的字段值仍是「不带前导 / 的 public 相对路径」（schema 约束），
-        // 但落点已统一到 public/images/bits/<slug>/。
+        // bits.images 字段值是不带前导 / 的 public 相对路径（schema 约束），
+        // 落点为 public/images/bits/<slug>/。
         src: 'images/bits/demo/bit-cover.png',
         path: 'public/images/bits/demo/bit-cover.png',
         fileName: 'bit-cover.png',
@@ -929,7 +929,7 @@ describe('admin images api', () => {
     await touch('src/content/blog/guide-assets/hero.png', '2026-03-31T00:00:00.000Z');
     await touch('src/assets/hero.png', '2026-04-04T00:00:00.000Z');
     await touch('public/apple-touch-icon.png', '2026-04-05T00:00:00.000Z');
-    // Theme Console 站点图标托管目录整体隐藏，即便文件是最新的也不进入 recent。
+    // Theme Console 站点图标托管目录整体隐藏，最新文件也不进入 recent。
     await mkdir(path.join(tempRoot, 'public', 'images', 'site'), { recursive: true });
     await writeFile(path.join(tempRoot, 'public', 'images', 'site', 'favicon-64x64-a1b2c3d4.png'), PNG_1X1);
     await touch('public/images/site/favicon-64x64-a1b2c3d4.png', '2026-04-06T00:00:00.000Z');

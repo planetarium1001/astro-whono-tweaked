@@ -1,7 +1,6 @@
 /**
- * `/archive/` 一级胶囊（全部 / 博客 / 项目 / 更新）。本脚本只声明作用域：切换激活态、重建 dialog
- * 里的标签按钮，再用 `entry-search:set-scope` 事件把作用域交给 `entry-search.ts`；可见集合
- * 统一由后者算出，两个脚本各自写 `hidden` 会互相覆盖。胶囊动效由 `.is-active` 加 CSS 滑块实现。
+ * `/archive/` 一级胶囊（全部 / 博客 / 项目 / 更新）：只声明作用域，
+ * 可见集合统一由 `entry-search.ts` 算出。
  */
 import {
   createContentSlider,
@@ -47,14 +46,7 @@ if (ROOT) {
   const tagPayload = readTagPayload();
   let currentScope: ScopeId = 'all';
 
-  /**
-   * 归档有两种过渡：
-   * - 一级胶囊横向切换，走内容容器左右滑动；
-   * - 标签筛选纵向收敛，走 `entry-search` 的整块淡入淡出（整月作为一块）。
-   *
-   * 滑动目标是内容容器 `[data-archive-content]`（即 `.archive-timeline`），
-   * 滑 `[data-archive-timeline]` 会把页头一并滑走。
-   */
+  /** 滑动目标是内容容器 `[data-archive-content]`；滑 `[data-archive-timeline]` 会把页头一并滑走。 */
   const contentSlider = createContentSlider(
     () => document.querySelector<HTMLElement>('[data-archive-content]')
   );
@@ -68,11 +60,7 @@ if (ROOT) {
     );
   };
 
-  /**
-   * 归档的 tag 入口随一级胶囊换语义：项目档隐藏整个 `#标签` 入口且 dialog 不可用；更新档把
-   * 入口文案与 dialog 标题改成「项目」，选项为项目名称；其余档仍是「标签」。称谓写在根上的
-   * `data-entry-tag-noun`，供 `entry-search` 生成「切换项目 / 清除筛选」这类按钮。
-   */
+  /** 归档的 tag 入口随一级胶囊换语义：项目档隐藏入口，更新档改称「项目」，其余档为「标签」。 */
   const syncTagEntryLabels = (scope: ScopeId) => {
     const isProjects = scope === 'projects';
     const noun = scope === 'devlog' ? '项目' : '标签';
@@ -112,12 +100,7 @@ if (ROOT) {
     if (TAG_COUNT) TAG_COUNT.textContent = `共 ${options.length} 个`;
   };
 
-  /**
-   * 空分组整体隐藏。
-   *
-   * 判定基准是 entry-search 广播的可见 slug 集合，不是 DOM 的 `hidden` 属性：
-   * 条目淡出动画期间 `hidden` 还没落，按属性判定会把刚变空的分组误判为仍有可见项。
-   */
+  /** 判定基准是 entry-search 广播的可见 slug 集合，不能用 DOM 的 `hidden`（淡出期间尚未落下）。 */
   const syncGroupVisibility = (visibleSlugs?: Set<string>) => {
     document.querySelectorAll<HTMLElement>(GROUP_SELECTOR).forEach((group) => {
       const items = Array.from(group.querySelectorAll<HTMLElement>('[data-entry-item]'));
@@ -128,11 +111,7 @@ if (ROOT) {
     });
   };
 
-  /**
-   * 收合时机：分组 `hidden` 若在事件到达的瞬间就落，父级的 `display:none` 会当场
-   * 掐掉组内还没轮到淡出的行。因此等 entry-search 广播的 `transition` Promise 走完
-   * 再收合，并用 `transitionId` 丢弃过期的那一轮。
-   */
+  /** 等 entry-search 的过渡走完再收合，`transitionId` 用于丢弃过期的一轮。 */
   let latestTransitionId = 0;
 
   const applyGroupVisibility = (visibleSlugs: Set<string> | undefined, transitionId: number) => {
@@ -150,12 +129,7 @@ if (ROOT) {
       )
     : null;
 
-  /**
-   * 切换作用域。
-   *
-   * 胶囊激活态与滑块立即更新（点击反馈不能等动画）；「换内容」交给 slider：
-   * 滑出结束后才落作用域，然后滑入。初始化（`animate: false`）不播动画。
-   */
+  /** 胶囊激活态与滑块立即更新，「换内容」交给 slider：滑出结束后才落作用域。 */
   const setActiveScope = (scope: ScopeId, options: { animate?: boolean } = {}) => {
     // 方向按胶囊在条上的先后顺序决定，不按取值大小。
     const direction: SlideDirection = pillDirection(
@@ -219,6 +193,3 @@ if (ROOT) {
   // 初始化：只落状态，不播滑动动画
   setActiveScope('all');
 }
-
-// 本文件没有 import/export 时 TS 会把顶层 const 当全局变量，与同类脚本冲突。
-export {};

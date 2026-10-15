@@ -1,11 +1,6 @@
 /**
- * 「整块一起淡出 / 淡入」的可见性过渡：给定总时长，元素错峰开始、最后同时结束；
- * 分组内成员全部要淡出时，把分组本身（含标题）当成一块。
- *
- * 淡出过程中不能落 `hidden`（文档流中的元素会立刻重排、后续内容瞬移），因此分两段：
- * 淡出动画跑完才一次性落 `hidden`，再统一显示并淡入。
- *
- * 并发语义交给调用方：`isStale()` 返回 true 时不再落任何状态。
+ * 「整块一起淡出 / 淡入」的可见性过渡：元素错峰开始、最后同时结束；分组内成员全部要淡出时，
+ * 把分组本身当成一块。淡出跑完才落 `hidden`（中途落会立刻重排）。`isStale()` 为 true 时不再落状态。
  */
 
 const DEFAULT_TOTAL_MS = 420;
@@ -27,10 +22,8 @@ type PhaseOptions = {
 };
 
 /**
- * 错峰开始、同时结束：第 i 个元素延迟 `i * step`、时长 `total - i * step`，
- * 所有元素的结束时刻都恰好是 `total`。
- *
- * `step` 会被夹取，保证最后一个元素仍有 `MIN_TARGET_MS` 可见时长。
+ * 错峰开始、同时结束：第 i 个元素延迟 `i * step`、时长 `total - i * step`；
+ * `step` 会被夹取，保证最后一个元素仍有 `MIN_TARGET_MS` 时长。
  */
 const playPhase = (
   targets: readonly HTMLElement[],
@@ -75,10 +68,7 @@ type VisibilityFadePlan = {
   stagger?: number;
 };
 
-/**
- * 跑一次「淡出 → 落 hidden → 显示 → 淡入」。
- * 返回的 Promise 在两段都结束后 resolve，调用方可用它做收尾（例如收合空分组）。
- */
+/** 跑一次「淡出 → 落 hidden → 显示 → 淡入」；Promise 在两段都结束后 resolve。 */
 export const runVisibilityFade = async ({
   hide,
   show,
@@ -115,13 +105,7 @@ export const runVisibilityFade = async ({
   }
 };
 
-/**
- * 把「整组都要淡出的成员」合并成组本身，让分组标题与条目作为一块淡出。
- *
- * @param targets 需要淡出的元素（DOM 顺序）
- * @param groupSelector 分组容器选择器（`/archive/` 的月份分组）
- * @param itemSelector 组内成员选择器
- */
+/** 把「整组都要淡出的成员」合并成组本身，让分组标题与条目作为一块淡出。 */
 export const mergeFullyHiddenGroups = (
   targets: readonly HTMLElement[],
   groupSelector: string,

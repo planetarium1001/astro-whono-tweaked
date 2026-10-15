@@ -53,6 +53,15 @@ type AdminContentEditorInfoTrigger = {
 
 export type AdminContentEditorIslandKey = 'blog' | 'projects' | 'bits' | 'devlog' | 'about';
 
+/** 编辑器岛键；顺序即后台内容编辑页的集合顺序。 */
+export const ADMIN_CONTENT_EDITOR_ISLAND_KEYS = [
+  'blog',
+  'projects',
+  'bits',
+  'devlog',
+  'about'
+] as const satisfies readonly AdminContentEditorIslandKey[];
+
 export type AdminContentEditorOutlines = {
   BlogOutlineItems: EditorOutlineBlogSourceItem[];
   bitsOutlineItems: EditorOutlineListSourceItem[];

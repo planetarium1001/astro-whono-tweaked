@@ -28,12 +28,12 @@ import { createValidation } from './validation';
 const root = document.querySelector<HTMLElement>('[data-admin-root]');
 
 if (!root) {
-  // Current page does not use admin console.
+  // 当前页没有后台主题控制台。
 } else {
   const controls = queryAdminThemeControls();
 
   if (!controls) {
-    // Required controls are missing.
+    // 必需控件缺失，queryAdminThemeControls 已输出缺失项。
   } else {
     const endpoint = root.getAttribute('data-settings-endpoint') || ADMIN_SETTINGS_API_PATH;
     const footerStartYearMax = getAdminFooterStartYearMax();
@@ -349,15 +349,13 @@ if (!root) {
         onReorder: controller.refreshDirty
       });
     }
-    if (controls.socialCustomList) {
-      initDragSort({
-        list: controls.socialCustomList,
-        rowSelector: '[data-social-preset-row], [data-social-custom-row]',
-        handleSelector: '[data-drag-sort-handle]',
-        orderInputSelector: '[data-social-preset-field="order"], [data-social-custom-field="order"]',
-        onReorder: controller.refreshDirty
-      });
-    }
+    initDragSort({
+      list: controls.socialCustomList,
+      rowSelector: '[data-social-preset-row], [data-social-custom-row]',
+      handleSelector: '[data-drag-sort-handle]',
+      orderInputSelector: '[data-social-preset-field="order"], [data-social-custom-field="order"]',
+      onReorder: controller.refreshDirty
+    });
 
     controller.start();
   }

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// 首页首屏 critical CSS（index.astro 的 homeHeadCriticalCss）是手写快照，且在 head 中位于
-// global.css 之后，同优先级声明会长期覆盖真实样式，与 src/styles 漂移就会出现只在首页复现的问题。
+// 首页 critical CSS（index.astro 的 homeHeadCriticalCss）是手写快照且位于 global.css 之后，
+// 与 src/styles 漂移就会出现只在首页复现的问题。
 
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -163,8 +163,7 @@ const layoutSidebar = blockBody(layoutCss, '.sidebar');
   }
 });
 
-// 快照在 global.css 之后内联输出，同优先级声明会长期覆盖真实样式，
-// 因此导航的窄屏尺寸必须与 layout.css 的对应断点逐字一致。
+// 快照在 global.css 之后内联输出，导航的窄屏尺寸必须与 layout.css 的断点逐字一致。
 const MOBILE_NAV_TIERS = [
   { query: '@media (max-width: 640px)', gap: '8px 8px', padding: '6px 7px', fontSize: '15px' },
   { query: '@media (max-width: 360px)', gap: '8px 6px', padding: '6px 6px', fontSize: '14px' }

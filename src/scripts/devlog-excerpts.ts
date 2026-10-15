@@ -1,11 +1,6 @@
 /**
- * `/devlog/` 的摘要策略：整页一个开关，不做逐条回退 —— 任一条摘要被压缩就整体回退，
- * 摘要挪到正文顶部（窄屏亦然）。
- *
- * 列表属性 `data-devlog-excerpts="inline"`：列表内显示摘要且正文不重复；
- * `"fallback"`：列表内一条都不显示，正文顶部完整摘要放开 `hidden`。
- * 判定方式是切到 inline 后逐条比较 `scrollWidth > clientWidth`（ellipsis 压缩），
- * 窄屏（≤900px）直接回退。无 JS 时摘要照旧显示。
+ * `/devlog/` 摘要策略：整页一个开关，任一条摘要被压缩就整体回退到正文顶部（窄屏亦然）。
+ * 列表属性 `data-devlog-excerpts` 取 `inline` / `fallback`；无 JS 时摘要照旧显示。
  */
 const list = document.querySelector<HTMLElement>('[data-devlog-list]');
 
@@ -25,18 +20,13 @@ if (list) {
   };
 
   /**
-   * 摘要一刀切的过渡，分三段：列表里的摘要淡出；落状态（摘要离开列表、正文顶部完整摘要
-   * 放开 `hidden`）；并行跑行高过渡与正文摘要淡入。反方向（`inline`）是镜像。
-   *
-   * 用令牌丢弃过期的一轮：测量与缩放可能连着触发，旧过渡不能盖住新一轮的状态。
+   * 摘要一刀切的过渡：列表摘要淡出 → 落状态 → 行高过渡与正文摘要淡入并行；`inline` 方向镜像。
+   * 用令牌丢弃过期的一轮。
    */
   const FADE_MS = 300;
   const REFLOW_MS = 360;
   let applyToken = 0;
-  /**
-   * 已落定的模式。不能用 `list.dataset.devlogExcerpts` 当状态读：测量时会把属性临时置成
-   * `inline`（`fallback` 下摘要是 `display:none`，量不到宽度），读属性会把回退态误判成 inline。
-   */
+  /** 已落定的模式；测量时属性会被临时置成 `inline`，不能拿它当状态读。 */
   let currentMode: 'inline' | 'fallback' | null = null;
 
   const canFade = (el: HTMLElement) =>
@@ -119,7 +109,7 @@ if (list) {
       return;
     }
 
-    // 第一步：摘要先淡出。
+    // 列表里的摘要先淡出。
     currentMode = 'fallback';
     const fadeOuts = descriptions.map((description) =>
       description.animate(
@@ -129,11 +119,11 @@ if (list) {
     );
     void Promise.all(fadeOuts.map((animation) => animation.finished.catch(() => {}))).then(() => {
       if (token !== applyToken) return;
-      // 第二步：摘要离开列表、正文里的完整摘要放开。
+      // 摘要离开列表，正文顶部的完整摘要放开。
       const before = measureRows();
       commitMode(true);
       cancelAnimations(descriptions);
-      // 第三步：行高过渡（正文范围扩大）+ 摘要文本淡入，并行。
+      // 行高过渡与正文摘要淡入并行。
       animateRowHeights(before);
       fadeSummariesIn();
     });
@@ -156,10 +146,7 @@ if (list) {
 
   syncMode();
 
-  /**
-   * 视口变化、字体替换都会改变行的可用宽度 → 重新判定。
-   * `requestAnimationFrame` 合帧，避免拖动窗口时每像素都跑一次测量。
-   */
+  /** 视口变化与字体替换都会改变可用宽度，用 `requestAnimationFrame` 合帧后重新判定。 */
   let frame = 0;
   const scheduleSync = () => {
     if (frame) return;
@@ -173,5 +160,5 @@ if (list) {
   document.fonts?.ready.then(scheduleSync).catch(() => {});
 }
 
-// 使本文件成为 ES 模块（无 import/export 时 TS 会把顶层 const 当全局变量）。
+// 无 import 时显式导出，避免 TS 把顶层 const 当全局变量。
 export {};

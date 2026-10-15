@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 /**
- * 校验间距的几何不变量。取值来自 dist 的 CSS、页面内联 <style> 与 <html> 上的内联自定义属性，
- * 只读一处会得出错误结论。
+ * 校验间距的几何不变量。取值来自 dist 的 CSS、页面内联 <style> 与 <html> 上的内联自定义属性。
  * 用法：SITE_URL=... npm run build && node ./scripts/check-layout-geometry.mjs
  */
 
@@ -24,10 +23,7 @@ const MIN_CLEARANCE = 4;
 const problems = [];
 const lines = [];
 
-/**
- * 读取构建页面 `<html>` 上的内联自定义属性（BaseLayout 写入的生效值）。
- * `:root` 与首页 critical CSS 快照里的 `--page-inline` 都只是默认值。
- */
+/** 读取构建页面 `<html>` 上的内联自定义属性（`:root` 与 critical CSS 里的值只是默认值）。 */
 const readHtmlInlineVariables = async (root) => {
   const pageFile = path.join(root, 'dist', 'index.html');
   if (!existsSync(pageFile)) return null;
@@ -47,8 +43,7 @@ const readHtmlInlineVariables = async (root) => {
   return variables;
 };
 
-// 求值：解析 var() 链、把 env(...) 视为 0、把 calc() 内的 px 项求和或按数字因子缩放。
-// 返回 px 数字或 null。
+// 解析 var() 链与 calc()，env(...) 视为 0；返回 px 数字或 null。
 const evaluatePx = (value, variables, depth = 0) => {
   if (!value || depth > 10) return null;
   let text = value.replace(/\s*!important\s*$/, '').trim();
@@ -152,10 +147,7 @@ const main = async () => {
     .filter(Boolean);
   const [shellPadStart, shellPadEnd] = shellPadParts.map((part) => evaluatePx(part, variables));
   const floatRight = evaluatePx(bySelector.get('.float-stack')?.get('right') ?? '', variables);
-  /**
-   * 把手位置由目录表头单独补偿：负的右外边距把表头推到 初始包含块 右缘，
-   * 右内边距再把把手压回 --rail-action-offset 的竖线。
-   */
+  /** 把手位置由目录表头单独补偿：负右外边距把表头推到右缘，右内边距把把手压回竖线。 */
   const railHeadPadRight = evaluatePx(
     bySelector.get('.article-toc__rail-head')?.get('padding-right') ?? '',
     variables
@@ -215,8 +207,7 @@ const main = async () => {
     lines.push(`  竖线两侧呼吸一致 = ${contentPad}px`);
   }
 
-  // 内容盒两侧的视觉间隙相等：起始内边距直接落在 初始包含块 左缘，结束内边距还要加上
-  // 被 scrollbar-gutter 排除在 初始包含块 之外的槽宽。
+  // 内容盒两侧视觉间隙相等：结束内边距还需加上被 scrollbar-gutter 排除的槽宽。
   const leftInset = shellPadStart;
   const rightInset = shellPadEnd + gutter;
   if (!near(leftInset, rightInset)) {
@@ -228,8 +219,8 @@ const main = async () => {
     lines.push(`  内容盒两侧视觉间隙相等 = ${leftInset}px`);
   }
 
-  // 后台设定的是「内容盒到浏览器边缘」的视觉间隙，程序内换算成 --page-inline = 间隙 - 槽宽。
-  // 两份取值分别来自 <html> 内联属性与 CSS，任何一个被单独改动都会在这里失败。
+  // 后台设定的是「内容盒到浏览器边缘」的视觉间隙，换算成 --page-inline = 间隙 - 槽宽；
+  // 两份取值分别来自 <html> 内联属性与 CSS。
   if (!near(O, pageGap - gutter)) {
     problems.push(
       `页面外缘间隙换算不成立：--page-inline(${O}) != --page-gap-inline(${pageGap})`
@@ -239,19 +230,14 @@ const main = async () => {
     lines.push(`  页面外缘间隙 = ${pageGap}px，换算 --page-inline = ${O}px（槽宽 ${gutter}px）`);
   }
 
-  // 悬浮列右缘距 初始包含块 右缘必须为正且不太小，否则会被视口边缘与滚动条压住。
-  // 偏移公式不叠加 --page-inline，因此不拿槽宽当阈值。
+  // 悬浮列右缘距右缘必须为正且不太小；偏移公式不叠加 --page-inline，故不拿槽宽当阈值。
   if (floatRight < MIN_RAIL_INSET - TOLERANCE) {
     problems.push(`悬浮列 right(${floatRight}) < ${MIN_RAIL_INSET}px，会贴住视口右缘`);
   } else {
     lines.push(`  悬浮列右缘距 初始包含块 右缘 ${floatRight}px（>= ${MIN_RAIL_INSET}px，不贴边）`);
   }
 
-  /**
-   * 把手与悬浮列右缘都直接以「距 初始包含块 右缘」计量。目录列右边界落在壳层内容盒右缘，
-   * 表头用 margin-right: -page-inline 补偿到 初始包含块 右缘，再用 padding-right: --rail-action-offset
-   * 把把手压回与悬浮列同一条竖线。
-   */
+  /** 把手与悬浮列右缘都以「距右缘」计量：表头用 margin-right 补偿到右缘，再用 padding-right 对齐竖线。 */
   if (!near(floatRight, railOffset)) {
     problems.push(`悬浮列 right(${floatRight}) != railOffset(${railOffset})`);
   }
@@ -281,9 +267,7 @@ const main = async () => {
     problems.push('壳层外边距不成立：--page-gap-inline 必须为正（两侧都要加宽）');
   }
 
-  // 悬浮列不能与正文文字相交。两者都换算到「距 初始包含块 右缘」参照系：
-  // 正文占据 [proseRightInset, ∞)（越靠左数值越大），悬浮列占据 [floatRight, floatRight + railSize]。
-  // 因此重叠条件是 floatLeftInset > proseRightInset。
+  // 悬浮列不得与正文相交：两者都换算到「距右缘」参照系，重叠条件是 floatLeftInset > proseRightInset。
   const proseRightInset = O + contentPad;
   const floatLeftInset = floatRight + railSize;
   if (floatLeftInset > proseRightInset - MIN_CLEARANCE) {
@@ -298,10 +282,8 @@ const main = async () => {
     );
   }
 
-  // `.page-heading--tag-bar` 的 display:grid 必须真的生效：lists.css 里更高特异度、
-  // 且加载更晚的 `.page-heading { display: flex }` 会把它压回去，类型检查与构建都看不出来。
-  // 判据取充分条件：所有声明了 display 且选择器提到 .page-heading 的规则里，
-  // 没有任何一条的 (特异度, 顺序) 能压过提到 .page-heading--tag-bar 的那条。
+  // `.page-heading--tag-bar` 的 display:grid 必须真的生效（lists.css 的 `.page-heading` 会压回 flex）：
+  // 没有任何提到 .page-heading 且声明 display 的规则的 (特异度, 顺序) 能压过它。
   const displayDeclarations = ordered
     .map((entry, index) => ({ ...entry, index }))
     .filter((entry) => entry.property === 'display' && entry.selector.includes('page-heading'));

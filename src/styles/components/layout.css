@@ -1,7 +1,5 @@
-/* Layout
-   壳层、导航、内容区、页面头与侧栏按钮；不放内容块（prose/callout/code-block/figure）、
-   页面卡片样式与页面私有调优。
- */
+/* 壳层、导航、内容区、页面头与侧栏按钮；不放内容块（prose/callout/code-block/figure）、
+   页面卡片样式与页面私有调优。 */
 
 /* 布局结构 */
 .shell {
@@ -298,10 +296,9 @@
 }
 
 /**
- * 两行页头：[标题] [tag 行 / 描述行]。.page-heading--tag-slot 由服务端在有 tag 入口时渲染，
- * 锁成两行并预留第 1 行高度（--page-tag-slot-height）；.page-heading--tag-bar 由脚本在已选标签
- * 或项目时挂上。lists.css 中 0,3,0 的 display / align-items / gap 会压过本组声明，
- * 这条 0,4,0 规则须声明回来，且必须写在最后。
+ * 两行页头：[标题] [tag 行 / 描述行]。--tag-slot 由服务端在有 tag 入口时渲染并锁成两行、
+ * 预留第 1 行高度（--page-tag-slot-height），--tag-bar 由脚本在已选标签或项目时挂上。
+ * 这条 0,4,0 规则须写在最后，否则被 lists.css 的 0,3,0 display / align-items / gap 压过。
  */
 @media (min-width: 901px) {
   .page-header .page-heading--tag-slot,
@@ -581,10 +578,10 @@ body.admin-page {
 body.admin-page .shell {
   grid-template-columns: var(--sidebar) 1px minmax(0, 1fr);
   max-width: 100vw;
-/**
- * 公开页与后台壳层共用同一套外边距 token：起始留视觉间隙，结束扣掉滚动条槽，
- * 两侧视觉间隙因此相等。
- */
+  /**
+   * 公开页与后台壳层共用同一套外边距 token：起始留视觉间隙，结束扣掉滚动条槽，
+   * 两侧视觉间隙因此相等。
+   */
   padding-inline: var(--page-gap-inline) var(--page-inline);
 }
 

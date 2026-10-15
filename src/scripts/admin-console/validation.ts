@@ -269,7 +269,7 @@ export const createValidation = ({
         return () => inputSiteAdminOverviewPublicVisible;
       case 'site.adminOverview.hiddenMessage':
         return () => inputSiteAdminOverviewHiddenMessage;
-      /* favicon input 均为隐藏元素，错误改聚焦站点图标区域的可见按钮；svg 无独立控件，借用 png 上传按钮定位。 */
+      /* favicon 的 input 均隐藏，聚焦改到站点图标区域的可见按钮；svg 无独立控件，借用 png 的按钮。 */
       case 'site.favicon.svg':
         return () => form.querySelector<HTMLElement>('[data-favicon-upload="png"]');
       case 'site.favicon.png':
@@ -367,13 +367,13 @@ export const createValidation = ({
       const field = customMatch[2];
       if (!Number.isInteger(index)) return undefined;
       if (field === 'visible') return getCustomVisibilityTarget(index);
-      if (field && field !== 'visible') {
+      if (field) {
         return getCustomFieldTarget(index, field as 'id' | 'label' | 'href' | 'iconKey' | 'order');
       }
       return getCustomFieldTarget(index, 'id');
     }
 
-    if (path === 'home.introMoreLinks' || path.startsWith('home.introMoreLinks[')) {
+    if (path.startsWith('home.introMoreLinks[')) {
       return () => inputHomeIntroMoreLinkPrimary;
     }
 

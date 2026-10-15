@@ -1,6 +1,4 @@
-/* 后台社交链接列表的排序规则
-   与 DOM 重排解耦，便于单独验证；行元素只用于读取结构隐藏标记。
-*/
+/** 后台社交链接列表的排序规则；与 DOM 重排解耦，便于单独验证。 */
 
 export type SocialOrderItem = {
   row: HTMLElement;
@@ -13,7 +11,7 @@ export type SocialOrderItem = {
 };
 
 /** 结构上隐藏的行（例如尚未填写的 X 预置行）。 */
-export const isHiddenSocialRow = (item: SocialOrderItem): boolean =>
+const isHiddenSocialRow = (item: SocialOrderItem): boolean =>
   item.row.dataset.rowHidden === 'true';
 
 /**

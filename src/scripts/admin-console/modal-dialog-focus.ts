@@ -39,9 +39,6 @@ const isRenderedFocusTarget = (element: HTMLElement): boolean =>
 const isFocusableElement = (element: HTMLElement): boolean =>
   element.tabIndex >= 0 && isRenderedFocusTarget(element);
 
-const canReceiveProgrammaticFocus = (element: HTMLElement): boolean =>
-  isRenderedFocusTarget(element);
-
 const focusElement = (element: HTMLElement | null): void => {
   if (!element) return;
   element.focus({ preventScroll: true });
@@ -78,7 +75,7 @@ export const createModalDialogFocusController = ({
 
       const preferredTarget = getInitialFocus?.() ?? null;
       const fallbackTarget = getFocusableElements()[0] ?? dialog;
-      const target = preferredTarget && canReceiveProgrammaticFocus(preferredTarget)
+      const target = preferredTarget && isRenderedFocusTarget(preferredTarget)
         ? preferredTarget
         : fallbackTarget;
 

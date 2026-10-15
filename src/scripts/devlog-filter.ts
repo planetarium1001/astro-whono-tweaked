@@ -15,11 +15,7 @@ import {
 } from '../utils/format';
 
 /**
- * `/devlog/` 的项目筛选与页头搜索，取值域只有 `project`（不含 kind）。
- *
- * 搜索的 haystack 取每行已渲染文本（本页全量渲染、无 index.json），关键词与项目同时成立。
- * 交互复用 tag dialog 的样式与已选胶囊：第一行项目名，第二行「描述 · 共 N 条更新 +
- * 切换项目 + 清除筛选」；切换过渡用条目淡入淡出，不翻页滑动。
+ * `/devlog/` 的项目筛选与页头搜索，取值域只有 `project`；搜索用每行已渲染文本，与项目条件同时成立。
  * 本页只有本脚本写 `hidden`，抽屉展开由 `devlog-drawer.ts` 负责。
  */
 
@@ -105,10 +101,7 @@ if (dialog && listEl) {
     tagTrigger: triggers[0] ?? null
   };
 
-  /**
-   * 已选项目胶囊 + 第二行动作（复用 tag 那一套 DOM 与样式）。
-   * 未选中时整块移除，`.page-heading--tag-bar` 也摘掉（页头回到单行）。
-   */
+  /** 已选项目胶囊 + 第二行动作；未选中时整块移除并回到单行页头。 */
   const renderChip = () => {
     if (!activeValue || !titleRow || !subtitle) {
       unmountSelectedChipBar(chipHost)?.remove();
@@ -125,10 +118,7 @@ if (dialog && listEl) {
     );
   };
 
-  /**
-   * 时间线收尾只认最后一条可见条目：筛选或搜索之后，新的「最后一条」同样把线收在它的日期上。
-   * 标记按计划结果同步打上，不等动画。
-   */
+  /** 时间线收尾只认最后一条可见条目，标记按计划结果同步打上。 */
   const markLastVisibleRow = () => {
     const lastVisible = [...ROWS].reverse().find((row) => matches(row)) ?? null;
     for (const row of ROWS) {
@@ -147,10 +137,7 @@ if (dialog && listEl) {
     if (searchLive && searchLive.textContent !== text) searchLive.textContent = text;
   };
 
-  /**
-   * 按当前状态（项目 ∧ 关键词）重算可见集合：整体一次过渡，错峰开始、同时结束，
-   * 与 tag 筛选同一套观感，不翻页滑动。
-   */
+  /** 按「项目 ∧ 关键词」重算可见集合并整体过渡一次，不翻页滑动。 */
   const runPlan = (options: { animate?: boolean } = {}) => {
     const animate = options.animate ?? true;
     const id = ++runId;
@@ -162,7 +149,7 @@ if (dialog && listEl) {
       if (!hit && !row.hidden) hide.push(row);
     }
 
-    // 计数按计划结果同步更新，不等动画：动画结束后再改，会让没有 WAAPI 的环境先显示旧数字。
+    // 计数与逐条状态同步落，不等动画。
     const visibleAfter = ROWS.filter((row) => matches(row)).length;
     applySubtitleCount(visibleAfter);
     syncOptions();
@@ -358,5 +345,3 @@ if (dialog && listEl) {
   revealHashTarget();
   window.addEventListener('hashchange', revealHashTarget);
 }
-
-export {};

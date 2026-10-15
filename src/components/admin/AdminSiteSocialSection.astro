@@ -10,7 +10,7 @@ interface Props {
 const { socialCustomLimit } = Astro.props;
 const { settings } = getThemeSettings();
 const presetOrder = settings.site.socialLinks.presetOrder;
-/** X 不再作为默认项：只有已配置链接时才渲染该行，其余情况由「新增链接」自选 X 图标。 */
+/** X 不是默认项：仅已配置链接时渲染该行，其余情况由「新增链接」自选 X 图标。 */
 const hasPresetX = Boolean((settings.site.socialLinks.x ?? '').trim());
 
 type SocialIconOption = {
@@ -83,7 +83,7 @@ const socialPresetRowList: SocialPresetRow[] = [
   }
 ];
 
-// 行序与后台编号一致
+// 按后台配置的行号排序。
 const socialPresetRows: readonly SocialPresetRow[] = socialPresetRowList.sort(
   (a, b) => (presetOrder[a.id] ?? 0) - (presetOrder[b.id] ?? 0)
 );

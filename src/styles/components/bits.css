@@ -1,6 +1,4 @@
-/* Bits
-   仅 /bits/ 页面相关样式，不干扰通用列表。
- */
+/* 仅 /bits/ 页面样式，不干扰通用列表。 */
 
 @import "./bit-card.css";
 /* 年份胶囊复用 /archive/ 一级胶囊的共享样式 */
@@ -105,9 +103,6 @@
   justify-content: center;
 }
 
-@media (hover: hover) and (pointer: fine) {
-}
-
 :root[data-theme="dark"] .bits-search-btn {
   color: #f0f0f0;
 }
@@ -176,11 +171,7 @@
   background: color-mix(in srgb, var(--panel) 38%, var(--bg));
 }
 
-/**
- * 列表间距用容器 gap：若由 .bit-card 的 margin 提供，年份 / 标签筛选会把 DOM 首张卡片
- * hidden 掉，视觉首张不再是 :first-child，16px 上外边距保留，切换筛选后间隙突变。
- * flex gap 下 hidden（display: none）的卡片不占间隙。
- */
+/* 列表间距用容器 gap：卡片 margin 在筛选隐藏首张卡片后会突变，display: none 不占 gap。 */
 #bits-list {
   display: flex;
   flex-direction: column;

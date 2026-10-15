@@ -19,6 +19,7 @@ import {
 } from './image-browse';
 import {
   AdminImageError,
+  ADMIN_IMAGE_LOCAL_PATH_MESSAGE,
   IMAGE_LOCAL_EXT_RE,
   getAdminImageFieldAllowedOrigins,
   getAdminImageCompatibleFieldValues,
@@ -57,7 +58,6 @@ export {
   getAdminImageFieldAllowedOrigins,
   getAdminImageListRequest,
   getAdminImageMetaRequest,
-  isAdminImageDirectory,
   isAdminImageFieldContext,
   normalizeAdminBitsImageSource,
   normalizeAdminLocalImageSource,
@@ -76,10 +76,6 @@ type AdminImageOwnerOption = {
   label: string;
   count: number;
 };
-
-type AdminImageBrowseGroupOption = AdminImageBrowseFilterOption;
-
-type AdminImageBrowseSubgroupOption = AdminImageBrowseFilterOption;
 
 export type AdminImageBrowseIndexItem = {
   path: string;
@@ -124,8 +120,8 @@ type AdminImageListResult = {
   scope: AdminImageScopeKey | '';
   group: string;
   subgroup: string;
-  groupOptions: AdminImageBrowseGroupOption[];
-  subgroupOptions: AdminImageBrowseSubgroupOption[];
+  groupOptions: AdminImageBrowseFilterOption[];
+  subgroupOptions: AdminImageBrowseFilterOption[];
   page: number;
   limit: number;
   totalCount: number;
@@ -806,8 +802,8 @@ const listAdminImageBrowseAssets = async (): Promise<AdminImageBrowseAsset[]> =>
 };
 
 const withoutCloudBrowseGroupOption = (
-  options: readonly AdminImageBrowseGroupOption[]
-): AdminImageBrowseGroupOption[] => options.filter((option) => option.value !== 'cloud');
+  options: readonly AdminImageBrowseFilterOption[]
+): AdminImageBrowseFilterOption[] => options.filter((option) => option.value !== 'cloud');
 
 export const listAdminImageBrowseIndex = async (): Promise<AdminImageBrowseIndexItem[]> => {
   const browseAssets = await listAdminImageBrowseAssets();
@@ -1184,7 +1180,7 @@ const resolveLocalTargetFromPath = (assetPath: string): LocalImageTarget => {
     || normalizedPath.includes('#')
     || !IMAGE_LOCAL_EXT_RE.test(normalizedPath)
   ) {
-    throw new AdminImageError('图片路径必须是 public/**、src/assets/** 或 src/content/** 下的规范仓库相对图片路径');
+    throw new AdminImageError(ADMIN_IMAGE_LOCAL_PATH_MESSAGE);
   }
 
   const canonicalPath = path.posix.normalize(normalizedPath);
@@ -1216,7 +1212,7 @@ const resolveLocalTargetFromPath = (assetPath: string): LocalImageTarget => {
     };
   }
 
-  throw new AdminImageError('图片路径必须是 public/**、src/assets/** 或 src/content/** 下的规范仓库相对图片路径');
+  throw new AdminImageError(ADMIN_IMAGE_LOCAL_PATH_MESSAGE);
 };
 
 export const getAdminImageMeta = async (input: AdminImageMetaInput): Promise<AdminImageMetaResult> => {

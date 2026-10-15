@@ -57,7 +57,7 @@ const HOVER_PREVIEW_CLOSE_DELAY_MS = 48;
 const HOVER_PREVIEW_MEDIA_QUERY = '(hover: hover) and (pointer: fine)';
 
 if (!root) {
-  // Current page does not use entry search / tags.
+  // 当前页没有条目搜索与标签入口。
 } else {
   const searchRoot = root.querySelector<HTMLElement>('[data-entry-search]');
   const input = searchRoot?.querySelector<HTMLInputElement>('[data-entry-search-input]') ?? null;
@@ -66,10 +66,7 @@ if (!root) {
   const feedbackEl = searchRoot?.querySelector<HTMLParagraphElement>('[data-entry-search-feedback]') ?? null;
   const liveEl = searchRoot?.querySelector<HTMLParagraphElement>('[data-entry-search-live]') ?? null;
   const tagTrigger = root.querySelector<HTMLElement>('[data-entry-tag-trigger]');
-  /**
-   * 所有「打开标签选择器」的入口。页头的 `#标签` 与控件条里的 `#标签` / `切换标签`
-   * 共用同一个委托处理器；控件条会被整体重建，因此这里每次现查，不缓存节点。
-   */
+  /** 所有「打开标签选择器」的入口；控件条会被整体重建，因此每次现查，不缓存节点。 */
   const tagOpenButtons = (): HTMLElement[] =>
     Array.from(root.querySelectorAll<HTMLElement>('[data-entry-tag-open]'));
   const tagDialog = root.querySelector<HTMLDialogElement>('[data-entry-tag-dialog]');
@@ -119,35 +116,27 @@ if (!root) {
   );
 
   /**
-   * 已选标签的复合逻辑表达式（见 `tag-expression.ts`）。URL 承载：
-   * 单段写成 `?tags=&mode=`（兼容旧深链接），复合表达式追加与 tags 一一对应的 `?ops=`。
+   * 已选标签的复合逻辑表达式（见 `tag-expression.ts`）：单段写成 `?tags=&mode=`，
+   * 复合表达式追加与 tags 一一对应的 `?ops=`。
    */
   let tagExpression: TagSegment[] = createEmptyExpression();
   /** 已选标签（派生量，按出现顺序；表达式是唯一真相）。 */
   const selectedTagKeys = (): string[] => listTagKeys(tagExpression);
 
-  /**
-   * `/archive/` 的 tag 入口随一级胶囊换语义：「更新」档叫「项目」（取值是项目名称），
-   * 其余档叫「标签」。称谓由 `archive-scope.ts` 写在根上的 `data-entry-tag-noun` 提供。
-   */
+  /** `/archive/` 的 tag 入口称谓：「更新」档为「项目」，其余档为「标签」，取自根上的 `data-entry-tag-noun`。 */
   const tagNoun = () => (root.dataset.entryTagNoun ?? '').trim() || '标签';
 
   /**
    * 一级作用域（仅 `/archive/` 用）：'' = 全部，否则对应 `[data-entry-item][data-archive-kind]`。
-   *
-   * 可见集合统一由本脚本按「作用域 ∧ 标签」一次算出，胶囊只声明作用域。
-   * 两个脚本各自写 `row.hidden` 会互相覆盖，表现为切换胶囊不清空标签、筛选没有效果。
+   * 可见集合只由本脚本算出，胶囊只声明作用域。
    */
   let activeScope = '';
   const scopeOf = (el: HTMLElement) => (el.dataset.archiveKind ?? '').trim();
   const matchesScope = (el: HTMLElement) => activeScope === '' || scopeOf(el) === activeScope;
 
   /**
-   * 年份维度（仅 `/bits/` 用）：`null` = 全部。
-   *
-   * 与作用域一样，年份只由胶囊声明，可见集合仍由本脚本一次算出。
-   * 年份从条目 DOM 的 `data-entry-year` 读取（与 slug 同源），不依赖 index.json，
-   * 因此索引加载失败时年份筛选本身依然成立。
+   * 年份维度（仅 `/bits/` 用）：`null` = 全部；年份读自条目 DOM 的 `data-entry-year`，
+   * 不依赖 index.json。
    */
   let activeYear: number | null = null;
   const yearOf = (el: HTMLElement) => {
@@ -185,14 +174,7 @@ if (!root) {
   let transitionRunId = 0;
   let transitionSettled: Promise<void> = Promise.resolve();
 
-  /**
-   * 整块淡出 / 淡入：把要变化的条目交给共享的 `runVisibilityFade`，
-   * 并把「整组都要变化」的条目合并成组（`/archive/` 的月份）。
-   *
-   * 落 `hidden` 只发生在整段淡出跑完之后，且带 `runId` 陈旧检查，
-   * 新一轮筛选一到达就让旧的一轮整段作废，因此不存在旧一轮把新一轮要显示的
-   * 条目藏起来的窗口。
-   */
+  /** 整块淡出 / 淡入；`/archive/` 的月份整组一起处理，`runId` 早于当前轮的过渡作废。 */
   const runVisibilityTransition = (
     hide: readonly PageItem[],
     show: readonly PageItem[],
@@ -219,13 +201,7 @@ if (!root) {
     });
   };
 
-  /**
-   * 「下一次 renderPage 直接落状态，不要逐条级联」。
-   *
-   * 一级胶囊与年份胶囊的切换用容器级左右滑动过渡（`content-slide.ts`），
-   * 此时再叠一套逐条级联就成了两套动作。胶囊脚本在事件里声明 `instant: true`，
-   * 本脚本只同步落 `hidden`；只作用于紧随其后的那一次渲染。
-   */
+  /** 下一次 renderPage 直接落 `hidden`，不逐条级联；只作用于紧随其后的那一次渲染。 */
   let instantRenderPending = false;
   const applyInstantItems = (next: PageItem[]) => {
     instantRenderPending = true;
@@ -233,10 +209,8 @@ if (!root) {
   };
 
   /**
-   * 广播本次可见的 slug 集合：分组标题的收敛以它为准，不能用 DOM 的 `hidden`（淡出动画期间
-   * `hidden` 尚未落下，会读到中间态）。`transition` / `transitionId` 是整轮过渡走完的信号，
-   * 让被筛空的年月标题等行都淡出之后再收合。从 `root` 冒泡派发而不是 `document.dispatchEvent`：
-   * `transitionId` 只在单个实例内有意义，文档派发会让已卸载的旧实例也用各自编号顶掉最新一轮。
+   * 广播本次可见的 slug 集合（分组标题据此收敛）；`transition` / `transitionId` 是过渡结束信号。
+   * 从 `root` 派发：`transitionId` 只在单个实例内有意义。
    */
   const dispatchFiltered = (visibleInPage: Set<PageItem>, runId: number) => {
     root.dispatchEvent(
@@ -259,8 +233,7 @@ if (!root) {
     const start = (currentPage - 1) * pageSize;
     const end = start + pageSize;
 
-    // 必须遍历全部 items 而不是只有 filteredItems：未命中的条目不在 filteredItems 里，
-    // 只遍历它等于从不隐藏未命中的条目，表现为点了标签筛选列表还是全部内容。
+    // 必须遍历全部 items：未命中的条目不在 filteredItems 里。
     const visibleInPage = new Set(filteredItems.slice(start, end));
 
     const instant = instantRenderPending;
@@ -279,8 +252,7 @@ if (!root) {
       return;
     }
 
-    // 只把真的需要变化的条目排进计划（按文档顺序）：淡出在前、淡入在后。
-    // 两个阶段各自错峰开始、同时结束；整组要变的一起作为一块。
+    // 只把需要变化的条目按文档顺序排进计划：淡出在前、淡入在后。
     const hide: PageItem[] = [];
     const show: PageItem[] = [];
     for (const item of items) {
@@ -636,11 +608,7 @@ if (!root) {
     );
   };
 
-  /**
-   * 已选标签控件条（两行结构，见 `selected-chip-bar.ts`）：
-   * 第一行是标签胶囊与连接符，第二行是副标题加「切换标签 / 清除筛选」文字链接。
-   * 两行左对齐成一块，放在页面标题右边。
-   */
+  /** 已选标签控件条的挂载点（两行结构见 `selected-chip-bar.ts`）。 */
   const chipHost: SelectedChipHost = {
     titleRow: pageTitleRow,
     subtitle: pageSubtitle,
@@ -659,9 +627,7 @@ if (!root) {
     if (!pageTitleRow) return;
 
     if (!hasAnyTag(tagExpression)) {
-      // 清空时整条滑出：先播退场动画再移除，避免生硬消失。
-      // 能力检查不可省：`Element.animate` 在 jsdom 里不存在，缺检查会在这里
-      // 抛异常并中断整个 click 处理器，后续 applyFilter 永远不执行。
+      // 清空时先播退场动画再移除；`Element.animate` 在 jsdom 里不存在，必须做能力检查。
       const existing = unmountSelectedChipBar(chipHost);
       if (existing && canAnimate(existing)) {
         const animation = existing.animate(
@@ -744,8 +710,7 @@ if (!root) {
     const rawQuery = (input?.value || '').trim();
     const queryTerms = tokenizeSearchQuery(rawQuery);
 
-    // 查询串为空时直接 showAll 会让纯标签筛选走不通：只要查询、标签、作用域、
-    // 年份任一存在就进入匹配。
+    // 查询串为空也可能是纯标签 / 作用域 / 年份筛选，四者任一存在就进入匹配。
     if (
       queryTerms.length === 0
       && !hasAnyTag(tagExpression)
@@ -764,7 +729,7 @@ if (!root) {
     if (!index || !indexHay || !indexTagKeys) return;
 
     const matchedSlugs = new Set<string>();
-    // 作用域（归档一级胶囊）与年份（bits 年份胶囊）先过滤掉一行，避免再算标签
+    // 先用作用域与年份排除条目，避免再算标签。
     const scopeSlugs = new Set(
       items.filter((item) => matchesScope(item.el)).map((item) => item.slug).filter(Boolean)
     );
@@ -778,7 +743,7 @@ if (!root) {
       const hay = indexHay.get(item.slug) || '';
       if (queryTerms.length > 0 && !queryTerms.every((term) => hay.includes(term))) continue;
 
-      // 命中判定走复合表达式（段内先算，再自左向右与左边整体结合）
+      // 命中判定走复合表达式。
       if (hasAnyTag(tagExpression)) {
         const normalizedTagKeys = indexTagKeys.get(item.slug) ?? [];
         if (!evaluateExpression(tagExpression, normalizedTagKeys)) continue;
@@ -882,14 +847,11 @@ if (!root) {
     void applyFilter();
   }
 
-  /**
-   * 一级胶囊（`/archive/`）通过该事件声明作用域。
-   * 切作用域时清空已选标签：标签集合本身按作用域派生，保留旧选择会得到不可能命中的组合。
-   */
+  /** 一级胶囊（`/archive/`）声明作用域；切作用域时清空已选标签（标签集合按作用域派生）。 */
   document.addEventListener('entry-search:set-scope', (event) => {
     const detail = (event as CustomEvent<{ scope?: string; clearTags?: boolean; instant?: boolean }>).detail ?? {};
     const nextScope = (detail.scope ?? '').trim();
-    // 容器级滑动过渡：本次可见性同步落状态，逐条级联让位给滑动
+    // 容器级滑动过渡：本次可见性同步落状态。
     const instant = detail.instant === true;
     activeScope = nextScope === 'all' ? '' : nextScope;
 
@@ -917,10 +879,7 @@ if (!root) {
     void applyFilter();
   });
 
-  /**
-   * 年份胶囊（`/bits/`）通过该事件声明年份。与作用域不同，这里不清空标签 ——
-   * 「年份 ∧ 标签」是有意义的组合（作用域与标签集合是派生关系，才必须清）。
-   */
+  /** 年份胶囊（`/bits/`）声明年份；与作用域不同，这里保留已选标签。 */
   document.addEventListener('entry-search:set-year', (event) => {
     const detail = (event as CustomEvent<{ year?: number | string | null; instant?: boolean }>).detail ?? {};
     const raw = detail.year;
@@ -974,17 +933,13 @@ if (!root) {
     }
   });
 
-  const handleHoverPreviewEnter = () => {
-    openSearchHoverPreview();
-  };
-
   const handleHoverPreviewLeave = (event: PointerEvent) => {
     const nextTarget = event.relatedTarget as Node | null;
     if (nextTarget && searchRoot?.contains(nextTarget)) return;
     scheduleHoverPreviewClose();
   };
 
-  searchRoot?.addEventListener('pointerenter', handleHoverPreviewEnter);
+  searchRoot?.addEventListener('pointerenter', openSearchHoverPreview);
   searchRoot?.addEventListener('pointerleave', handleHoverPreviewLeave);
 
   document.addEventListener('click', (event) => {
@@ -998,12 +953,8 @@ if (!root) {
   });
 
   /**
-   * 已选标签控件条：打开选择器「继续筛选」、移除单个标签、清除全部、切换连接符。
-   * 监听挂在 `root` 上，同时覆盖控件条与 dialog 内的清除按钮。
-   *
-   * 判断顺序不能改：dialog 的清除按钮也带 `[data-entry-tag-clear]`，若先判移除按钮，
-   * 点清除会命中 remove 分支而 `dataset.entryTagRemove` 为空，走到「空 key 直接 return」，
-   * `applyFilter` 永不执行。因此先 open、再 clear、再 op、最后 remove（且要求 key 非空）。
+   * 已选标签的委托处理器，同时覆盖控件条与 dialog 内的清除按钮（不另注册，否则会重复处理）。
+   * 判断顺序不可改：先 open、再 clear、再 op、最后 remove（且要求 key 非空）。
    */
   root.addEventListener('click', (event) => {
     const target = event.target as HTMLElement | null;
@@ -1061,11 +1012,7 @@ if (!root) {
     void applyFilter();
   });
 
-  /**
-   * `+` / `/` 开关：切换时把已选部分整体括起来，再追加新的一段。
-   * 当前待选段已有标签时变成 `(已选) 新运算符`，之后选的标签进入新段；
-   * 待选段为空时只改这一段的运算符，反复切换不会堆括号。
-   */
+  /** `+` / `/` 开关：待选段非空时把已选部分括起来并追加新段，为空时只改本段运算符。 */
   tagModeButtons.forEach((button) => {
     button.addEventListener('click', (event) => {
       event.preventDefault();
@@ -1084,10 +1031,6 @@ if (!root) {
     void applyFilter();
   });
 
-  /**
-   * 清除筛选在 dialog 内部与控件条上各有一个入口，都由上面挂在 `root` 上的委托处理器
-   * 接管，这里不单独注册：否则同一次点击会被处理两次，且会破坏委托处理器里的判断顺序。
-   */
   tagCloseBtn?.addEventListener('click', () => {
     closeTagDialog();
   });

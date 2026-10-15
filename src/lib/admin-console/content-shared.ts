@@ -77,6 +77,5 @@ export type {
 
 export {
   applyAdminContentWritePlan,
-  buildAdminContentWritePlan,
   buildAdminContentWritePlanFromState
 } from './content-write-plan';

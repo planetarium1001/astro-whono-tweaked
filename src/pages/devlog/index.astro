@@ -65,7 +65,6 @@ const projectValues = Array.from(
 const projectOptions = projectValues.map((value) => ({
   key: value,
   label: value,
-  href: `/devlog/?project=${encodeURIComponent(value)}`,
   count: items.filter((item) => item.data.project === value).length
 }));
 ---

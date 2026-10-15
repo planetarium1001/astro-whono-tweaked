@@ -845,10 +845,7 @@ export const initAdminImagesConsole = () => {
   });
 
   detailEl.addEventListener('click', async (event) => {
-    /**
-     * 重命名会同步改写内容里的引用，因此先确认再提交；失败时把服务端的原话透出去
-     * （例如「目标文件已存在，未做任何改动」）。
-     */
+    // 重命名会同步改写内容里的引用，先确认再提交；失败时透出服务端原文。
     const renameTarget = event.target instanceof Element
       ? event.target.closest<HTMLButtonElement>('[data-rename-path]')
       : null;
@@ -888,7 +885,7 @@ export const initAdminImagesConsole = () => {
             ? `已重命名为 ${payload.result.to}，同步改写 ${rewritten.length} 个文件 / ${count} 处引用`
             : `已重命名为 ${payload.result.to}（没有内容引用它）`
         );
-        // 列表与详情都要重新拉取：路径变了，缓存里的预览/元数据也失效
+        // 路径已变，列表与详情都要重新拉取。
         detailMetaCache.delete(renamePath);
         selectedPath = payload.result.to;
         await loadList({ updateLocation: true });

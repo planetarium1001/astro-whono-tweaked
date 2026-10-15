@@ -16,6 +16,7 @@ import {
   type AdminContentEditorOutlineRegistration,
   type AdminContentEditorStyleSlot
 } from './admin-content-editor-registry';
+import { ADMIN_CONTENT_EDITOR_ISLAND_KEYS } from './admin-content-editor-registry';
 
 type WithBase = (path: string) => string;
 type ReadEditorPayload = (
@@ -45,16 +46,9 @@ type AdminContentEditDevState = {
 };
 
 /**
- * 工作区编辑器覆盖的集合；新增集合必须同时出现在这里，
- * 否则 DEV 下打开该集合的编辑页会抛错。
+ * 工作区编辑器覆盖的集合与编辑器岛键一一对应，直接派生自岛键列表，避免两处列表漂移。
  */
-const WORKSPACE_EDITOR_COLLECTIONS = [
-  'blog',
-  'projects',
-  'bits',
-  'devlog',
-  'about'
-] as const satisfies readonly AdminContentWorkspaceEditorPayload['collection'][];
+const WORKSPACE_EDITOR_COLLECTIONS = ADMIN_CONTENT_EDITOR_ISLAND_KEYS;
 
 /** 白名单判定，供回归测试断言集合覆盖。 */
 export const isAdminContentWorkspaceEditorPayload = (

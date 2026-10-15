@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 /**
- * 从主题仓库同步更新。
- *
- * 按 theme.json 记录的仓库与基准提交对主题文件做三方合并：站点未改动的直接取新版，
- * 站点改过的用 git merge-file 合并；站点自有路径不覆盖，只在报告中列出。
+ * 从主题仓库同步更新：按 theme.json 的仓库与基准提交做三方合并，站点自有路径不覆盖。
  *
  *   npm run theme:update            合并并更新 theme.json 的基准提交
  *   npm run theme:update -- --check 只报告变更，不写入
@@ -78,10 +75,7 @@ const detectBinaryPaths = (baseCommit, headCommit) => {
   return paths;
 };
 
-/**
- * 二进制文件无法做文本三方合并，只能整文件取舍：
- * 一边未改动就取另一边，双方都改过则保留站点版本并报冲突，避免写入损坏内容。
- */
+/** 二进制文件无法三方合并：一边未改动就取另一边，双方都改过则保留站点版本并报冲突。 */
 const mergeBinary = (base, ours, theirs) => {
   const unchanged = (a, b) => a !== null && b !== null && a.equals(b);
   if (ours === null) return { content: theirs, conflicted: false };

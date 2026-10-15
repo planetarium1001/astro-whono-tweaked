@@ -9,7 +9,7 @@ import {
   type AdminContentEditorEndpoints,
   type AdminContentEditorStyleSlot
 } from '../src/components/admin/admin-content-editor-registry';
-import { ADMIN_CONTENT_EDITOR_ISLAND_KEYS } from '../src/components/admin/admin-content-editor-islands';
+import { ADMIN_CONTENT_EDITOR_ISLAND_KEYS } from '../src/components/admin/admin-content-editor-registry';
 import { ADMIN_CONTENT_WRITE_COLLECTION_KEYS } from '../src/lib/admin-console/content-collections';
 import type {
   AdminAboutEditorPayload,

@@ -14,7 +14,7 @@ describe('admin content projects/devlog write contract', () => {
     const { POST } = await import('../src/pages/api/admin/content/entry');
 
     const current = await readAdminContentEntryEditorPayload('projects', 'demo-project');
-    // projects 已取消 tags/repo/repoLabel/demo/demoLabel：字段袋只剩基础字段。
+    // 字段袋只有基础字段
     expect(Object.keys(current.values).sort()).toEqual(
       ['title', 'subtitle', 'description', 'type', 'icon', 'image', 'date', 'draft'].sort()
     );
@@ -52,7 +52,7 @@ describe('admin content projects/devlog write contract', () => {
     expect(saved).toContain('title: Edited Project');
     expect(saved).toContain('type: 实验');
     expect(saved).toContain('Project body');
-    // 仓库/演示链接留在正文 markdown 的末尾链接组里，不写回 frontmatter
+    // 仓库/演示链接留在正文的末尾链接组里，不写回 frontmatter
     expect(saved).toContain('[仓库](https://example.com/repo)');
     expect(saved).toContain('[演示](https://example.com/demo)');
     const frontmatterText = /^---\n([\s\S]*?)\n---/.exec(saved)?.[1] ?? '';
@@ -61,7 +61,7 @@ describe('admin content projects/devlog write contract', () => {
     }
   });
 
-  // image 与 icon 同构：只有值变化才产生补丁，未登记进字段矩阵的 frontmatter 字段不会被重建丢弃。
+  // image 与 icon 同构：只有值变化才产生补丁，未登记进字段矩阵的 frontmatter 字段不会被丢弃。
   it('writes the projects image field as a diff patch and keeps unlisted frontmatter fields', async () => {
     const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
     const { POST } = await import('../src/pages/api/admin/content/entry');
@@ -108,7 +108,7 @@ describe('admin content projects/devlog write contract', () => {
     expect(response.status).toBe(200);
     const payload = JSON.parse(await response.text());
     expect(payload.ok).toBe(true);
-    // 只有 image 变化：其余字段不产生补丁，写入计划仍是差分补丁。
+    // 只有 image 变化：其余字段不产生补丁。
     expect(payload.result.changedFields).toEqual(['image']);
 
     const saved = await readFile(sourcePath, 'utf8');
@@ -150,8 +150,7 @@ describe('admin content projects/devlog write contract', () => {
     }
   });
 
-  // devlog 已完全 markdown 化：外链写在正文里，frontmatter 不再有 links，
-  // 这里同时守住「不会把 links 写回 frontmatter」。
+  // devlog 外链写在正文里：frontmatter 不写 links，也不会把 links 写回 frontmatter。
   it('writes devlog frontmatter + body markdown links, and never writes a links field', async () => {
     const { readAdminContentEntryEditorPayload } = await import('../src/lib/admin-console/content-shared');
     const { POST } = await import('../src/pages/api/admin/content/entry');
@@ -200,7 +199,7 @@ describe('admin content projects/devlog write contract', () => {
 });
 
 // 客户端保存体若只给 blog/bits 附 frontmatter，projects/devlog 的保存会被服务端
-// 以「frontmatter 必须是对象」拒绝；这里直接断言客户端构造的请求体形态。
+// 以「frontmatter 必须是对象」拒绝，这里直接断言客户端构造的请求体形态。
 describe('client write request body for new collections', () => {
   it.each(['projects', 'devlog'] as const)('attaches frontmatter for %s', async (collection) => {
     const { buildContentWriteRequestBody } = await import(
@@ -242,7 +241,7 @@ describe('client write request body for new collections', () => {
   });
 });
 
-// entry-transport 的载荷守卫若没有 projects/devlog 分支，
+// entry-transport 的载荷守卫缺少 projects/devlog 分支时，
 // 这两个集合的删除（单条与批量）与保存回读会全部拿到 null。
 describe('entry transport guards for new collections', () => {
   it.each(['projects', 'devlog'] as const)('resolves %s payloads from a response body', async (collection) => {

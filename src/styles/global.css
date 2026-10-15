@@ -1,7 +1,5 @@
-/* global.css：公开站点共享样式入口，只负责 tokens/base 与跨页面公共规则。
-   页面私有规则见 home.css / about.css；article.css 为正文页专用；
-   bits-page.css 为 /bits/ 专用；Admin 样式按路由单独引入。
-   断点变量覆盖仅保留共享层变量与跨页面公共规则。 */
+/* 公开站点共享样式入口：tokens/base 与跨页面公共规则；页面私有规则见 home.css / about.css，
+   article.css 为正文页专用，bits-page.css 为 /bits/ 专用，Admin 样式按路由单独引入。 */
 @import "./components/layout.css";
 @import "./components/lists.css";
 @import "./components/entry-tags.css";
@@ -127,7 +125,7 @@
   --sidebar: 224px;
   /* 前后台侧栏共用；内容宽度 = --sidebar - 2 * 内边距 */
   --sidebar-padding-block: 52px;
-/**
+  /**
    * 间距几何硬约束，由 check-layout-geometry.mjs 断言：
    * nav gap + dot + sidebarPad == contentPad；
    * 壳层起始内边距 == 结束内边距 + scrollbarGutter；
@@ -144,10 +142,7 @@
   /* 壳层铺满视口，不设 max-inline-size。 */
   --layout-divider-inline-size: 1px;
   --public-sidebar-inline-size: 224px;
-/**
-   * 内容侧水平内边距 = 侧栏导航文字到竖线的距离（10 + 4 + 15 = 29），
-   * 使竖线两侧留白一致。
-   */
+  /* 内容侧水平内边距 = 侧栏导航文字到竖线的距离（10 + 4 + 15 = 29），使竖线两侧留白一致。 */
   --public-content-padding-inline: 29px;
   /* 后台编辑器预览的正文可读宽度：壳层与内容都铺满后，退化为「视口 − 侧栏 − 竖线 − 两侧内边距」。 */
   --article-readable-inline-size: calc(

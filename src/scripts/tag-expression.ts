@@ -1,8 +1,6 @@
 /**
- * 标签筛选的复合逻辑表达式。状态是分段数组 [{ op, keys }]：
- * 每段的 op 同时约束段内标签之间，以及该段与左侧累计结果之间。
- * `and` 段要求全部命中，`or` 段要求任一命中。
- * 本模块是纯函数、无 DOM；渲染与事件在 `entry-search.ts`。
+ * 标签筛选的复合逻辑表达式，状态为分段数组 [{ op, keys }]：段的 op 同时约束段内标签之间
+ * 以及该段与左侧累计结果之间。纯函数、无 DOM。
  */
 
 export type TagOp = 'and' | 'or';
@@ -30,10 +28,8 @@ const cloneSegments = (segments: readonly TagSegment[]): TagSegment[] =>
   segments.map((segment) => ({ op: segment.op, keys: [...segment.keys] }));
 
 /**
- * 丢弃空段、合并相邻同 op 的段，并在末尾保留一个段。
- *
- * 仅当输入末段本来就为空时才保留空段：它代表用户刚切过运算符，预览需显示成 `( 已选 ) /`。
- * 无条件补空段会把 `tags=a` 渲染成 `( a ) +`，产生多余括号与悬空运算符。
+ * 丢弃空段、合并相邻同 op 的段；仅当输入末段为空时保留一个空段
+ * （代表用户刚切过运算符，预览需显示成 `( 已选 ) /`）。
  */
 const normalizeExpression = (segments: readonly TagSegment[]): TagSegment[] => {
   const merged: TagSegment[] = [];
@@ -96,10 +92,7 @@ export const removeTag = (segments: readonly TagSegment[], key: string): TagSegm
   );
 
 /**
- * 切换 `+` / `/`。
- *
- * 待选段非空：左侧整体加括号并追加一个 op 为 `next` 的空段。
- * 待选段为空：只改末段 op，反复切换不产生多余括号。
+ * 切换 `+` / `/`：待选段非空时左侧整体加括号并追加一个同 op 的空段，为空时只改末段 op。
  */
 export const switchPendingOp = (segments: readonly TagSegment[], next: TagOp): TagSegment[] => {
   const list = cloneSegments(segments);
@@ -142,8 +135,7 @@ export const isSingleSegment = (segments: readonly TagSegment[]): boolean =>
   normalizeExpression(segments).length === 1;
 
 /**
- * 复合判断：段内先算，再自左向右与左边整体结合。
- * 空表达式（没选任何标签）返回 `true`，不参与筛选。
+ * 复合判断：段内先算，再自左向右与左边整体结合；空表达式返回 `true`。
  */
 export const evaluateExpression = (
   segments: readonly TagSegment[],
@@ -165,19 +157,14 @@ export const evaluateExpression = (
   return accumulated ?? true;
 };
 
-/**
- * 预览记号流。左边整块在每次追加新段时被 `(` `)` 包起来，与求值顺序一致。
- */
+/** 预览记号流：左侧整块在追加新段时被 `(` `)` 包起来，与求值顺序一致。 */
 export const buildExpressionTokens = (segments: readonly TagSegment[]): ExpressionToken[] => {
   const list = normalizeExpression(segments);
   const nonEmpty = list.filter((segment) => segment.keys.length > 0);
   if (nonEmpty.length === 0) return [];
 
   const tokens: ExpressionToken[] = [];
-  /**
-   * 左侧累计结果是否出现过运算符。出现过才加括号：
-   * 单标签的 `a /` 不需要写成 `( a ) /`；`( a + b ) / c` 必须保留括号才读得出求值顺序。
-   */
+  /** 左侧累计结果出现过运算符才加括号（`( a + b ) / c` 必须保留括号才读得出求值顺序）。 */
   let leftHasOp = false;
 
   nonEmpty.forEach((segment, index) => {
@@ -219,10 +206,7 @@ export const formatExpression = (segments: readonly TagSegment[], labelOf?: (key
     .join(' ');
 
 /**
- * 从 URL 读表达式，兼容三种写法：
- * - `?tags=a,b&ops=and,or` —— 复合表达式（`ops` 与 `tags` 一一对应）；
- * - `?tags=a,b&mode=or`    —— 旧版扁平写法（所有标签同一 op）；
- * - `?tags=a`              —— 默认 AND。
+ * 从 URL 读表达式，兼容 `?tags=&ops=`（复合）、`?tags=&mode=`（旧版扁平）与 `?tags=`（默认 AND）；
  * 非法 key 由调用方通过 `isUsableKey` 过滤。
  */
 export const parseExpression = (params: URLSearchParams, isUsableKey: (key: string) => boolean): TagSegment[] => {
@@ -252,9 +236,7 @@ export const parseExpression = (params: URLSearchParams, isUsableKey: (key: stri
 };
 
 /**
- * 把表达式写进 URL：
- * - 单段写成旧的 `tags=&mode=`（保持既有深链接与测试口径）；
- * - 复合表达式追加与 `tags=` 一一对应的 `ops=`。
+ * 把表达式写进 URL：单段写成 `tags=&mode=`，复合表达式写成与 `tags=` 一一对应的 `ops=`。
  */
 export const applyExpressionToParams = (params: URLSearchParams, segments: readonly TagSegment[]): void => {
   const list = normalizeExpression(segments).filter((segment) => segment.keys.length > 0);

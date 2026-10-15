@@ -85,11 +85,12 @@
 | 位置 | 写法 | 示例 |
 | --- | --- | --- |
 | 正文 Markdown 与 HTML | 以 `/` 开头，按 `public/` 解析 | `/images/blog/hello/cover.webp` |
-| `bits` 的 `images[].src`、`author.avatar` | 不带前导斜杠，不带 `public/` | `images/bits/note/a.webp` |
+| `bits` 的 `images[].src` | 不带前导斜杠，不带 `public/`，或 `https://` 远程地址 | `images/bits/note/a.webp` |
+| `bits` 的 `author.avatar` | 相对路径，不允许远程地址 | `author/avatar.webp` |
 | `projects` 的 `icon`、`image` | 不带前导斜杠，不带 `public/` | `images/projects/demo/icon.svg` |
-| 远程图片 | `https://` 地址 | `https://example.com/a.webp` |
+| `blog` 的 `cover`、正文中的远程图 | 相对路径或 `https://` 地址 | `https://example.com/a.webp` |
 
-正文引用可以带前导斜杠，也可以写相对路径（`./assets/a.webp`）。frontmatter 的图片字段值带 `/`、`public/`、`http://`、`..`、`?`、`#` 或非图片扩展名时 schema 会报错。`badge` 是纯文本角标，不按图片路径校验。
+正文引用可以带前导斜杠，也可以写相对路径（`./assets/a.webp`）。`bits` 的 `images[].src` 与 `author.avatar` 由 schema 校验：带 `/`、`public/`、`http://`、`..`、`?`、`#` 或非图片扩展名时直接报错。`projects` 的 `icon`、`image` 与 `blog` 的 `cover` 不做 schema 校验，由 `npm run check:image-references` 在构建前统一检查引用是否存在。`badge` 是纯文本角标，不按图片路径校验。
 
 ## 末尾链接组
 
@@ -101,17 +102,13 @@
 [仓库](https://github.com/planetarium1001/astro-whono-tweaked) · [演示](https://example.com)
 ```
 
-规则：
-
 - 链接组前留一个空行，与正文分成两段。
 - 链接组是正文末尾连续若干行，每行只由 markdown 链接与分隔符（空白或 `·|、,，/`）构成，一行可放多个链接。
 - 渲染时链接按书写顺序排列，之间只留间隔，不输出分隔符。
 - 链接组不参与摘要派生，也不会在正文中重复出现。
 - `blog` 不使用这套写法，正文中间的链接按普通 markdown 渲染。
 
-## Markdown 扩展
-
-### 提示块
+## 提示块
 
 ```markdown
 :::tip[提示]
@@ -119,7 +116,7 @@
 :::
 ```
 
-### 图注
+## 图注
 
 ```html
 <figure class="figure figure--md figure--center">
@@ -130,7 +127,7 @@
 
 必须同时写 `figure` 基础类：样式选择器是 `figure.figure--*`，只写修饰类不会生效。尺寸类 `figure--sm`、`figure--md`、`figure--lg`、`figure--full` 与对齐类 `figure--left`、`figure--center`、`figure--right` 可各取一个，省略时按居中默认排版。
 
-### 画廊
+## 画廊
 
 ```html
 <ul class="gallery cols-2">
@@ -145,7 +142,7 @@
 
 `ul` 需要带 `gallery`，列数再追加 `cols-2` 或 `cols-3`；只有 `gallery` 时按缺省网格排列，不带 `gallery` 则按普通无序列表渲染。
 
-### 公式
+## 公式
 
 行内公式用 `$$x + y$$`，块级公式把 `$$` 单独成行：
 
@@ -159,9 +156,9 @@ $$
 
 单个 `$` 不作为公式定界符，代码块与行内代码里的 `$$` 原样输出。
 
-### 代码块
+## 代码块
 
-用围栏代码块并标注语言，渲染时套上工具栏，显示语言与行数、内置复制按钮，行号由后台「代码块行号」开关控制。
+用围栏代码块并标注语言，渲染时套上工具栏，显示语言与行数、内置复制按钮，行号由后台「代码显示 → 代码块行号」控制。
 
 ````markdown
 ```ts
@@ -169,7 +166,7 @@ export const add = (a: number, b: number): number => a + b;
 ```
 ````
 
-### 折叠内容
+## 折叠内容
 
 ```markdown
 <details>
@@ -180,7 +177,7 @@ export const add = (a: number, b: number): number => a + b;
 </details>
 ```
 
-### 关于页指令
+## 关于页指令
 
 下列指令只在关于页（`src/content/about/index.md`）中生效：
 
@@ -198,4 +195,4 @@ export const add = (a: number, b: number): number => a + b;
 ::contact-links
 ```
 
-连续的 `friend` 渲染为友链卡片列表，连续的 `faq` 渲染为问答列表，`::contact-links` 输出站点联系方式。
+`site-info` 的属性均为可选，渲染为站点信息卡片。连续的 `friend` 渲染为友链卡片列表，指令正文是简介文字；连续的 `faq` 渲染为问答列表，问题来自 `question` 属性，指令正文是回答。`::contact-links` 输出 `site.json` 中配置的联系方式。

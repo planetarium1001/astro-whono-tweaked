@@ -2095,8 +2095,9 @@ export const resetThemeSettingsCache = (): void => {
   cachedSettings = null;
 };
 
-// 文件缺失的槽位按主题默认回退（渲染兜底，不阻断构建、不锁后台）。抑制只发生在标签页图标组
-// （svg/png）内部：自定义后继续输出默认 SVG 会让桌面浏览器优先选中默认图标；触摸图标与其不竞争，独立回退。
+// 文件缺失的槽位按主题默认回退，不阻断构建、不锁后台。
+// 标签页图标（svg/png）的默认值只在两个槽位都缺失时输出：自定义后继续输出默认 SVG
+// 会让桌面浏览器优先选中默认图标；触摸图标不参与竞争，独立回退。
 const resolveRenderableFaviconPath = (value: string | null): string | null => {
   if (!value) return null;
   const projectRoot = process.env.ASTRO_WHONO_INTERNAL_TEST_PROJECT_ROOT?.trim() || process.cwd();

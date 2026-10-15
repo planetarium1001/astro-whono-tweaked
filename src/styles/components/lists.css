@@ -1,6 +1,4 @@
-/* Lists
-   通用列表与归档布局；不放页面专属卡片与页面私有间距调优。
- */
+/* 通用列表与归档布局；不放页面专属卡片与页面私有间距调优。 */
 
 .list {
   display: flex;
@@ -372,7 +370,7 @@ a.tag:focus-visible {
   border-radius: 3px;
 }
 
-/* Pagination */
+/* 分页 */
 .pagination {
   margin-top: 22px;
   padding-top: 12px;

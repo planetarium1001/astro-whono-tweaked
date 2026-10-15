@@ -59,9 +59,8 @@ describe('页头：标题 + 两行块（tag 行 / 描述行）', () => {
     );
   });
 
-  // /blog/ /bits/ /archive/ 的页头带 `--with-search`，lists.css 里 0,3,0 的规则会覆盖
-  // display / align-items / gap（align-items: baseline + gap: 12px），使这几页的
-  // tag 行与描述行之间比 /devlog/ 多出 12px。必须用 0,4,0 把这三个属性一起抢回来。
+  // /blog/ /bits/ /archive/ 的页头带 `--with-search`，lists.css 的 0,3,0 规则会覆盖
+  // display / align-items / gap，多出 12px 行距；必须用 0,4,0 把这三个属性抢回来。
   it('带搜索框的页头用 0,4,0 抢回 display / align-items / gap', async () => {
     const layout = await read(LAYOUT_CSS);
     const override =
@@ -138,7 +137,7 @@ describe('/devlog/：间距不变量', () => {
   });
 });
 
-describe('/devlog/：摘要全局一刀切', () => {
+describe('/devlog/：摘要回退策略', () => {
   it('回退态隐藏全部摘要、正常态不重复显示正文里的摘要', async () => {
     const css = await read(DEVLOG_CSS);
 
@@ -193,8 +192,8 @@ describe('/devlog/：时间线收尾', () => {
   });
 });
 
-describe('/devlog/：摘要一刀切的过渡', () => {
-  it('先淡出 → 再过渡行高（正文范围）+ 并行淡入正文摘要，时间比原来长', async () => {
+describe('/devlog/：摘要回退的过渡', () => {
+  it('先淡出，再过渡正文行高并并行淡入摘要，两段时长都不低于下限', async () => {
     const script = await read('src/scripts/devlog-excerpts.ts');
 
     expect(script).toContain('FADE_MS');
@@ -229,7 +228,7 @@ describe('/devlog/：窄屏时间线与两行条目', () => {
     expect(narrow).toMatch(
       /\.devlog-row__headline\s*\{[^}]*padding-left:\s*calc\(var\(--devlog-line-x\) \+ var\(--devlog-line-gutter\) - var\(--devlog-row-pad-x\)\)/
     );
-    // 日期底色让线在日期处断开（节点观感）
+    // 日期底色让线在日期处断开
     expect(css).toMatch(/\.devlog-row__date\s*\{[^}]*background:\s*var\(--bg\)/);
   });
 
@@ -242,8 +241,8 @@ describe('/devlog/：窄屏时间线与两行条目', () => {
   });
 });
 
-describe('tag dialog：搜索框已删、逻辑预览长胶囊', () => {
-  it('活动 dialog 里不再渲染筛选输入框', async () => {
+describe('tag dialog：逻辑预览长胶囊（无搜索框）', () => {
+  it('活动 dialog 不渲染筛选输入框', async () => {
     const [header, entryTags] = await Promise.all([read(TAG_HEADER_ASTRO), read(ENTRY_TAGS_CSS)]);
 
     expect(header).not.toContain('data-entry-tag-filter');
@@ -366,7 +365,7 @@ describe('项目卡片与末尾链接行', () => {
     // 触控热区用覆盖层实现，视觉高度就是文字一行
     expect(links).toMatch(/\.trailing-links a::after\s*\{[^}]*height:\s*var\(--tap-min-h\)/);
     expect(links).not.toMatch(/\.trailing-links a\s*\{[^}]*min-height/);
-    // 悬停下划线贴文字（text-decoration），不再画在盒子的底边上
+    // 悬停下划线用 text-decoration 贴文字，不画在盒子底边
     expect(links).toMatch(/\.trailing-links a:hover[\s\S]{0,200}?text-decoration:\s*underline/);
     expect(links).toMatch(/\.prose \.trailing-links a\s*\{[^}]*border-bottom:\s*0/);
   });
@@ -427,7 +426,7 @@ describe('项目卡片与末尾链接行', () => {
 });
 
 describe('卡片弹窗：统一宽度与滚动区', () => {
-  it('项目与动态的卡片弹窗共用同一份宽度 token，不再各自写死', async () => {
+  it('项目与动态的卡片弹窗共用同一份宽度 token', async () => {
     const [global, projects, bits] = await Promise.all([
       read('src/styles/global.css'),
       read('src/styles/projects-page.css'),
@@ -472,7 +471,7 @@ describe('阅读模式与页脚位置', () => {
     expect(toc).toMatch(
       /grid-template-columns:[\s\S]{0,140}?var\(--sidebar\)[\s\S]{0,100}?var\(--layout-divider-inline-size\)/
     );
-    // 阅读模式的正文左右内边距跟随普通设计，不再用固定值
+    // 阅读模式的正文左右内边距跟随普通设计
     expect(layout).toMatch(
       /body\.immersive-page\[data-reading="immersive"\] \.content\s*\{[^}]*padding:\s*64px var\(--pad-x\)/
     );
@@ -495,7 +494,7 @@ describe('文章目录列：右边界跟随页面外缘间隙', () => {
       /--article-toc-column:\s*calc\(var\(--article-toc-inline-size\) - var\(--page-inline\)\)/
     );
 
-    // 补偿从列移到表头：列本身不再用负右外边距，右内边距归 0
+    // 补偿放在表头：列不用负右外边距，右内边距归 0
     const rail = /^\.article-toc--rail\s*\{([^}]*)\}/m.exec(css)?.[1] ?? '';
     expect(rail, '需要 .article-toc--rail 规则').not.toBe('');
     expect(rail).toMatch(/margin-right:\s*0/);
@@ -606,7 +605,7 @@ describe('后台设置行的排版', () => {
     const themeShared = await read('src/lib/admin-console/theme-shared.ts');
     expect(themeShared).toContain('（px，最小 ${ADMIN_SITE_PAGE_GAP_MIN}；仅 901px 以上生效）');
 
-    // 两列均分来自 .admin-grid，旧的行内 flex 排版与格子类不再保留
+    // 两列均分来自 .admin-grid
     expect(form).not.toContain('admin-footer-row');
     expect(form).toMatch(/\.admin-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
     // 百分比与间隙输入框都很短
@@ -616,7 +615,7 @@ describe('后台设置行的排版', () => {
 });
 
 describe('RSS 点击区域与 RSS 开关', () => {
-  it('可点元素右侧的「·」不吃点击（原来点 RSS 右边那个点也会触发 RSS）', async () => {
+  it('可点元素右侧的「·」不接收点击', async () => {
     const css = await read(ENTRY_TAGS_CSS);
 
     // 分隔符绝对定位 + pointer-events: none，链接的点击盒子只剩文字
@@ -627,7 +626,7 @@ describe('RSS 点击区域与 RSS 开关', () => {
     // 间距改由元素自身的 margin 提供（否则两段会贴在一起）
     expect(css).toMatch(/\.page-subtitle__item:not\(:last-child\)\s*\{[^}]*margin-right:\s*1\.1em/);
     // 纯文本那段（不可点）保持行内分隔符，但只在后面还有可见项时才画：
-    // hidden 的兄弟不算，否则末尾会多出一个孤零零的「·」
+    // hidden 的兄弟不算，否则末尾会多出一个「·」
     expect(css).toMatch(
       /\.page-subtitle__text:has\(~ \.page-subtitle__item:not\(\[hidden\]\)\)::after\s*\{[^}]*content:\s*"·"/
     );
@@ -674,7 +673,7 @@ describe('RSS 点击区域与 RSS 开关', () => {
   });
 });
 
-describe('#标签 与「切换标签」不再同时出现', () => {
+describe('#标签 与「切换标签」互斥', () => {
   it('hidden 属性真的隐藏（display:inline-flex 会压过 UA 的 [hidden]）', async () => {
     const css = await read(ENTRY_TAGS_CSS);
     expect(css).toMatch(
@@ -743,7 +742,7 @@ describe('涟漪过渡期间冻结滚动条配色', () => {
   });
 });
 
-describe('/devlog/ 增加搜索', () => {
+describe('/devlog/ 页头搜索', () => {
   it('页头打开搜索，过滤由 devlog-filter 一并负责（项目 ∧ 关键词）', async () => {
     const [page, script] = await Promise.all([
       read('src/pages/devlog/index.astro'),
@@ -760,7 +759,7 @@ describe('/devlog/ 增加搜索', () => {
 });
 
 describe('归档 tag 的作用域与语义', () => {
-  it('项目档不再暴露标签入口，更新档只取项目名称，全部档不带项目集合的 tags', async () => {
+  it('项目档不暴露标签入口，更新档只取项目名称，全部档不带项目集合的 tags', async () => {
     const [page, scopeScript, indexJson, entryScript] = await Promise.all([
       read('src/pages/archive/index.astro'),
       read('src/scripts/archive-scope.ts'),
@@ -772,7 +771,7 @@ describe('归档 tag 的作用域与语义', () => {
     expect(page).toMatch(/const projectTags: TagSummary\[\] = \[\];/);
     expect(page).toMatch(/collectTagScopedSummary\('devlog', devlogs, \(entry\) => \[\s*entry\.data\.project\s*\]/);
     expect(page).toMatch(/collectTagScopedSummary\(\s*'all',\s*\[\s*\.\.\.blogs,\s*\.\.\.devlogs\s*\]/);
-    // index.json 的 devlog tags 也不再含 kind
+    // index.json 的 devlog tags 不含 kind
     expect(indexJson).toMatch(/tags: \[entry\.data\.project\]/);
     expect(indexJson).not.toMatch(/tags: \[entry\.data\.project, entry\.data\.kind\]/);
 
@@ -798,7 +797,7 @@ describe('归档的更新行补「项目名：」', () => {
     expect(page).toMatch(/project: entry\.data\.project/);
     // 半角冒号，冒号后一个空格
     expect(page).toMatch(/\$\{row\.project\}: `/);
-    // 项目名不再单独着色 → 与标题一起继承链接色，悬停时整体变成同一个高亮色
+    // 项目名与标题继承同一个链接色，悬停整体高亮
     expect(css).toMatch(/\.archive-timeline__project\s*\{[^}]*color:\s*inherit/);
   });
 });
@@ -851,12 +850,12 @@ describe('弹窗正文层级与宽屏面板间距', () => {
   });
 });
 
-describe('胶囊条严格照搬原「絮语」设计', () => {
+describe('胶囊条视觉规格', () => {
   it('不额外指定字体族、悬停不加底色', async () => {
     const css = await read('src/styles/components/scope-pills.css');
     const item = /\.scope-pills__item\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
 
-    // 原实现没有 font-family（跟随页面正文字体）
+    // 不指定 font-family，字体跟随正文
     expect(item).not.toContain('font-family');
     expect(item).toMatch(/font-size:\s*13px/);
     // 悬停只变色，不加底色
@@ -893,7 +892,7 @@ describe('目录展开/收起的正文右内边距', () => {
       /@media \(min-width: 1024px\) and \(max-width: 1279\.98px\)\s*\{[\s\S]{0,300}?body\.immersive-page\[data-reading='immersive'\] \.shell\[data-toc='true'\] \.content\s*\{[^}]*padding-right:\s*var\(--pad-x\)/
     );
 
-    // ≥1280 展开态不再有「归零 / 车道」覆写 → 走基础规则的 --pad-x
+    // ≥1280 展开态走基础规则的 --pad-x
     const wideBlock = /@media \(min-width: 1280px\)\s*\{([\s\S]*?)\n\}/.exec(
       layout.slice(layout.indexOf('内容区域'))
     )?.[1] ?? '';
@@ -901,7 +900,7 @@ describe('目录展开/收起的正文右内边距', () => {
   });
 });
 
-describe('最后两条微调：目录标题字号 + 时间/kind 可读性', () => {
+describe('目录标题字号与时间/kind 配色', () => {
   it('「本文目录」不小于目录条目字号（两种形态一致）', async () => {
     const css = await read('src/styles/components/article-toc.css');
     const base = Number(/\.article-toc\s*\{[^}]*font-size:\s*([\d.]+)px/.exec(css)?.[1] ?? 0);
@@ -927,7 +926,7 @@ describe('最后两条微调：目录标题字号 + 时间/kind 可读性', () =
     const badge = /^\.badge\s*\{([^}]*)\}/m.exec(lists)?.[1] ?? '';
     expect(badge).toMatch(/color:\s*var\(--muted\)/);
 
-    // 日期：不再用 --faint
+    // 日期使用 --muted
     const devlogDate = /\.devlog-row__date\s*\{([^}]*)\}/.exec(devlog)?.[1] ?? '';
     expect(devlogDate).toMatch(/color:\s*var\(--muted\)/);
     expect(devlogDate).not.toContain('var(--faint)');
@@ -936,7 +935,7 @@ describe('最后两条微调：目录标题字号 + 时间/kind 可读性', () =
     expect(archiveDate).toMatch(/color:\s*var\(--muted\)/);
     expect(archiveDate).not.toContain('var(--faint)');
 
-    // kind 胶囊：照搬 .badge 的浅色/暗色配色
+    // kind 胶囊与 .badge 的浅色/暗色配色一致
     const kind = /\.devlog-row__kind\s*\{([^}]*)\}/.exec(devlog)?.[1] ?? '';
     expect(kind).toMatch(/background:\s*#fafafa/);
     expect(kind).toMatch(/color:\s*var\(--muted\)/);

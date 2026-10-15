@@ -7,7 +7,6 @@ export type ViewStatKey = 'pv' | 'uv';
 
 /** 槽位挂载完成、可以填值时在 document 上派发 */
 export const VIEW_STATS_READY_EVENT = 'astro-whono:view-stats-ready';
-export const VIEW_STATS_ROOT_SELECTOR = '[data-view-stats]';
 export const VIEW_STATS_ITEM_SELECTOR = '[data-view-stat]';
 export const VIEW_STATS_VALUE_SELECTOR = '[data-view-stat-value]';
 

@@ -48,7 +48,7 @@ const hasToc = tocHeadings.length > 0;
 const entryTags: string[] = entry?.data?.tags ?? [];
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
-// 静态标签路由已删除，详情页标签统一指向列表页的 `?tags=<key>`，由 entry-search.ts 即时筛选。
+// 详情页标签统一指向列表页的 `?tags=<key>`，由 entry-search.ts 即时筛选。
 const tagLinks = visibleTags.map((tag) => {
   const key = toTagKey(tag);
   return {

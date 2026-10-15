@@ -1,50 +1,24 @@
 # astro-whono-tweaked
 
-基于 [cxro/astro-whono](https://github.com/cxro/astro-whono) 的 Astro 博客主题分支，面向长文阅读做了增量改造：新增文章目录、右下角浮动操作列、阅读位置记忆与主题切换涟漪，收窄侧栏并让壳层宽度随视口自适应。主题结构、内容集合、后台与 Markdown 扩展沿用上游，无破坏性改动。
+基于 [cxro/astro-whono](https://github.com/cxro/astro-whono)（MIT）的 Astro 博客主题模板。沿用上游的双栏壳层、后台控制台与 Markdown 扩展，在其上做面向长文阅读的增量改造，并把主题更新做成可重复执行的合并流程。
 
-在线演示：<https://planetarium1001.github.io/astro-whono-tweaked/>
+- 本仓库：<https://github.com/planetarium1001/astro-whono-tweaked>
+- 示例站点：<https://planetarium1001.github.io/astro-whono-tweaked/>
+- 上游项目：<https://github.com/cxro/astro-whono>
 
-上游完整说明（部署、后台、写作、字体子集化、Markdown 扩展）见 [docs/README.upstream.md](docs/README.upstream.md)，英文版见 [docs/README.upstream.en.md](docs/README.upstream.en.md)。
+## 特性
 
-## 预览
-
-| 宽屏 | 窄屏 |
+| 特性 | 说明 |
 | --- | --- |
-| ![](docs/images/preview_page_1.webp) | ![](docs/images/preview_page_2.webp) |
-| ![](docs/images/preview_archive_1.webp) | ![](docs/images/preview_archive_2.webp) |
-
-| 后台内容 | 后台主题 | 后台图片 |
-| --- | --- | --- |
-| ![](docs/images/preview_admin_1.webp) | ![](docs/images/preview_admin_2.webp) | ![](docs/images/preview_admin_3.webp) |
-
-## 主要特性
-
-阅读体验：
-
-- 文章目录：宽屏（视口 ≥ 1280px）作为壳层第 4 列常驻，阅读模式下门槛降至 1024px；窄屏折叠在正文顶部可展开。
-- 目录状态记忆：收起状态存于 localStorage，在首次绘制前生效；滚动时高亮当前小节。
-- 定位反馈：点击目录跳转后目标小节短暂高亮并聚焦标题，读屏可落到该小节。
-- 浮动操作列：文章与列表页右下角常驻阅读模式、回到上次阅读位置、回到顶部三个按钮，按需出现。
-- 阅读位置记忆：跨次打开按路径存 localStorage（最近标题加段内偏移，滚动比例兜底），本次会话内用位置栈原路返回。
-- 阅读模式：入口在浮动列，进入后侧栏收拢、正文放宽、右侧目录保留；进出遵循 `prefers-reduced-motion`。
-- 主题切换涟漪：以点击处为圆心圆形展开；不支持 View Transitions API 或系统偏好减少动效时直接切换。
-
-站点能力：
-
-- 浏览数据槽位：文章元信息行与页面底部预留 PV / UV 位置，数字由站点自行接入统计服务。
-- 备案信息：页脚居中显示工信部备案号与公安联网备案号，链接与图标可配置，默认不显示。
-- 侧栏文案富文本：站点名与引用文案支持换行、少量 HTML 标签与对齐工具类。
-- 响应式壳层：侧栏 224px，壳层宽度随视口自适应；`html` 固定滚动条槽位，页面高度变化时不横跳。
-- 列表卡片详情弹窗：项目与动态卡片整卡可点（链接、图片等可交互部分除外），弹窗展示完整正文、全部标签与全部图片，内容过长在弹窗内滚动；弹窗宽度统一，高度随内容。
-- 卡片高度约束：项目卡片多列时所有行等高，单卡另有高度上限；动态卡片正文按行数温和截断，截断时在右下角给出「查看全文」提示。
-- 项目展示图：项目 frontmatter 的 `image?` 渲染成卡片内左浮动缩略图（固定框裁切），文字从它右侧绕排；卡片头部为「图标 + 胶囊标题 + 小号副标题」两列，弹窗复用同一套头部。
-
-沿袭上游：
-
-- 五个内容集合（博客、项目、动态、更新、关于）与归档时间线视图。
-- 本地后台 Admin Console（概览、主题、写作、图片、快照），仅开发环境可读写，生产产物为只读静态壳。
-- RSS（全站与分栏列表页）、浅色与深色模式、自托管子集字体。
-- Callout、Figure、Gallery、公式等 Markdown 扩展。
+| 双栏壳层 | 侧栏 224px，滚动条槽位固定；页面外缘间隙与窄屏标题宽度可配 |
+| 五类内容 | `blog`、`projects`、`bits`、`devlog`、`about`，另有跨集合归档 |
+| 后台控制台 | `/admin/`，开发环境可读写：概览、主题、写作、图片、快照 |
+| 长文阅读 | 文章目录、阅读模式、浮动操作列、阅读位置记忆、主题切换涟漪 |
+| 浏览数据槽位 | 预置 PV / UV 位置与样式，数字由站点自行接入 |
+| 备案信息 | 页脚居中显示工信部与公安联网备案号 |
+| 主题同步 | `npm run theme:update` 按文件三方合并，站点自有路径不覆盖 |
+| 构建守卫 | 类型、快照漂移、布局几何、触控尺寸、字体字符集 |
+| 字体子集 | 自托管 WOFF2，按内容与模板字符集生成 |
 
 ## 快速开始
 
@@ -52,66 +26,96 @@
 
 ```bash
 npm install
-npm run dev       # 开发服务器，后台在 /admin/
-npm run build     # 产出 dist/
+npm run dev       # 开发服务器，后台入口 /admin/
+npm run build     # 输出到 dist/
 npm run preview   # 预览构建结果
 ```
 
-部署静态产物即可，`dist/` 可直接交给任意静态托管。仓库自带 Netlify 配置（`npm run build` + 发布 `dist`），也自带 GitHub Pages 工作流，详见「持续集成与预览部署」。
+### 从模板创建
 
-## 配置
+在仓库页面点「Use this template」创建自己的仓库，得到独立历史。之后用 `npm run theme:update` 获取主题更新，无需共享 git 历史。
 
-### 站点常量
+### 克隆指定分支
 
-`site.config.mjs` 定义站点标题、作者、描述与列表页每页条目数（`PAGE_SIZE_BLOG`、`PAGE_SIZE_BITS`、`PAGE_SIZE_ARCHIVE`）。服务端分页已取消，这三个值是前端每页条目数，由列表页写入 `[data-entry-filters][data-page-size]` 供客户端分页读取。
+只取 `main` 一个分支在本地写作：
 
-构建期环境变量：
+```bash
+git clone --branch main --single-branch https://github.com/planetarium1001/astro-whono-tweaked.git my-site
+cd my-site
+npm install
+npm run dev
+```
 
-| 变量 | 作用 |
-| --- | --- |
-| `SITE_URL` | 站点 origin，用于 RSS、canonical、og 与 sitemap；为空时 RSS 回落到 `https://example.invalid`，canonical/og 省略，sitemap 不生成 |
-| `ASTRO_WHONO_BASE_PATH` | 部署子路径，默认 `/`；项目页部署在仓库子路径时由 Pages 工作流推导 |
+克隆得到的 `origin` 指向主题仓库，不能向它推送。要变成自己的站点，先清掉主题历史再重新初始化：
 
-### 主题设置
+```bash
+rm -rf .git
+git init -b main
+git add -A
+git commit -m "chore: 从 astro-whono-tweaked 初始化"
+git remote add origin git@github.com:<你的账号>/<你的仓库>.git
+git push -u origin main
+```
 
-可配置项以 JSON 保存在 `src/data/settings/`，按领域分为五组：
+清掉历史不影响主题更新：`theme.json` 记录主题仓库与基准提交，`theme:update` 不依赖 git 历史。
+
+想保留主题历史、用 git 合并而不是 `theme:update`，就不要删 `.git`，只改远程地址：
+
+```bash
+git remote set-url origin git@github.com:<你的账号>/<你的仓库>.git
+git push -u origin main
+```
+
+### Fork 本仓库
+
+Fork 后 `main` 与主题同源历史，可直接合并：
+
+```bash
+git remote add theme https://github.com/planetarium1001/astro-whono-tweaked.git
+git fetch theme main
+git merge theme/main
+```
+
+## 主题设置与后台
+
+设置以 JSON 保存在 `src/data/settings/`，按领域分成五个文件。
 
 | 文件 | 内容 |
 | --- | --- |
-| `site.json` | 站点标题与描述、站点语言、页脚版权、备案信息、favicon、社交链接、后台概览可见性、窄屏标题宽度上限、页面外缘间隙 |
-| `shell.json` | 侧栏站点名、引用文案、导航项（标签、装饰符、顺序、可见性） |
+| `site.json` | 站点标题与描述、站点语言、页脚版权、备案信息、favicon、社交链接、后台概览可见性、窄屏站点标题宽度上限（`titleMaxPercent`）、页面外缘间隙（`pageGapPx`） |
+| `shell.json` | 侧栏站点名（`brandTitle`）、窄屏标题（`titleNarrow`）、引用文案、导航项的标签、装饰符、顺序与可见性 |
 | `home.json` | 首页引导语、更多入口、Hero 图 |
 | `page.json` | 各列表页标题与副标题、动态页默认作者、列表页 RSS 开关 |
 | `ui.json` | 代码块行号、阅读模式入口、浮动操作列、浏览数据、侧栏动作、文章元信息、侧栏分隔线、字体角色 |
 
-推荐用后台主题页（`/admin/theme/`）修改；直接编辑 JSON 同样有效，字段缺失时回落到默认值。开发环境下修改 `ui.json` 的字体需要在重启后生效。设置项的职责划分与操作路径见 [docs/admin-console.md](docs/admin-console.md)。
+推荐用后台主题页（`/admin/theme/`）修改，直接编辑 JSON 同样有效，字段缺失或非法时回落到默认值。`npm run dev` 下的后台可读写，生产产物中的后台是只读静态壳。
 
-### 浏览数据（PV / UV）
+窄屏标题与侧栏站点名同组：`shell.titleNarrow` 留空时与 `shell.brandTitle` 一致，`site.titleMaxPercent` 限制它在窄屏（≤ 900px）下的可渲染宽度。开发环境下修改 `ui.json` 的字体需要重启。
 
-主题只渲染位置、样式与 DOM 槽位，数字由站点自行接入。开关、前缀文案与显示位置在后台主题页的「浏览数据」中设置，默认关闭；开关打开但未填值时槽位保持隐藏，不占位、不引起重排。
+浏览数据（PV / UV）只渲染位置与样式，备案号默认不显示，字段说明见 [docs/analytics.md](docs/analytics.md)。
 
-| 位置 | 出现处 |
+## 主题同步
+
+`theme:update` 读取 `theme.json` 记录的主题仓库、分支与基准提交，拉取主题新版本，按文件做三方合并：
+
+```bash
+npm run theme:update -- --check   # 只报告将要发生的变更，不写入
+npm run theme:update              # 执行合并，并更新 theme.json 的基准提交
+```
+
+| 情况 | 处理 |
 | --- | --- |
-| 文章元信息行 | 博客详情页：日期、标签、字数、阅读时长、浏览数、访客数 |
-| 页面底部 | 首页与各列表页，位于页脚版权之上 |
+| 站点未改动该文件 | 直接取主题新版本 |
+| 主题未改动该文件 | 保留站点版本 |
+| 双方都改动 | `git merge-file` 合并，冲突保留标记并列出 |
+| 文件为二进制 | 整文件取舍；双方都改过则保留站点版本并报冲突 |
+| 站点自有路径 | 不覆盖，仅在报告中列出 |
 
-接入点：
+站点自有路径包括 `src/content/`、`src/data/settings/`、`public/images/`、`public/author/`、`public/fonts/`、`tools/`、`tests/fixtures/`、`README.md`、`.github/workflows/pages.yml` 与 `theme.json`。
 
-| 要做的事 | 改哪里 |
-| --- | --- |
-| 上报访问 | `src/layouts/BaseLayout.astro` 的 `<head>` 内加入 tracker 脚本 |
-| 填充数字 | `src/scripts/view-stats.ts`，唯一接入点，默认空实现 |
-| 开关与位置 | 后台主题页的「浏览数据」，写入 `src/data/settings/ui.json` |
-
-其余页面类型枚举、属性含义、helper、Umami 分享通道的完整步骤与取数口径见 [docs/analytics.md](docs/analytics.md)。
-
-### 备案信息
-
-工信部备案号与公安联网备案号在后台主题页的「备案信息」中填写，默认不显示，渲染在页脚最底部（版权行之下、居中）。链接仅允许 `beian.miit.gov.cn`（ICP）与 `beian.mps.gov.cn`、`beian.gov.cn`（公安，兼容旧写法）。字段说明与法规要求见 [docs/analytics.md](docs/analytics.md#备案信息)。
+存在冲突时命令以非零状态退出，且不更新 `theme.json`；解决后重跑。主题删除的文件不会自动移除，报告会列出待确认项。合并完成后建议执行 `npm run verify`。
 
 ## 内容模型
-
-内容集合与路由：
 
 | 集合 | 源文件 | 路由 |
 | --- | --- | --- |
@@ -123,36 +127,7 @@ npm run preview   # 预览构建结果
 
 `/archive/` 是跨博客、项目、更新的全站时间线，按年月分组，不含动态。
 
-博客 frontmatter：
-
-| 字段 | 必填 | 说明 |
-| --- | --- | --- |
-| `title` | 是 | 标题 |
-| `date` | 是 | `YYYY-MM-DD` 或带时区的 ISO 8601 |
-| `description` | 否 | 摘要，留空时按正文截取 |
-| `tags` | 否 | 字符串数组，默认空 |
-| `draft` | 否 | `true` 仅本地预览，构建、公开列表与 RSS 会过滤 |
-| `publishedAt` | 否 | 带时区的 ISO 8601 |
-| `updatedAt` | 否 | `YYYY-MM-DD` 或带时区的 ISO 8601，不得早于 `date` |
-| `slug` | 否 | 小写 kebab-case，允许 CJK，覆盖默认路径 |
-| `cover`、`badge` | 否 | 封面与角标 |
-
-其余集合的字段：
-
-| 集合 | frontmatter |
-| --- | --- |
-| `bits` | `title?`、`description?`、`date`、`tags`、`draft`、`slug?`、`images[]`（`src`、`width?`、`height?`、`alt?`）、`author?`（`name?`、`avatar?`） |
-| `projects` | `title`、`subtitle?`、`description?`、`type?`、`icon?`、`image?`、`date`、`draft` |
-| `devlog` | `title`、`date`、`project`、`kind?`、`description?`、`draft` |
-| `about` | 无约束，正文写在 `index.md` |
-
-`projects` 与 `devlog` 共用「末尾链接」写法：正文与链接之间留一个空行，末尾连续若干行每行只写 markdown 链接，可一行多个，用空白或 `·|、,，/` 分隔。渲染时链接组落在正文下一行并右对齐，链接之间只留间隔，不输出 `·` 等分隔符。摘要派生，以及归档与后台的检索文本，都先用剥离链接组后的正文生成，链接组也不会在正文里重复出现。博客不使用这套写法，正文中间的链接仍按普通 markdown 渲染。
-
-图片放在 `public/` 下（如 `public/images/blog/<slug>/a.webp`），正文写 `/images/blog/<slug>/a.webp`；动态的 `images[].src` 与 `author.avatar`，以及项目的 `icon` / `image`，都不带前导斜杠、也不带 `public/`（如 `images/projects/demo/cover.webp`）。博客详情页的 `slug` 默认为文件名去掉 `YYYY-MM-DD-` 前缀后的部分，可用 frontmatter 的 `slug` 覆盖；文件名规范见 [docs/development.md](docs/development.md)。
-
-订阅源为 `/rss.xml` 与 `/blog/rss.xml`，两者内容相同，均输出博客。列表页的 RSS 入口由 `page.json` 的 `listRss` 控制，博客、动态、归档三页可分别开关，链接统一指向 `/blog/rss.xml`。
-
-三种写作入口：后台的写作页新建与编辑；在对应目录直接新增 `.md`；`npm run new:bit` 生成动态草稿。动态、更新与项目均为无独立详情页的列表集合，条目通过页内锚点定位。
+三种写作入口：后台写作页新建与编辑；在对应目录直接新增 `.md`；`npm run new:bit` 生成动态草稿。frontmatter 字段、图片路径约定与 Markdown 扩展写法见 [docs/writing.md](docs/writing.md)。
 
 ## 目录结构
 
@@ -167,87 +142,96 @@ src/styles/         样式入口与各组件样式
 src/plugins/        Markdown 渲染管线：remark / rehype 插件与 HTML 白名单
 src/utils/          格式化、日期、slug 规则等通用工具
 src/data/settings/  主题设置 JSON
-public/             静态资源与上传目录：images/、fonts/、author/ 等
-scripts/            仓库维护脚本：字体子集、各项校验、new:bit
-tools/              字体字符集基线与快照
+public/             静态资源：fonts/、author/ 等
+scripts/            维护脚本：字体子集、各项校验、new:bit、theme:update
+tools/              字体字符集基线与指纹
 tests/              Vitest 用例与页面快照
 docs/               仓库文档
 ```
 
 分层与数据流见 [docs/architecture.md](docs/architecture.md)。
 
-## 开发与校验
+## 开发与验证
 
-常用命令为 `npm run dev`、`npm run build`、`npm run preview`、`npm run new:bit`，校验命令为 `npm run check`（类型检查与守卫脚本）、`npm test`（Vitest）与 `npm run verify`（check、test、build 与产物类校验依次执行）。
+```bash
+npm run check     # 类型检查与源码类守卫
+npm test          # Vitest
+npm run verify    # check、test、build 与产物类校验依次执行
+npm run ci        # 等价于 verify，CI 使用
+```
 
-构建前需提供 `SITE_URL`，否则 sitemap 不生成、产物校验会失败。产物类校验（`check:prod-artifacts`、`check:layout-geometry`、`check:touch-targets`）读取 `dist/`，必须在构建后执行。
+`npm run verify` 依次执行 `astro check` 与 `check:svelte`（编译全部 Svelte 组件）、`check:admin-content-source-boundary`（后台内容模块的引用边界）、`check:home-critical-css`（首屏 critical CSS 快照未漂移）、`check:image-references`（图片引用可解析）、`check:font-charset`（字符集与子集一致），然后运行用例、构建、刷新 fixtures，并执行 `check:prod-artifacts`（产物清单、后台只读壳、RSS / sitemap / robots）、`check:layout-geometry`（壳层几何不变量）、`check:touch-targets`（交互元素最终尺寸不小于 44px）。
 
-校验脚本清单、测试组织、命名规范与 CI 流程见 [docs/development.md](docs/development.md)。
+产物类校验读取 `dist/`，必须在构建后执行；`SITE_URL` 为空时 sitemap 不生成，产物守卫会失败。
+
+字体子集按内容字符集生成：改动内容后运行 `npm run check:font-charset` 确认，必要时用 `npm run font:build` 重新生成（需要 `pyftsubset` 与放在 `tools/fonts-src/` 的源字体）。改动侧栏或壳层尺寸后，需要同步 `src/pages/index.astro` 中 `homeHeadCriticalCss` 的对应声明。
+
+校验脚本清单、测试组织与命名规范见 [docs/development.md](docs/development.md)。
+
+## 部署
+
+### 分支模型
+
+| 分支 | 内容 | 用途 |
+| --- | --- | --- |
+| `main` | 主题代码、每类一到数条种子内容、中性默认设置 | 模板与更新来源 |
+| `demo` | 完整示例内容、示例截图与站点设置 | 部署到 GitHub Pages |
+
+改动方向是单向的：主题改动先在 `main` 完成，再在 `demo` 检出上执行 `npm run theme:update` 同步过去（`demo` 的 `theme.json` 指向本仓库的 `main`）。不要创建 `demo` 合并回 `main` 的请求——两个分支在内容、设置与测试快照上刻意不同，合并会把模板重新变成示例站，并在 `tests/fixtures/` 与 `theme.json` 上产生冲突。详见 [docs/upstream.md](docs/upstream.md)。
+
+### 工作流
+
+仓库自带两个 GitHub Actions 工作流，都不需要配置 secret。
+
+| 工作流 | 触发 | 作用 | 权限 |
+| --- | --- | --- | --- |
+| `ci.yml` | push / PR 到 `main`、`demo` | `npm ci` 后执行 `npm run ci` | `contents: read` |
+| `pages.yml` | push 到 `demo`、手动触发 | 构建并发布到 GitHub Pages | `contents: read`、`pages: write`、`id-token: write` |
+
+`pages.yml` 固定在 `demo` 分支运行，工作流文件本身留在默认分支，因此仍可从 Actions 页面手动触发。`main` 不参与部署。
+
+### 构建期环境变量
+
+| 变量 | 作用 |
+| --- | --- |
+| `SITE_URL` | 站点 origin，用于 RSS、canonical、og 与 sitemap。为空时 RSS 回落到 `https://example.invalid`，canonical 与 og:url、og:image 省略，sitemap 不生成 |
+| `ASTRO_WHONO_BASE_PATH` | 部署子路径，默认 `/`。项目页部署在仓库子路径时由 Pages 工作流推导 |
+
+产物守卫断言 sitemap 存在，因此 CI 与发布构建必须提供 `SITE_URL`；本地仅预览时可省略。
+
+### 配置 GitHub Pages
+
+1. 仓库设为 public。Free 计划下私有仓库无法使用 Pages。
+2. Settings → Pages → Source 选 **GitHub Actions**。不要选「Deploy from a branch」：该路径会走 GitHub 内置的 Jekyll 构建，对 Astro 项目必然失败。
+3. Settings → Environments → `github-pages` → **Deployment branches and tags** → 加入部署分支（本仓库为 `demo`）。该策略默认只放行默认分支；不放行时 `deploy` 作业会在没有任何步骤执行的情况下立即失败，而 `build` 仍然成功。
+4. 触发一次部署：向部署分支推送，或在 Actions → `pages` → Run workflow。
+
+### 部署自己的站点
+
+`pages.yml` 默认只部署 `demo`：`on.push.branches` 与 `actions/checkout` 的 `ref` 都指向它。内容放在 `main` 时要把这两处一起改掉，否则部署的仍是 `demo` 的内容：
+
+- `on.push.branches` 改为自己的部署分支；
+- `actions/checkout` 去掉 `ref: demo`，让它检出发起运行的那个提交。
+
+改完后同样要在 `github-pages` 环境里放行新的部署分支。站点地址由工作流按仓库名推导：项目页发布在 `https://<owner>.github.io/<repo>/`，仓库名为 `<owner>.github.io` 时发布在根路径。绑定自定义域名后，把工作流中的 `SITE_URL` 与 `ASTRO_WHONO_BASE_PATH` 改为固定值（`https://你的域名` 与 `/`），否则资源路径会带上仓库子路径而 404。
+
+其他静态托管：构建产物 `dist/` 可直接发布，仓库自带 Netlify 配置（`npm run build` + 发布 `dist`）。
 
 ## 文档
 
 | 文档 | 内容 |
 | --- | --- |
-| [docs/architecture.md](docs/architecture.md) | 集合与路由、服务端与客户端分层、后台模块边界、样式与构建期流水线 |
-| [docs/admin-console.md](docs/admin-console.md) | 后台五个模块的职责、可做的事与常见操作路径 |
-| [docs/development.md](docs/development.md) | 环境、命令、校验脚本、测试与 CI、内容命名规范 |
-| [docs/analytics.md](docs/analytics.md) | 访问统计槽位契约、Umami 接入步骤、取数口径与备案字段 |
+| [docs/architecture.md](docs/architecture.md) | 目录分层、集合与路由、壳层与布局几何、首屏快照、字体子集流程 |
+| [docs/development.md](docs/development.md) | 环境、命令、验证流水线、fixture 与守卫脚本、命名规范 |
+| [docs/writing.md](docs/writing.md) | 各集合 frontmatter、图片路径、末尾链接组与 Markdown 扩展 |
+| [docs/admin-console.md](docs/admin-console.md) | 后台五个模块、主题页分组、校验与排序规则 |
+| [docs/analytics.md](docs/analytics.md) | 浏览数据槽位契约、统计接入、备案字段 |
+| [docs/upstream.md](docs/upstream.md) | 与上游的关系、增量范围、同步方向 |
 | [docs/llm-view-stats-prompt.md](docs/llm-view-stats-prompt.md) | 浏览数据取数脚本的提示词模板 |
-| [docs/README.upstream.md](docs/README.upstream.md) | 上游 README 快照（中文） |
-| [docs/README.upstream.en.md](docs/README.upstream.en.md) | 上游 README 快照（英文） |
 
-## 与上游的关系
+## 致谢
 
-主题结构、内容集合、后台、Markdown 扩展与字体子集化流程沿用上游，本分支只做增量与局部调整：新增文章目录、浮动操作列、主题切换涟漪、侧栏文案富文本、浏览数据槽位与备案信息；阅读模式入口移到浮动列并重做了进出过渡；侧栏由 320px 收窄到 224px，壳层宽度随视口自适应，前后台共用同一组间距 token。
-
-同步上游：
-
-```bash
-git remote add upstream https://github.com/cxro/astro-whono.git
-git fetch upstream --tags
-git checkout main
-git merge upstream/main
-npm run check
-```
-
-`npm run check` 包含首屏 critical CSS 的漂移检查。合并上游后若该检查报错，说明上游改动了侧栏或壳层尺寸，需要同步 `src/pages/index.astro` 中 `homeHeadCriticalCss` 的对应声明。
-
-## 持续集成与预览部署
-
-仓库自带两个 GitHub Actions 工作流，均不需要配置 secret：
-
-| 工作流 | 触发 | 作用 | 权限 |
-| --- | --- | --- | --- |
-| `ci.yml` | push / PR 到 `main` | `npm ci` 后执行 `npm run ci`（等同 `verify`，已含产物类守卫） | `contents: read` |
-| `pages.yml` | push 到 `main`、手动触发 | 构建并发布到 GitHub Pages | `contents: read`、`pages: write`、`id-token: write` |
-
-启用 Pages 预览：仓库设为 public（Free 计划下私有仓库无法使用 Pages）；Settings → Pages → Source 选 GitHub Actions，不需要 `gh-pages` 分支，建议先启用再 push，否则首次运行会在 deploy 步骤失败，可在 Actions 中对失败运行点 Re-run all jobs 重试；随后 push 到 `main` 或在 Actions 中手动运行。
-
-站点地址由工作流按仓库名推导：项目页发布在 `https://<owner>.github.io/<repo>/`，仓库名为 `<owner>.github.io` 时发布在根路径并把 base 设为 `/`，改仓库名后无需改工作流。
-
-其他情况：
-
-- fork 后 `pages.yml` 默认跳过（`if: github.repository == '…'` 守卫）；想在自己的 fork 中发布，把该行改成自己的仓库名并启用 Pages。
-- 绑定自定义域名后站点移到域名根路径，需要把工作流中的 `SITE_URL` 与 `ASTRO_WHONO_BASE_PATH` 改为固定值（`https://你的域名` 与 `/`），否则资源路径会带上仓库子路径而 404。
-- 不需要 Pages 预览时删掉 `.github/workflows/pages.yml` 即可，`ci.yml` 与构建不受影响。
-
-## 调参
-
-| 需要调整的内容 | 变量 / 常量 | 位置 |
-| --- | --- | --- |
-| 侧栏宽度与内外边距 | `--sidebar`、`--public-sidebar-inline-size`、`--sidebar-padding-block`、`--sidebar-padding-inline` | `src/styles/global.css` |
-| 壳层与正文宽度 | `--layout-shell-max-inline-size`、`--max` | `src/styles/global.css` |
-| 页面外缘间隙（内容盒到浏览器边缘，后台可配，默认 32，范围 32–160） | `site.pageGapPx`、`--page-gap-inline`、`--page-inline` | `src/data/settings/site.json`、`src/layouts/BaseLayout.astro` |
-| 目录列宽与出现门槛 | `--article-toc-inline-size`、`--article-toc-handle-column`、`@media (min-width: 1280px / 1024px)` | `src/styles/components/article-toc.css` |
-| 目录跳转高亮的底色与时长 | `--prose-flash-bg`、`FLASH_DURATION_MS` | 同上、`src/scripts/article-toc.ts` |
-| 主题切换涟漪 | `RIPPLE_DURATION_MS`、`RIPPLE_EASING` | `src/scripts/sidebar-theme.ts` |
-| 阅读模式过渡 | `READING_ANIM_MS`，需与样式中的 `520ms` 一致 | `src/scripts/sidebar-reading.ts`、`src/styles/components/layout.css` |
-| 浮动按钮尺寸、侧栏文案排版工具类 | `--float-button-size`、`.whono-left` 等 | `src/styles/components/layout.css` |
-| 富文本白名单 | `ALLOWED_TAGS`、`ALLOWED_STYLE_PROPERTIES` | `src/lib/setting-html.ts` |
-| 浏览数据槽位与填值 | `.view-stats*`、`resolveViewStats`、`setViewStatValue` | `src/styles/components/view-stats.css`、`src/lib/view-stats.ts` |
-| 备案链接白名单与长度 | `ADMIN_ICP_FILING_HOSTS`、`ADMIN_POLICE_FILING_HOSTS`、`ADMIN_FILINGS_NUMBER_MAX_LENGTH` | `src/lib/admin-console/theme-shared.ts` |
-
-改动侧栏或壳层尺寸后，需要同步 `src/pages/index.astro` 中 `homeHeadCriticalCss` 的对应声明，该快照在 `global.css` 之后加载并覆盖首屏几何，`npm run check:home-critical-css` 会指出不一致项。
+本仓库是对 [cxro/astro-whono](https://github.com/cxro/astro-whono)（MIT）的增量改造，站点由 [Astro](https://astro.build/) 构建。
 
 ## 许可
 

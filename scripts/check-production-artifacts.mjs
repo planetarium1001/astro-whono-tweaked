@@ -162,7 +162,7 @@ const runProductionArtifactCheck = async () => {
   expect(!sitemapXml.includes('/admin/images/'), 'Admin images route leaked into sitemap');
   expect(!sitemapXml.includes('/admin/data/'), 'Admin data route leaked into sitemap');
 
-  // 读者端不再有写稿入口：旧的 reader partial 路由不产出，读者页也不带写稿钩子。
+  // 读者端不得有写稿入口：不产出 bits draft partial 路由，读者页也不带写稿钩子。
   expect(
     !existsSync('dist/bits/draft-dialog'),
     'Bits draft partial route should no longer be generated (moved to the admin console)'
@@ -282,11 +282,8 @@ const runProductionArtifactCheck = async () => {
   expect(!/\.admin-/.test(indexHtml), 'Homepage still contains admin CSS rules');
   expect(!/--admin-status-/.test(indexHtml), 'Homepage still contains admin CSS tokens');
 
-  // typography 覆盖（<html style> 内联属性）引用的每个 --font-* 变量必须在同页有定义
-  // （定义由 <Font> 组件的内联 <style> 提供）；缺定义 = 构建期字体下载失败被静默降级
-  // （如 provider 不可达），在这里显式失败。默认态 <html> 无 style 属性，本断言空转；
-  // 页面样式对 --font-readable/copy/mono 角色 token 的引用由外链 global.css 的 :root
-  // 提供定义，不在本断言范围内。
+  // <html style> 引用的每个 --font-* 变量必须在同页有定义；缺定义说明构建期字体下载被静默降级。
+  // 默认态 <html> 无 style 属性，本断言空转。
   const htmlStyleMatch = indexHtml.match(/<html[^>]+style="([^"]*)"/);
   const referencedFontVariables = htmlStyleMatch
     ? Array.from(

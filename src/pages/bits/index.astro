@@ -2,7 +2,7 @@
 import BitsPageView from '../../components/BitsPageView.astro';
 import { getBitsPageData } from '../../lib/bits';
 
-/** 服务端分页已取消：SSR 渲染全部条目。 */
+/** SSR 渲染全部条目，不做服务端分页。 */
 const { items, yearOptions, totalCount } = await getBitsPageData();
 ---
 

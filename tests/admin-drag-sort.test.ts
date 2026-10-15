@@ -4,8 +4,8 @@ import { initDragSort } from '../src/scripts/admin-console/drag-sort';
 
 /**
  * 后台主题页两处列表（侧栏导航、社交链接）的拖拽排序。
- * jsdom 的 getBoundingClientRect 全为 0，因此 dragover 的插入位置完全由 clientY 决定：
- * 负值落在目标行上半区（插到其前），非负值落在下半区（插到其后）。
+ * jsdom 的 getBoundingClientRect 全为 0，dragover 的插入位置完全由 clientY 决定：
+ * 负值插到目标行之前，非负值插到其后。
  */
 
 const ROW_SELECTOR = '.row';

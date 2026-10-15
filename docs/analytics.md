@@ -1,6 +1,6 @@
 # 访问统计与备案配置
 
-主题只渲染位置、样式与 DOM 槽位，数字由站点自行接入。开关、前缀文案与显示位置在后台主题页的「浏览数据」中设置，默认关闭；开关打开但未填值时槽位保持隐藏，不占位、不引起重排。
+主题只渲染位置、样式与 DOM 槽位，数字由站点自行接入。开关、前缀文案与显示位置在后台主题页的「内页设置 → 浏览数据」中设置，内置默认关闭；未接入取数脚本时槽位保持隐藏，不占位、不引起重排。
 
 ## 槽位契约
 
@@ -25,7 +25,7 @@
 | `data-view-route` | 去掉 base 的逻辑路由 |
 | `data-view-title` | 剥掉标签的纯文本标题 |
 
-文章详情页的槽位在元信息行内，其余页面在页脚版权之上独占一行。可用 helper：
+文章详情页的槽位在元信息行内，其余页面在页脚版权之上独占一行。可用的 helper 在 `src/lib/view-stats.ts`：
 
 | 名称 | 作用 |
 | --- | --- |
@@ -67,19 +67,19 @@ for (const item of resolveViewStats('uv')) setViewStatValue(item, uv);
    ```
 
    脚本默认上报到自身地址，不同源时用 `data-host-url` 指定，`data-domains` 可限定统计域名，其余属性见 [Tracker configuration](https://docs.umami.is/docs/tracker-configuration)。加完在 Realtime 中确认上报生效。
-3. 开分享：该 website → Edit → Share URL → Add，勾选需要公开的视图，得到 `https://stats.example.com/share/<slug>/<name>`，`<slug>` 供下一步使用。
+3. 开分享：该 website → Edit → Share URL → Add，勾选需要公开的视图，得到 `https://stats.example.com/share/<slug>/<name>`。
 4. 填脚本：按 `src/scripts/view-stats.ts` 中的 Umami 片段填入实例地址与 slug。`GET /api/share/{slug}` 免认证，返回资源引用、参数与作用域受限的 token，再用它请求 `GET /api/websites/{id}/stats?...&path=<路径>`。字段位置以实例为准，可对照分享页的 Network 面板。
 5. 开开关：后台主题页勾选开关与显示位置，`npm run dev` 验证。
 
 本地实例上线时需注意：
 
-- 混合内容与私有网络：站点为 `https://` 时浏览器会拒绝请求 `http://` 或内网地址（`localhost`、`192.168.x.x`）。本机开发不受影响；上线需为 Umami 配置 https 域名（反代加证书）或隧道服务。
+- 混合内容与私有网络：站点为 `https://` 时浏览器会拒绝请求 `http://` 或内网地址（`localhost`、`192.168.x.x`）。本机开发不受影响；上线需为 Umami 配置 https 域名或隧道服务。
 - 跨域：读接口是否返回 `Access-Control-Allow-Origin` 取决于实例配置，先执行 `curl -sI -H "Origin: https://你的域名" "https://stats.example.com/api/share/<slug>"` 确认；未放行时加一层同源代理（Cloudflare Worker、Nginx 反代 `/stats/*`），脚本改请求代理地址即可。
 - 分享范围：share 免登录只读，持有链接即可查看勾选的全部视图（路径、来源、国家等），仅勾选必要视图，停用后及时删除。
 
 ## 取数口径
 
-账号级 API key 为全量读写凭据，不得用于前端；浏览器端只使用免认证的只读通道。除 share 通道外，官方另有两类路径：嵌入分享页 iframe、定时拉取（cron 或 GitHub Actions）。
+账号级 API key 为全量读写凭据，不得用于前端；浏览器端只使用免认证的只读通道。除 share 通道外，官方另有两类路径：嵌入分享页 iframe、定时拉取。
 
 [官方口径](https://docs.umami.is/docs/metric-definitions)规定：
 
@@ -103,16 +103,16 @@ busuanzi、vercount 一类服务由脚本写入自身约定的 DOM（如 `busuan
 
 ## 备案信息
 
-工信部备案号与公安联网备案号在后台主题页的「备案信息」中填写，默认不显示，渲染在页脚最底部（版权行之下、居中）。
+工信部备案号与公安联网备案号在后台「站点设置 → 备案信息」中填写，默认不显示，渲染在页脚最底部（版权行之下、居中）。两项都为空时整块不输出。
 
 | 字段 | 说明 |
 | --- | --- |
-| 工信部备案号 | 如 `皖ICP备12345678号-1`，链接固定指向 [工信部备案管理系统](https://beian.miit.gov.cn/)；广东填主体备案号，其他省份填网站备案号 |
-| 公安备案号 | 如 `皖公网安备12345678901234号`，取号内数字串拼成 `https://beian.mps.gov.cn/#/query/webSearch?code=<编号>` |
+| 工信部备案号 | 如 `皖ICP备12345678号-1`。链接留空时指向 [工信部备案管理系统](https://beian.miit.gov.cn/)；广东填主体备案号，其他省份填网站备案号 |
+| 公安备案号 | 如 `皖公网安备12345678901234号`。链接留空时取号内最长的数字串（至少 6 位）拼成 `https://beian.mps.gov.cn/#/query/webSearch?code=<编号>` |
 | 工信部备案链接 | 可选覆盖，留空用备案系统首页 |
 | 公安备案链接 | 可选覆盖，平台给出的地址优先 |
-| 公安备案图标 | https 图片地址或 `public/**` 相对路径；留空只显示文字，文件缺失时不输出图标 |
+| 公安备案图标 | `https://` 图片地址或 `public/**` 相对路径；留空只显示文字，文件缺失时不输出图标 |
 
-依据《非经营性互联网信息服务备案管理办法》，备案编号须在主页底部中央标明并链接工信部备案管理系统。公安联网备案须在网站开通之日起 30 日内通过 [全国互联网安全管理服务平台](https://beian.mps.gov.cn/#/)办理，编号（14 位：6 位属地码、`02`、6 位顺序码）与图标均由该平台下发，审核通过后 30 日内放到网页底部。
+依据《非经营性互联网信息服务备案管理办法》，备案编号须在主页底部中央标明并链接工信部备案管理系统。公安联网备案须在网站开通之日起 30 日内通过 [全国互联网安全管理服务平台](https://beian.mps.gov.cn/#/)办理，编号与图标均由该平台下发，审核通过后 30 日内放到网页底部。
 
 链接仅允许 `beian.miit.gov.cn`（ICP）与 `beian.mps.gov.cn`、`beian.gov.cn`（公安，兼容旧写法），白名单常量是 `ADMIN_ICP_FILING_HOSTS` 与 `ADMIN_POLICE_FILING_HOSTS`；备案号长度上限是 `ADMIN_FILINGS_NUMBER_MAX_LENGTH`，页脚图标尺寸由 `--site-footer-filing-icon-size` 控制。

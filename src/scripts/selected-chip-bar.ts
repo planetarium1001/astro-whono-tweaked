@@ -1,10 +1,8 @@
 import { OP_CHAR, type ExpressionToken } from './tag-expression';
 
 /**
- * 页头筛选项控件：已选胶囊条、搜索面板开关、副标题计数。控件条两行左对齐放在标题右边：
- * 第一行是标签图标与已选胶囊，第二行是「描述 · 共 N 篇 / 条」加「切换标签 / 清除筛选」。
- * 本模块只建节点、切布局、改文案，不绑事件；事件委托由调用方挂在 `[data-entry-tag-open]`
- * / `[data-entry-tag-remove]` / `[data-entry-tag-clear]` 上。
+ * 页头筛选控件：已选胶囊条、搜索面板开关、副标题计数。本模块只建节点与改文案，不绑事件；
+ * 事件委托由调用方挂在 `[data-entry-tag-open]` / `[data-entry-tag-remove]` / `[data-entry-tag-clear]` 上。
  */
 
 /** 条首标签图标：与 dialog / 页头同一枚 lucide `tag`（脚本创建的节点）。 */
@@ -70,10 +68,7 @@ const createSelectedChip = ({
   return chip;
 };
 
-/**
- * 表达式里的运算符按钮：文案就是 `+` / `/`。
- * 调用方保证 `segmentIndex` 指向该运算符右侧那一段。
- */
+/** 表达式里的运算符按钮，文案即 `+` / `/`；`segmentIndex` 指向该运算符右侧那一段。 */
 const createExpressionOpButton = (op: 'and' | 'or', segmentIndex: number): HTMLButtonElement => {
   const button = document.createElement('button');
   button.type = 'button';
@@ -165,11 +160,8 @@ export const createSelectedChipActions = (itemNoun: string): HTMLElement => {
 };
 
 /**
- * 两行布局开关：`.page-heading--tag-bar` 让副标题缩进到第二列（与第一行胶囊左对齐），
- * 同时隐藏副标题里的 `#标签` 入口（改由「切换标签」接管）。
- *
- * 该类的 `display: grid` 会被 `lists.css` 的更高优先级规则压回 flex，
- * 布局不变量由 `check:layout-geometry` 校验。
+ * 两行布局开关：`.page-heading--tag-bar` 让副标题与第一行胶囊左对齐，并隐藏副标题里的 `#标签` 入口；
+ * 该类的 `display: grid` 会被 `lists.css` 压回 flex，由 check:layout-geometry 校验。
  */
 const syncSelectedChipLayout = (
   pageHeading: HTMLElement | null,
@@ -214,10 +206,7 @@ export const mountSelectedChipBar = (
   syncSelectedChipLayout(host.pageHeading, host.tagTrigger, true);
 };
 
-/**
- * 摘掉动作按钮并回到单行页头布局。返回第一行控件条本身（不删除），
- * 调用方可以给它播退场动画后再移除。
- */
+/** 摘掉动作按钮并回到单行页头布局；返回第一行控件条本身（不删除）。 */
 export const unmountSelectedChipBar = (host: SelectedChipHost): HTMLElement | null => {
   const existing = host.titleRow?.querySelector<HTMLElement>(STATUS_SELECTOR) ?? null;
   host.subtitle?.querySelector<HTMLElement>(ACTIONS_SELECTOR)?.remove();
@@ -228,10 +217,7 @@ export const unmountSelectedChipBar = (host: SelectedChipHost): HTMLElement | nu
 /** 副标题里的「共 N 篇 / 条」及其后的限定词。 */
 const SUBTITLE_COUNT_RE = /共\s*\d+\s*(?:篇|条)(内容|絮语|动态|文章|更新)?/;
 
-/**
- * 刷新副标题里的「共 N 篇 / 条」：单位与限定词沿用模板写法，其余文案原样保留。
- * `count` 为 null 时恢复模板原文。
- */
+/** 刷新副标题里的「共 N 篇 / 条」；`count` 为 null 时恢复模板原文。 */
 export const syncSubtitleCount = (
   textEl: HTMLElement | null,
   template: string,
@@ -253,10 +239,7 @@ export const syncSubtitleCount = (
   textEl.textContent = template.replace(SUBTITLE_COUNT_RE, `共 ${count} ${unit}${trailing}`);
 };
 
-/**
- * 页头搜索面板的开合：同步 `is-open`、`aria-expanded` / `aria-hidden`，
- * 以及输入框能否被 Tab 聚焦。
- */
+/** 页头搜索面板的开合：同步 `is-open`、`aria-expanded` / `aria-hidden` 与输入框的 Tab 可达性。 */
 export const setSearchPanelOpen = (
   searchRoot: HTMLElement | null,
   parts: {

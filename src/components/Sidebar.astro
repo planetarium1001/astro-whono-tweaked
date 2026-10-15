@@ -64,9 +64,8 @@ const showAdminEntry = !hidePublicSidebarActionsInDevAdmin
 const isPageScopedAdminSidebar = isAdminContext && adminSidebarScope === 'page';
 const showAdminRouteRail = isAdminContext && isDev;
 const showAdminNavPanels = isDev && !isPageScopedAdminSidebar;
-// 站点名与引用文案走白名单 HTML（lib/setting-html.ts）：
-// 白名单外的标签转义为文本；读屏标签用剥掉标签的纯文本。
-// 宽屏 / 窄屏标题同走这套渲染与提取；aria-label 固定用宽屏标题的纯文本作为规范化站点名。
+// 站点名与引用文案走白名单 HTML（lib/setting-html.ts），白名单外的标签转义为文本；
+// 宽屏 / 窄屏标题同走这套渲染，aria-label 固定取宽屏标题的纯文本作为站点名。
 const siteTitleHtml = renderSettingHtml(siteTitle);
 const siteTitleNarrowHtml = renderSettingHtml(siteTitleNarrow || siteTitle);
 const quoteHtml = renderSettingHtml(quote);

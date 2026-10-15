@@ -1,19 +1,18 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { renderFixturePage } from './fixture-page';
+import { createFixturePageLoader } from './fixture-page';
 
 /**
- * `/devlog/` 的「项目」筛选与行内展开：取值域只有 `project`，交互复用 tag dialog 的样式，
- * 旧的 `[data-devlog-filter-bar]` 胶囊条已不存在。用构建产物里的真实页面 HTML 与真实脚本
- * 跑交互，断言可见性收敛、单选语义、「全部」复位、`?project=` 首屏筛选与深链接可用。
+ * `/devlog/` 的「项目」筛选与行内展开：取值域只有 `project`，交互复用 tag dialog。
+ * 用构建产物里的真实页面 HTML 与真实脚本跑交互，断言可见性收敛、单选语义、
+ * 「全部」复位、`?project=` 首屏筛选与深链接可用。
  */
 
-const loadPage = () => renderFixturePage('devlog-page.dev.html');
+const loadPage = createFixturePageLoader('devlog-page.dev.html');
 
-// `vi.resetModules()` 只清模块缓存，不会清掉上一例挂在 document / window 上的监听器
-//（jsdom 的 document 在一个文件里是共享的）。每多跑一例就多一份 click 委托，点一次按钮
-// 会被处理多次，偶数次就等于「没反应」，表现为随用例顺序时好时坏的假失败。
-// 因此把导入期间注册的监听器记下来，afterEach 统一摘掉。
+// vi.resetModules() 只清模块缓存，不摘上一例挂在 document / window 上的监听器。
+// 多跑一例就多一份 click 委托，点一次会被处理多次，表现为随用例顺序时好时坏的假失败。
+// 因此记录导入期间注册的监听器，afterEach 统一摘掉。
 const boundListeners: { target: EventTarget; type: string; listener: EventListenerOrEventListenerObject }[] = [];
 
 const importScripts = async () => {
@@ -112,7 +111,7 @@ describe('/devlog/ 的「项目」筛选与行内展开', () => {
     vi.resetModules();
   });
 
-  it('复用 tag dialog（不是胶囊条），取值域只有 project、没有 kind', async () => {
+  it('复用 tag dialog，取值域只有 project、没有 kind', async () => {
     await loadPage();
     await importScripts();
 
@@ -125,7 +124,7 @@ describe('/devlog/ 的「项目」筛选与行内展开', () => {
     // 单选项目没有 AND/OR 语义，也没有 RSS
     expect(dialog()!.querySelector('.entry-tags-dialog__mode')).toBeNull();
     expect(document.querySelector('.page-subtitle__link'), 'devlog 不该有 RSS 链接').toBeNull();
-    // 不得再出现旧的胶囊条
+    // 不出现胶囊条
     expect(document.querySelector('[data-devlog-filter-bar]')).toBeNull();
     expect(document.querySelector('.scope-pills__item')).toBeNull();
 
@@ -175,13 +174,13 @@ describe('/devlog/ 的「项目」筛选与行内展开', () => {
     expect(option(project)!.getAttribute('aria-pressed')).toBe('true');
     expect(option(project)!.classList.contains('is-active')).toBe(true);
     expect(option('')!.getAttribute('aria-pressed')).toBe('false');
-    // 副标题计数跟着可见条数走（不再单独挂一个计数元素）
+    // 副标题计数跟随可见条数
     expect(subtitleText()).toContain(`共 ${expected.length} 条更新`);
     expect(document.querySelector('[data-devlog-count]')).toBeNull();
   });
 
-  // 选中项目后要显示当前项目（复用 tag 的设计）：第一行已选胶囊，
-  // 第二行「切换项目 / 清除筛选」，同时触发器让位。
+  // 选中项目后要显示当前项目：第一行已选胶囊，
+  // 第二行「切换项目 / 清除筛选」，触发器隐藏。
   it('选中项目后显示已选胶囊（复用 tag 的设计），触发器让位给「切换项目 / 清除筛选」', async () => {
     await loadPage();
     await importScripts();
@@ -264,7 +263,7 @@ describe('/devlog/ 的「项目」筛选与行内展开', () => {
     expect(panel.hidden).toBe(true);
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
     expect(row.classList.contains('is-open')).toBe(false);
-    // 右侧不再出现「展开 / 收起」字样，只留图标
+    // 右侧只留图标，不显示「展开 / 收起」字样
     expect(row.querySelector('[data-devlog-action-label]')).toBeNull();
     expect(row.querySelector('.devlog-row__caret')).not.toBeNull();
 
@@ -370,7 +369,7 @@ describe('/devlog/ 的「项目」筛选与行内展开', () => {
     ).toBe('未找到匹配内容');
   });
 
-  it('正文末尾的链接组渲染成独立链接行，正文里不再重复出现链接', async () => {
+  it('正文末尾的链接组渲染成独立链接行，正文里不重复出现链接', async () => {
     await loadPage();
 
     const row = rows().find((item) => item.querySelector('.devlog-panel__prose .trailing-links'));
@@ -380,7 +379,7 @@ describe('/devlog/ 的「项目」筛选与行内展开', () => {
     const linkRow = prose.querySelector<HTMLElement>('.trailing-links')!;
     expect(linkRow, '链接行使用共享的 .trailing-links 标记').not.toBeNull();
     expect(linkRow.parentElement).toBe(prose);
-    // 正文 markdown 里已剥离链接组：链接只出现在链接行里
+    // 链接组已从正文剥离，只出现在链接行里
     const anchors = Array.from(prose.querySelectorAll('a'));
     expect(anchors.length).toBeGreaterThan(0);
     expect(anchors.every((anchor) => linkRow.contains(anchor)), '正文与链接行不应重复渲染链接').toBe(true);

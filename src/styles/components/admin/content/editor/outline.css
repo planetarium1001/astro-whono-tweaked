@@ -1,6 +1,4 @@
-/* Admin Content Editor Outline
-   承载 blog 编辑器右侧目录面板、tab 与列表行；面板作为布局列参与 grid，不作为 overlay。
-*/
+/* blog 编辑器右侧目录面板、tab 与列表行；面板作为布局列参与 grid，不是 overlay。 */
 
 .admin-editor-outline-panel {
   display: grid;

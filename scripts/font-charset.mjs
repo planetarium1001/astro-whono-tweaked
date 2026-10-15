@@ -48,7 +48,7 @@ const main = async () => {
     const baseText = await fs.readFile(BASE_CHARSET_PATH, 'utf8');
     addText(baseText);
   } catch (_) {
-    // Optional base charset file; ignore if missing.
+    // 基准字符集文件可缺省。
   }
 
   const files = await collectFiles();
@@ -89,14 +89,13 @@ const main = async () => {
       process.exit(1);
     }
 
-    // stamp 由 font:subset 成功后写入（charset 文件的 sha256）：纯 txt 对比无法发现
-    // 「跑了 font:charset 却没跑 font:subset」的 woff2 过期状态。
+    // stamp 由 font:subset 成功后写入，用于发现「跑了 font:charset 却没跑 font:subset」的过期状态。
     const stampPath = path.join(path.dirname(OUTPUT_PATH), 'charset-common.sha256');
     let stamp = '';
     try {
       stamp = (await fs.readFile(stampPath, 'utf8')).trim();
     } catch (_) {
-      // Missing stamp is handled by the mismatch branch below.
+      // stamp 缺失由下面的不一致分支处理。
     }
     const committedHash = createHash('sha256').update(committed).digest('hex');
     if (stamp !== committedHash) {

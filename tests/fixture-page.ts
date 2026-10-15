@@ -33,6 +33,9 @@ export const renderFixturePage = async (name: string) => {
   renderFixture(await readFile(fixturePath(name), 'utf8'));
 };
 
+/** 生成绑定某个页面快照的加载助手，供用例在 beforeEach 里复用。 */
+export const createFixturePageLoader = (name: string) => () => renderFixturePage(name);
+
 /** 只让 index.json 的请求成功，其它一律 404。 */
 export const stubIndexFetch = (indexJson: string) => {
   vi.stubGlobal('fetch', async (input: RequestInfo | URL) => {

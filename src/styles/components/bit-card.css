@@ -1,6 +1,4 @@
-/* Bit card
-   Shared card styles for the public bits list and the admin bits preview.
-*/
+/* 公开 bits 列表与后台 bits 预览共用的卡片样式。 */
 
 .bit-card {
   position: relative;

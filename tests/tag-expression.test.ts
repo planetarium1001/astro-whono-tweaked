@@ -22,8 +22,7 @@ import {
  * 切换 `+` 与 `/` 时把前面选中的部分用 `()` 括起来，再在后面追加新的逻辑段。
  *
  * 在单位层钉住四处：切换运算符时的括号结构（`(a + b) / c`）、反复切换不堆括号、
- * 复合求值（段内先算再自左向右结合）、URL 读写（单段写 `tags=&mode=`，
- * 复合写 `tags=&ops=`，且能读回旧链接）。
+ * 复合求值（段内先算再自左向右结合）、URL 读写（单段 `tags=&mode=`，复合 `tags=&ops=`）。
  */
 
 const expression = (...segments: TagSegment[]): TagSegment[] => segments;
@@ -148,7 +147,7 @@ describe('tag-expression：复合求值', () => {
 describe('tag-expression：URL 读写', () => {
   const usable = (key: string) => key !== '';
 
-  it('单段仍写旧格式 tags=&mode=（保持深链接与旧测试口径）', () => {
+  it('单段写 tags=&mode= 格式，保证深链接兼容', () => {
     const params = new URLSearchParams();
     applyExpressionToParams(params, expression({ op: 'or', keys: ['a', 'b'] }));
     expect(params.get('tags')).toBe('a,b');
@@ -172,20 +171,19 @@ describe('tag-expression：URL 读写', () => {
     expect(listTagKeys(parsed)).toEqual(['a', 'b', 'c']);
   });
 
-  it('旧链接 / 非法值都退化到安全状态', () => {
-    // 旧写法：只有一个 tags
+  it('非法的 ops / mode 参数退化到安全状态', () => {
+    // 只有 tags、没有 ops：按单段处理
     expect(formatExpression(parseExpression(new URLSearchParams('tags=x'), usable))).toBe('x');
-    // ops 长度不足 → 缺的按 mode / 默认 and 处理
-    // ops 缺位按 mode/默认 and 补齐：a 单独成段 → a && (b && c)，显示为 a + b + c
+    // ops 缺位按 mode / 默认 and 补齐：a 单独成段 → a && (b && c)，显示为 a + b + c
     expect(formatExpression(parseExpression(new URLSearchParams('tags=a,b,c&ops=or'), usable))).toBe('a + b + c');
-    // 完全非法 → 空表达式
+    // 没有任何有效标签 → 空表达式
     expect(hasAnyTag(parseExpression(new URLSearchParams('tags=,,&ops=or'), usable))).toBe(false);
     const cleared = new URLSearchParams('tags=a&mode=or&ops=or');
     applyExpressionToParams(cleared, createEmptyExpression());
     expect(cleared.toString()).toBe('');
   });
 
-  it('移除标签 / 取消选中', () => {
+  it('切换标签取消选中，removeTag 移除', () => {
     let next = toggleTag(createEmptyExpression(), 'a');
     next = toggleTag(next, 'b');
     next = toggleTag(next, 'b'); // 再点一次 = 取消

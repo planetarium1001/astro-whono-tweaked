@@ -1,5 +1,4 @@
-/* archive-page.css — /archive/ 全站时间线（一级胶囊 + 年月分组，含窄屏）。
-   一级胶囊条的样式在共享层 components/scope-pills.css。 */
+/* /archive/ 全站时间线（一级胶囊 + 年月分组，含窄屏）；一级胶囊样式见 components/scope-pills.css。 */
 @import "./components/scope-pills.css";
 
 .archive-timeline {

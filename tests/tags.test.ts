@@ -59,7 +59,7 @@ describe('tags', () => {
       count: 1
     });
     expect(filterEntriesByTag(entries, 'astro-build')).toEqual([entries[0]]);
-    // 静态标签页已删除：所有标签路径都回落到列表页入口。
+    // 所有标签路径都回落到列表页入口。
     expect(getTagPath('archive', 'Astro Build')).toBe('/archive/');
     expect(getTagPath('archive', 'Astro Build', 3)).toBe('/archive/');
     expect(getTagPath('archive', '???')).toBe('/archive/');

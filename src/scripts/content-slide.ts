@@ -1,14 +1,8 @@
 import { canAnimate } from './visibility-fade';
 
 /**
- * 胶囊条页面的共享动效：滑块对齐与内容区左右滑动。
- *
- * 内容过渡不用 `startViewTransition`：内容切换依赖异步的 index.json，而 View Transition 的
- * DOM 变更回调要求同步；且它会为整页（含侧栏、目录）拍快照，把主题涟漪的
- * `::view-transition` 规则一并卷入。
- *
- * 调用方负责立即更新胶囊状态以保证点击反馈不延迟，只把「换内容」交给 `run()`：
- * 滑出结束后才执行 swap。
+ * 胶囊条页面的共享动效：滑块对齐与内容区左右滑动。内容过渡不用 `startViewTransition`
+ * （内容切换依赖异步的 index.json，其 DOM 变更回调要求同步）。
  */
 
 // 时长与曲线：滑出用加速离开、滑入用减速落位，整段约 0.74s。
@@ -36,11 +30,7 @@ const play = (
   );
 };
 
-/**
- * 内容滑动方向：
- * - `forward`：内容向左滑出、从右侧滑入；
- * - `backward`：内容向右滑出、从左侧滑入。
- */
+/** 内容滑动方向：`forward` 向左滑出，`backward` 向右滑出。 */
 export type SlideDirection = 'forward' | 'backward';
 
 const sign = (direction: SlideDirection) => (direction === 'forward' ? -1 : 1);
@@ -75,13 +65,8 @@ type ContentSlider = {
 };
 
 /**
- * 为某个内容容器建一个切换器。
- *
- * `getContainer` 用函数而不是元素：脚本在模块求值时初始化，容器可能来自按需渲染的片段，
- * 每次切换现查一次。
- *
- * 并发语义：每次 `run` 递增令牌；若上一次的滑出还没结束就来了新的一次，
- * 旧的一次在滑出结束后放弃 swap，由最新的一次接管。
+ * 为某个内容容器建切换器。`getContainer` 用函数：容器可能来自按需渲染的片段，每次现查。
+ * 每次 `run` 递增令牌，旧的滑出结束后放弃 swap，由最新的一次接管。
  */
 export const createContentSlider = (getContainer: () => HTMLElement | null): ContentSlider => {
   let runId = 0;
@@ -105,9 +90,8 @@ export const createContentSlider = (getContainer: () => HTMLElement | null): Con
 };
 
 /**
- * 胶囊条滑块：宽度取所有胶囊的最大宽度（切换时只有位移、没有宽度跳变），
- * 以激活项中心定位并夹取到 `[0, 容器宽 − 滑块宽]`。
- * resize 与字体就绪后重新对齐到当前 `.is-active` 胶囊。
+ * 胶囊条滑块：宽度取所有胶囊的最大宽度，以激活项中心定位并夹取到 `[0, 容器宽 − 滑块宽]`；
+ * resize 与字体就绪后重新对齐到 `.is-active` 胶囊。
  */
 type PillCursor = {
   /** 把滑块对齐到指定的胶囊。 */

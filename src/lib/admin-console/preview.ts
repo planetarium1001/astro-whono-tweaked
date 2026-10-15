@@ -199,7 +199,7 @@ const createPreviewProcessor = (collection: AdminContentCollectionKey, sourceFil
 
   const processor = unified()
     .use(remarkParse)
-    // 后台预览是手写 pipeline，不继承 Astro Markdown 默认 GFM / smartypants。
+    // GFM 与 smartypants 用等价插件补齐，与公开侧的 Astro 内建行为对齐。
     .use(remarkGfm)
     .use(remarkSmartypants, markdownSmartypantsOptions);
 

@@ -27,10 +27,7 @@ const card = buildBitsCardViewModel({
   base
 });
 const maxVisible = BITS_CARD_VISIBLE_IMAGE_LIMIT;
-/**
- * 卡片正文的两套口径由视图模型统一给出：预算内渲染完整 Markdown，超出预算改用纯文本摘要，
- * 保证「判定完整渲染」与可见行数不会错位。摘要被截断时另给一行「全文」提示。
- */
+/** 正文口径取自视图模型：未超预算且未截断时渲染完整 Markdown，否则渲染纯文本摘要。 */
 const renderFullBody = card.body.shouldRenderFull && !card.body.truncated && Boolean(Content);
 const previewExcerpt = excerpt || card.body.excerpt;
 const dialogId = `bit-dialog-${bitEntry.id}`;

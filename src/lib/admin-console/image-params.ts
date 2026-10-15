@@ -73,6 +73,10 @@ type AdminImageFieldConfig = {
 
 export const IMAGE_LOCAL_EXT_RE = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
 
+/** 仓库内相对图片路径的统一校验文案，元数据读取与路径解析共用。 */
+export const ADMIN_IMAGE_LOCAL_PATH_MESSAGE =
+  '图片路径必须是 public/**、src/assets/** 或 src/content/** 下的规范仓库相对图片路径';
+
 const FIELD_CONFIG: Record<AdminImageFieldContext, AdminImageFieldConfig> = {
   'bits.images': {
     allowedOrigins: ['public'],
@@ -162,9 +166,6 @@ export const normalizeAdminImageOwnerValue = (value: string | null | undefined):
 
 export const isAdminImageFieldContext = (value: string): value is AdminImageFieldContext =>
   value in FIELD_CONFIG;
-
-export const isAdminImageDirectory = (value: string): value is AdminImageDirectory =>
-  normalizeAdminImageDirectory(value) !== '';
 
 /** 统一空白、反斜杠与末尾斜杠。 */
 const normalizeDirectoryInput = (value: string | null | undefined): string =>

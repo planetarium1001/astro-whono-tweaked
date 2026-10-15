@@ -207,8 +207,8 @@ const katexStylesheetAttrs = { [MARKDOWN_MATH_STYLESHEET_DATA_ATTR]: 'true' };
   />
 
   <script>
-    // 求值顺序有意义：entry-search 必须先注册 entry-search:set-year 监听，
-    // bits-year-filter 最后求值并立即广播初始年份。
+    // 求值顺序：entry-search 需先注册 entry-search:set-year 监听，
+    // bits-year-filter 最后求值并广播初始年份。
     import '../scripts/entry-search.ts';
     import '../scripts/bits-search.ts';
     import '../scripts/bits-year-filter.ts';

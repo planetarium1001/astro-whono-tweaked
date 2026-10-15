@@ -1,6 +1,4 @@
-/* Admin Content Editor Pane Content
-   承载正文编辑器、预览 scroller/prose 和空/错误内容态；不承载 data-layout/data-effective-view 覆盖。
-*/
+/* 正文编辑器、预览 scroller/prose 与空/错误内容态；不含 data-layout/data-effective-view 覆盖。 */
 
 .admin-editor-shell__pane--body {
   --admin-editor-codemirror-cursor: color-mix(in srgb, var(--text) 88%, var(--muted) 12%);
@@ -40,7 +38,7 @@
   inline-size: 100%;
 }
 
-/* Markdown highlight presets: keep palette variables scoped to the body pane. */
+/* Markdown 高亮调色板变量限定在正文面板内。 */
 .admin-editor-shell__pane--body[data-markdown-highlight-theme] {
   background: var(--admin-editor-themed-pane-bg);
 }

@@ -3,7 +3,6 @@ import UiIcon from './UiIcon.astro';
 
 type TagOption = {
   count: number;
-  href: string;
   key: string;
   label: string;
 };
@@ -45,10 +44,7 @@ const {
   /** 单选筛选没有 AND/OR 语义，传 false 隐藏逻辑预览行。 */
   showModeToggle?: boolean;
   showRss?: boolean;
-  /**
-   * `/bits/` 自带工具栏搜索（含结果面板），页头搜索与之重复，且会对同一份
-   * `index.json` 再 fetch 一次，因此那里传 false，只复用标题行与标签 dialog。
-   */
+  /** `/bits/` 自带工具栏搜索，页头搜索重复且会再请求一次 `index.json`，那里传 false。 */
   showSearch?: boolean;
   subtitleText?: string | null;
   tagOptions?: TagOption[];

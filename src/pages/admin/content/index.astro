@@ -62,8 +62,7 @@ const loadContentDevState = async () => {
 
 const contentDevState = shouldShowContentConsole ? await loadContentDevState() : null;
 const pageData = contentDevState?.pageData ?? null;
-// Keep the Svelte list-action island behind a DEV-only dynamic import; production
-// builds intentionally skip the Svelte integration.
+// list-action island 仅在 DEV 下动态导入；生产构建跳过 Svelte 集成。
 let ContentListActionsIsland: any = null;
 let ContentBulkActionsIsland: any = null;
 if (import.meta.env.DEV && pageData) {

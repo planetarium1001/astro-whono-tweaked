@@ -17,9 +17,8 @@ import {
 /**
  * 端到端客户端行为测试（真实页面 HTML + 真实 entry-search.ts）。
  *
- * 只看标记层的静态检查无法覆盖真实交互路径：事件绑定、index 加载、hidden 语义、
- * slug 归一化任一环断掉都表现为「点了没反应」。这里用 jsdom 载入从构建产物抓下来的
- * 真实 HTML，stub fetch 返回真实 index.json，再 import 真实脚本并断言 DOM 结果。
+ * jsdom 载入构建产物里的真实 HTML，stub fetch 返回真实 index.json，再 import 真实脚本断言 DOM：
+ * 事件绑定、index 加载、hidden 语义、slug 归一化任一环断掉都表现为「点了没反应」。
  */
 
 describe('entry-search 客户端行为', () => {
@@ -91,7 +90,7 @@ describe('entry-search 客户端行为', () => {
     });
   });
 
-  it('bits：列表不会被整体隐藏（曾经 data-section-selector 指向卡片容器自身）', async () => {
+  it('bits：筛选后列表不会被整体隐藏', async () => {
     await loadPage(PAGES[0]);
     await importEntrySearch();
 
@@ -142,7 +141,7 @@ describe('entry-search 客户端行为', () => {
     const devlogPill = document.querySelector<HTMLElement>('[data-archive-scope="devlog"]');
     expect(allPill && devlogPill).toBeTruthy();
 
-    // 期望条数从 DOM 里算，不写死数字：新增内容不该让这个用例变红
+    // 期望条数从 DOM 推导，不写死数字，内容变化不会让用例失败
     const devlogCount = pageItems().filter(
       (el) => (el.dataset.archiveKind ?? '').trim() === 'devlog'
     ).length;
@@ -236,8 +235,8 @@ describe('entry-search 客户端行为', () => {
     // 选一个只命中最后一个月（1 月）的标签
     const matchesFor = (key: string) =>
       indexItems.filter((item) => getTagKeys(item.tags).includes(key));
-    // 取命中数最少的标签：断言「可见分组数 == 命中项所在月分数」而不是硬编码 1，
-    // 这样语料变化（新增文章）时测试依然正确。
+    // 取命中数最少的标签：断言可见分组数与命中项所在月分数一致，而非硬编码 1。
+    // 语料变化时这个用例仍然成立。
     const candidate = tagButtons()
       .map((el) => (el.dataset.entryTagKey ?? '').trim())
       .sort((a, b) => matchesFor(a).length - matchesFor(b).length)[0];
@@ -322,7 +321,7 @@ describe('entry-search 客户端行为', () => {
     expect(document.querySelector('.entry-tag-op')).toBeNull();
   });
 
-  it('bits：控件条的「清除」按钮真的清空筛选（曾因处理器顺序 + animate 缺失而失效）', async () => {
+  it('bits：控件条的「清除」按钮清空筛选', async () => {
     await loadPage(PAGES[0]);
     await importEntrySearch();
 
@@ -381,13 +380,13 @@ describe('entry-search 客户端行为', () => {
     expect(chipLabel!.tagName).toBe('BUTTON');
     expect(chipLabel!.textContent?.startsWith('#')).toBe(true);
 
-    // 两个动作按钮在副标题那一行，复用旧的克制文字链接样式
+    // 两个动作按钮在副标题那一行，沿用主题既有的文字链接样式
     const actionsBlock = document.querySelector<HTMLElement>('[data-entry-tag-actions]');
     expect(actionsBlock, '动作按钮需要在副标题那一行').not.toBeNull();
     expect(actionsBlock!.parentElement?.classList.contains('page-subtitle')).toBe(true);
     const actions = Array.from(actionsBlock!.querySelectorAll<HTMLElement>('button'));
     expect(actions.map((el) => el.textContent?.trim())).toEqual(['切换标签', '清除筛选']);
-    // 复用旧主题样式：切换标签 = accent 色的 `.page-subtitle__action`，清除 = 灰色的 `.page-subtitle__link`
+    // 切换标签 = accent 色的 `.page-subtitle__action`，清除 = 灰色的 `.page-subtitle__link`
     expect(actions[0]!.classList.contains('page-subtitle__action')).toBe(true);
     expect(actions[1]!.classList.contains('page-subtitle__link')).toBe(true);
     // 动作已不在第一行
@@ -395,8 +394,8 @@ describe('entry-search 客户端行为', () => {
   });
 
   // 有标签时页头切成两行两列：第一行标题 + 控件条，第二行副标题 + 动作，
-  // 副标题里的 #标签 入口让位给「切换标签」；清空后恢复单行。
-  it('bits：有已选标签时页头切成两行两列，副标题的 #标签 入口让位给「切换标签」', async () => {
+  // 副标题里的 #标签 入口换成「切换标签」；清空后恢复单行。
+  it('bits：有已选标签时页头切成两行两列，副标题的 #标签 入口换成「切换标签」', async () => {
     await loadPage(PAGES[0]);
     await importEntrySearch();
 
@@ -514,12 +513,12 @@ describe('entry-search 客户端行为', () => {
     );
   });
 
-  // dialog 不再有筛选搜索框；标题与标签胶囊之间是逻辑预览长胶囊，`+` / `/` 开关在其右侧。
+  // dialog 没有筛选搜索框；标题与标签胶囊之间是逻辑预览长胶囊，`+` / `/` 开关在其右侧。
   it.each(PAGES)('$name：标签 dialog 没有筛选搜索框，+// 挂在预览长胶囊右边', async (page) => {
     await loadPage(page);
     await importEntrySearch();
 
-    // 搜索框（连同它的工具栏）彻底不存在
+    // 搜索框（连同它的工具栏）不存在
     expect(document.querySelector('[data-entry-tag-filter]')).toBeNull();
     expect(document.querySelector('dialog .entry-tags-dialog__toolbar')).toBeNull();
 
@@ -601,7 +600,7 @@ describe('entry-search 客户端行为', () => {
       { timeout: 3000 }
     );
 
-    // URL 换成复合写法（`ops=`），旧的 `mode=` 让位
+    // URL 写入复合写法（`ops=`），不写 `mode=`
     expect(window.location.search).toContain('ops=');
     expect(window.location.search).not.toContain('mode=');
   });

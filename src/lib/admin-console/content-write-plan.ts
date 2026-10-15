@@ -20,11 +20,7 @@ import {
   type AdminBlogOptionalInputMode
 } from './content-blog-frontmatter';
 import type { AdminContentValidationIssue } from './content-entry-contract';
-import type { AdminContentEntryWriteCollectionKey } from './content-collections';
-import {
-  loadAdminContentSourceState,
-  type AdminContentSourceState
-} from './content-entry-source';
+import type { AdminContentSourceState } from './content-entry-source';
 import {
   assertAdminContentEntryWritable,
   getRequiredBooleanField,
@@ -698,18 +694,6 @@ export const buildAdminContentWritePlanFromState = async (
   };
 };
 
-export const buildAdminContentWritePlan = async (
-  collection: AdminContentEntryWriteCollectionKey,
-  entryId: string,
-  frontmatterInput: unknown,
-  bodyInput?: string
-): Promise<AdminWritePlan & { state: AdminContentSourceState }> =>
-  buildAdminContentWritePlanFromState(
-    await loadAdminContentSourceState(collection, entryId),
-    frontmatterInput,
-    bodyInput
-  );
-
 export const applyAdminContentWritePlan = (
   state: Pick<AdminContentSourceState, 'sourceText'>,
   patches: readonly FrontmatterPatch[],
@@ -722,78 +706,63 @@ export const applyAdminContentWritePlan = (
 const createMissingValuesIssue = (field: string, expected: string): AdminContentValidationIssue =>
   createIssue(field, `${expected}`);
 
-export const parseAdminProjectsEditorInput = (
-  input: unknown
-): { values?: AdminProjectsEditorValues; issues: AdminContentValidationIssue[] } => {
+/**
+ * projects / devlog 的编辑器输入结构一致，只有文本字段集合不同。
+ * `textFields` 的顺序即校验顺序，issue 的 path 与文案由字段名推导。
+ */
+const parseAdminTextEditorInput = <TField extends string>(
+  input: unknown,
+  textFields: readonly TField[]
+): { values?: Record<TField, string> & { draft: boolean }; issues: AdminContentValidationIssue[] } => {
   if (!isRecord(input)) {
     return { issues: [createMissingValuesIssue('frontmatter', 'frontmatter 必须是对象')] };
   }
 
   const issues: AdminContentValidationIssue[] = [];
-  const getText = (field: keyof AdminProjectsEditorValues): string => {
-    const value = input[field];
-    if (value == null) return '';
-    if (typeof value !== 'string') {
-      issues.push(createIssue(String(field), `frontmatter.${String(field)} 必须是字符串`));
-      return '';
-    }
-    return value;
-  };
-
   const draft = input.draft;
   if (typeof draft !== 'boolean') {
-    issues.push(createIssue('draft', 'frontmatter.draft 必须是布尔值'));
+    return { issues: [createIssue('draft', 'frontmatter.draft 必须是布尔值')] };
   }
-  if (issues.length > 0) return { issues };
 
-  return {
-    issues,
-    values: {
-      title: getText('title'),
-      subtitle: getText('subtitle'),
-      description: getText('description'),
-      type: getText('type'),
-      icon: getText('icon'),
-      image: getText('image'),
-      date: getText('date'),
-      draft: draft as boolean
+  const values: Record<string, string | boolean> = {};
+  for (const field of textFields) {
+    const value = input[field];
+    if (value == null) {
+      values[field] = '';
+      continue;
     }
-  };
+    if (typeof value !== 'string') {
+      issues.push(createIssue(String(field), `frontmatter.${String(field)} 必须是字符串`));
+      values[field] = '';
+      continue;
+    }
+    values[field] = value;
+  }
+  values.draft = draft;
+
+  return { issues, values: values as unknown as Record<TField, string> & { draft: boolean } };
 };
+
+export const parseAdminProjectsEditorInput = (
+  input: unknown
+): { values?: AdminProjectsEditorValues; issues: AdminContentValidationIssue[] } =>
+  parseAdminTextEditorInput(input, [
+    'title',
+    'subtitle',
+    'description',
+    'type',
+    'icon',
+    'image',
+    'date'
+  ]);
 
 export const parseAdminDevlogEditorInput = (
   input: unknown
-): { values?: AdminDevlogEditorValues; issues: AdminContentValidationIssue[] } => {
-  if (!isRecord(input)) {
-    return { issues: [createMissingValuesIssue('frontmatter', 'frontmatter 必须是对象')] };
-  }
-
-  const issues: AdminContentValidationIssue[] = [];
-  const getText = (field: keyof AdminDevlogEditorValues): string => {
-    const value = input[field];
-    if (value == null) return '';
-    if (typeof value !== 'string') {
-      issues.push(createIssue(String(field), `frontmatter.${String(field)} 必须是字符串`));
-      return '';
-    }
-    return value;
-  };
-
-  const draft = input.draft;
-  if (typeof draft !== 'boolean') {
-    issues.push(createIssue('draft', 'frontmatter.draft 必须是布尔值'));
-  }
-  if (issues.length > 0) return { issues };
-
-  return {
-    issues,
-    values: {
-      title: getText('title'),
-      date: getText('date'),
-      project: getText('project'),
-      kind: getText('kind'),
-      description: getText('description'),
-      draft: draft as boolean
-    }
-  };
-};
+): { values?: AdminDevlogEditorValues; issues: AdminContentValidationIssue[] } =>
+  parseAdminTextEditorInput(input, [
+    'title',
+    'date',
+    'project',
+    'kind',
+    'description'
+  ]);

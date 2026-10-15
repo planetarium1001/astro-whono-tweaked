@@ -10,10 +10,9 @@ import {
 } from '../src/utils/slug-rules';
 
 /**
- * 内容 entryId 的命名规范 `YYYY-MM-DD-title`。
- *
- * 标题里的特殊字符与空格必须被消除，否则会破坏结构。这里逐条钉住实测表，再补边界：
- * 空 slug、超长截断、Windows 保留名、幂等性，以及公开 slug 允许 CJK（`BLOG_PUBLIC_SLUG_RE`）。
+ * 内容 entryId 的命名规范 `YYYY-MM-DD-title`：标题里的特殊字符与空格必须被消除。
+ * 逐条钉住实测表，并补边界：空 slug、超长截断、Windows 保留名、幂等性，
+ * 以及公开 slug 允许 CJK（`BLOG_PUBLIC_SLUG_RE`）。
  */
 
 describe('slugifyEntryTitle', () => {

@@ -53,10 +53,7 @@ const shouldBypassIndexCache = import.meta.env.DEV;
 
 let indexHay: Map<string, string> | null = null;
 let filterRunId = 0;
-/**
- * 当前年份（null = 全部）。由 `bits-year-filter.ts` 通过 `entry-search:set-year` 声明，
- * 与列表可见性同源；本脚本只用它约束关键词搜索的结果集合。
- */
+/** 当前年份（null = 全部），由 `bits-year-filter.ts` 通过 `entry-search:set-year` 声明。 */
 let activeYear: number | null = null;
 const filterRunner = createDebouncedAsyncRunner(() => applyFilter(), FILTER_DEBOUNCE_MS);
 
@@ -209,7 +206,7 @@ const syncUrlState = (query = getTrimmedQuery()) => {
   }
 };
 
-/** 只读 `?q=`；`?year=` 由 `bits-year-filter.ts` 读取（两者互不覆盖）。 */
+/** 只读 `?q=`；`?year=` 归 `bits-year-filter.ts`。 */
 const readInitialState = () => {
   const url = new URL(window.location.href);
   return { query: (url.searchParams.get(QUERY_PARAM_QUERY) ?? '').trim() };
@@ -487,8 +484,8 @@ if (input && initialState.query) {
 syncUrlState(initialState.query);
 
 /**
- * 年份胶囊声明年份后，搜索结果必须落在同一年份内，否则会与列表可见性不一致。
- * 初始值也从 `?year=` 读一次：带 `?q=&year=` 直接打开时，事件可能早于本脚本的求值。
+ * 年份胶囊声明年份后，搜索结果必须落在同一年份内；初始值也从 `?year=` 读一次
+ * （带 `?q=&year=` 打开时事件可能早于本脚本求值）。
  */
 const readYearParam = () => {
   const raw = (new URL(window.location.href).searchParams.get(QUERY_PARAM_YEAR) ?? '').trim();

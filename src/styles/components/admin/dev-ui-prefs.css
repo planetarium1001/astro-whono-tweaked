@@ -1,6 +1,4 @@
-/* DEV-only local UI preferences and sidebar navigation switcher.
-   Loaded only in local dev; production shell CSS stays free of local
-   preference selectors and chrome. */
+/* 仅本地开发加载的 UI 偏好与侧栏导航切换器；生产壳层不含这些本地偏好选择器。 */
 
 body.admin-page[data-admin-dev='true'] .admin-console--shell > .admin-route-nav {
   display: none;

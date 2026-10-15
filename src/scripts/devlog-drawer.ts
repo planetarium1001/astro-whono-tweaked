@@ -1,12 +1,9 @@
 import { canAnimate } from './visibility-fade';
 
 /**
- * `/devlog/` 抽屉展开与收缩：整行可点（按钮包住 meta 与标题），`aria-expanded` 跟随状态，
- * `#<entryId>` 锚点进入时自动展开对应条目。
+ * `/devlog/` 抽屉展开与收缩：整行可点，`#<entryId>` 锚点进入时自动展开。
  *
- * 展开从 0 高度过渡到实测高度，收起反向过渡完再落 `hidden`。用实测高度而不是
- * `grid-template-rows: 0fr`：面板里有代码块与图片。
- * reduced-motion 或环境没有 WAAPI（jsdom）时直接切换，不做动画。
+ * 展开用实测高度过渡，reduced-motion 或环境没有 WAAPI（jsdom）时直接切换。
  */
 const ROWS = Array.from(document.querySelectorAll<HTMLElement>('[data-devlog-row]'));
 
@@ -96,6 +93,3 @@ if (ROWS.length > 0) {
   openFromHash();
   window.addEventListener('hashchange', openFromHash);
 }
-
-// 本文件没有 import/export 时 TS 会把顶层 const 当全局变量，与同类脚本冲突。
-export {};

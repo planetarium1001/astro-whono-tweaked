@@ -25,6 +25,9 @@ import {
   tokenizeSearchQuery
 } from '../src/utils/format';
 
+/** 可编辑设置载荷的深拷贝，供各用例在副本上做规范化与校验断言。 */
+const baseSettings = () => structuredClone(getEditableThemeSettingsPayload().settings);
+
 describe('admin-console/shared', () => {
   it('reports duplicate and range issues for social orders', () => {
     expect(
@@ -145,7 +148,7 @@ describe('admin-console/shared', () => {
   });
 
   it('canonicalizes admin settings snapshots and reports contract mismatches', () => {
-    const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    const raw = baseSettings() as Record<string, any>;
     raw.site.title = `  ${raw.site.title}  `;
     raw.site.footer.startYear = String(raw.site.footer.startYear);
     raw.site.socialLinks.email = `mailto:${raw.site.socialLinks.email}`;
@@ -213,7 +216,7 @@ describe('admin-console/shared', () => {
   });
 
   it('canonicalizes typography font ids against the registry per role', () => {
-    const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    const raw = baseSettings() as Record<string, any>;
     raw.ui.typography.readable = 'lxgw-wenkai-lite';
     raw.ui.typography.copy = 'system-mono';
     raw.ui.typography.mono = 'bogus-font';
@@ -256,7 +259,7 @@ describe('admin-console/shared', () => {
   });
 
   it('validates typography font ids per role', () => {
-    const settings = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    const settings = baseSettings() as Record<string, any>;
     settings.ui.typography.copy = 'system-mono';
     settings.ui.typography.mono = 'bogus-font';
 
@@ -267,7 +270,7 @@ describe('admin-console/shared', () => {
   });
 
   it('validates admin overview public display settings', () => {
-    const settings = structuredClone(getEditableThemeSettingsPayload().settings);
+    const settings = baseSettings();
     settings.site.adminOverview.publicVisible = false;
     settings.site.adminOverview.hiddenMessage = '暂未公开';
     settings.ui.sidebarActions.showAdminEntry = true;
@@ -281,7 +284,7 @@ describe('admin-console/shared', () => {
   });
 
   it('canonicalizes favicon slot paths and keeps invalid inputs for validation', () => {
-    const raw = structuredClone(getEditableThemeSettingsPayload().settings) as Record<string, any>;
+    const raw = baseSettings() as Record<string, any>;
     raw.site.favicon = {
       svg: null,
       png: ' public/images/site/favicon-64x64-a1b2c3d4.png ',
@@ -302,7 +305,7 @@ describe('admin-console/shared', () => {
   });
 
   it('validates favicon file existence through localFileExists', () => {
-    const settings = structuredClone(getEditableThemeSettingsPayload().settings);
+    const settings = baseSettings();
     settings.site.favicon = {
       svg: null,
       png: '/images/site/favicon-64x64-a1b2c3d4.png',
@@ -341,13 +344,8 @@ describe('admin-console/shared', () => {
   });
 });
 
-/**
- * 窄屏站点标题宽度是页面宽度百分比（默认 35%），在单位层钉住默认值 / 夹取 / 校验。
- * 该值最终写到 `<html>` 的 `--site-title-max-inline`，写错会让窄屏标题过宽或消失。
- */
+/** 窄屏站点标题宽度是页面宽度百分比（默认 35%，范围 10–100），最终写到 `<html>` 的 `--site-title-max-inline`。 */
 describe('admin-console/shared：窄屏站点标题宽度百分比', () => {
-  const baseSettings = () => structuredClone(getEditableThemeSettingsPayload().settings);
-
   it('默认值 35%，缺失时补齐', () => {
     // 只断言默认值：站点设置文件里带不带该键、取值多少都不该影响结论
     const raw = baseSettings() as Record<string, any>;
@@ -380,13 +378,8 @@ describe('admin-console/shared：窄屏站点标题宽度百分比', () => {
   });
 });
 
-/**
- * 页面外缘间隙是内容盒到浏览器边缘的视觉距离（px，默认与下限都是 32，上限 160），
- * 在单位层钉住默认值 / 夹取 / 校验。它最终决定 `<html>` 上的内边距。
- */
+/** 页面外缘间隙是内容盒到浏览器边缘的视觉距离（px，默认与下限 32，上限 160），最终决定 `<html>` 的内边距。 */
 describe('admin-console/shared：页面外缘间隙', () => {
-  const baseSettings = () => structuredClone(getEditableThemeSettingsPayload().settings);
-
   it('默认值 32，缺失时补齐', () => {
     const payload = getEditableThemeSettingsPayload().settings;
     expect(payload.site.pageGapPx).toBe(32);
@@ -427,15 +420,10 @@ describe('admin-console/shared：页面外缘间隙', () => {
   });
 });
 
-/**
- * RSS 订阅设置：一个总开关（`enabled`）加 `/blog/` `/bits/` `/archive/` 三个互不干扰的页面开关。
- */
+/** RSS 订阅设置：总开关 `enabled` 加 `/blog/` `/bits/` `/archive/` 三个互不干扰的页面开关。 */
 describe('admin-console/shared：列表页 RSS 开关', () => {
-  const baseSettings = () => structuredClone(getEditableThemeSettingsPayload().settings);
-
   it('缺省时四个都是开（默认值），并可被输入覆盖', () => {
-    // 不断言磁盘上的当前值：后台保存过之后它可能是用户调过的状态
-    //（总开关被关过就是 enabled: false），这里只钉默认值与规范化。
+    // 不断言磁盘上的当前值（可能已被用户改过），只钉默认值与规范化。
     const raw = baseSettings() as Record<string, any>;
     delete raw.page.listRss;
     expect(canonicalizeAdminThemeSettings(raw).page.listRss).toEqual({

@@ -1,7 +1,6 @@
-/* scope-pills.css — 一级胶囊条的共享样式（/archive/ 作用域胶囊、/bits/ 年份胶囊）。
-   脚本按 data-* 钩子工作，不依赖类名：
-   .scope-pills > .scope-pills__cursor（绝对定位滑块）+ button.scope-pills__item，
-   第一项必须是「全部」。 */
+/* 一级胶囊条的共享样式（/archive/ 作用域胶囊、/bits/ 年份胶囊）。
+   脚本按 data-* 钩子工作，不依赖类名：.scope-pills > .scope-pills__cursor（绝对定位滑块）
+   + button.scope-pills__item，第一项必须是「全部」。 */
 .scope-pills {
   --scope-pills-h: 34px;
   position: relative;
@@ -117,7 +116,6 @@
   }
 }
 
-/* <=640px */
 /**
  * 窄屏胶囊：字号 13px、左右内边距 12px、容器高度 34px。
  */

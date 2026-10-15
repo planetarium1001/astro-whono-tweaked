@@ -167,17 +167,17 @@ const normalizeSingleLine = (value: unknown, fallback = ''): string => {
 
 export const normalizeEmail = (value: string): string => value.replace(/^mailto:/i, '').trim();
 
-const parseOrder = (value: string | number | null | undefined, fallback: number): number => {
+export const parseOrder = (value: string | number | null | undefined, fallback: number): number => {
   const next = Number.parseInt(String(value ?? '').trim(), 10);
   return Number.isFinite(next) ? next : fallback;
 };
 
-const parseInteger = (value: string | number | null | undefined): number | null => {
+export const parseInteger = (value: string | number | null | undefined): number | null => {
   const next = Number.parseInt(String(value ?? '').trim(), 10);
   return Number.isFinite(next) ? next : null;
 };
 
-const normalizeTrimmed = (value: unknown): string => String(value ?? '').trim();
+export const normalizeTrimmed = (value: unknown): string => String(value ?? '').trim();
 
 const normalizeHeroImageInput = (value: unknown): string | null => {
   const rawValue = normalizeTrimmed(value);
@@ -443,10 +443,7 @@ export const createFormCodec = ({
     viewStatsPreviewFooterEl.textContent = footer;
   };
 
-  /**
-   * 总开关关掉时三个页面各自的勾选框没有意义，置灰并加 `aria-disabled`
-   * （与「启用双链接」那一套一致）。
-   */
+  /** 总开关关掉时三个页面各自的勾选框置灰并加 `aria-disabled`。 */
   const syncListRssControls = (): void => {
     const enabled = Boolean(inputPageListRssEnabled.checked);
     for (const input of [inputPageListRssBlog, inputPageListRssBits, inputPageListRssArchive]) {

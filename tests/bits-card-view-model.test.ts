@@ -168,7 +168,7 @@ describe('bits card view model', () => {
     expect(viewModel.authorAvatar).toBe('/blog/author/default.webp');
   });
   it('摘要优先收在句末标点之后，否则回退到空白处', () => {
-    // 句末标点足够靠后：收成完整句子，不再补省略号
+    // 句末标点足够靠后：收成完整句子，不补省略号
     expect(truncateTextAtWord('第一句。第二句。第三句。', 9)).toBe('第一句。第二句。');
     // 没有句末标点：回退到最后一个空白，避免把西文单词截成两半
     expect(truncateTextAtWord('hello world foo', 14)).toBe('hello world…');

@@ -16,9 +16,9 @@ import {
 /**
  * 级联动效测试：串行，一次只走一步。
  *
- * 单独成文件是因为这一组要替换 Element.prototype.animate 并自己控制时钟，作用范围最小。
- * jsdom 没有 Web Animations API，这里给它可控的假实现（记录目标元素、起止时刻与方向，
- * 只在测试推进时钟时 resolve finished），才能断言串行语义、旧队列立即停止与分组收合时机。
+ * 这一组要替换 Element.prototype.animate 并自己控制时钟，因此单独成文件。
+ * jsdom 没有 Web Animations API，这里给可控的假实现：记录目标元素、起止时刻与方向，
+ * 只在测试推进时钟时 resolve finished，用于断言串行语义、旧队列作废与分组收合时机。
  */
 
 type FakeAnimationRecord = {
@@ -191,6 +191,11 @@ const slugsForYear = (year: string) =>
 describe('级联动效：串行，一次只走一步', () => {
   let harness: ReturnType<typeof createAnimationHarness>;
 
+  /** 动画记录的最后一帧 transform，用于断言滑动终点。 */
+  const lastFrame = (record: (typeof harness.records)[number]) => record.frames.at(-1)?.transform ?? '';
+  /** 动画记录的第一帧 transform，用于断言滑动起点。 */
+  const firstFrame = (record: (typeof harness.records)[number]) => record.frames[0]?.transform ?? '';
+
   beforeEach(() => {
     stubEntrySearchEnvironment();
     harness = createAnimationHarness();
@@ -219,7 +224,7 @@ describe('级联动效：串行，一次只走一步', () => {
 
     const hides = () => harness.entryItemRecords('hide');
 
-    // 点击后整批动画同时被创建，不再一条条排队
+    // 点击后整批动画同时创建，不逐条排队
     expect(hides().length, '需要变化的条目应当一次性全部进入过渡').toBe(expectedHideOrder.length);
 
     // 顺序 = 文档顺序（自上而下扫过）
@@ -266,7 +271,7 @@ describe('级联动效：串行，一次只走一步', () => {
     expect(harness.entryItemRecords('hide').every((record) => record.cancelled || record.settled)).toBe(true);
   });
 
-  it('blog：新一轮筛选立即取代旧队列（旧队列不再继续淡出）', async () => {
+  it('blog：新一轮筛选立即取代旧队列', async () => {
     const { indexItems } = await loadPage(PAGES[1]);
     await importEntrySearch();
 
@@ -358,9 +363,8 @@ describe('级联动效：串行，一次只走一步', () => {
     );
   });
 
-  // 归档要分开两种过渡：一级胶囊是横向切换（左右滑动），标签筛选是纵向收敛
-  //（竖直整块淡入淡出）。两段过渡都必须让页头不参与动画，
-  // 否则会重现「页头在滑、内容没动」。
+  // 归档的两种过渡：一级胶囊走横向滑动，标签筛选走竖直整块淡入淡出。
+  // 两段过渡都不能让页头参与动画。
   it('archive：一级胶囊切换走内容左右滑动（页头不参与）', async () => {
     await loadPage(PAGES[2]);
     await importEntrySearch({ archiveScope: true });
@@ -495,17 +499,13 @@ describe('级联动效：串行，一次只走一步', () => {
     expect(harness.entryItemRecords().length).toBe(0);
   });
 
-  // 滑动方向必须按胶囊在条上的位置顺序决定：胶囊条是年份倒序，
-  // 若按年份数值比较方向会正好相反。往右点一颗 = 内容向左滑出、从右侧滑入。
+  // 滑动方向按胶囊在条上的位置顺序决定：胶囊条是年份倒序，
+  // 按年份数值比较会正好相反。往右点一颗 = 内容向左滑出、从右侧滑入。
   it('bits：年份前进与后退的滑动方向相反（按胶囊条位置顺序）', async () => {
     await loadPage(PAGES[0]);
     await importEntrySearch({ bitsYear: true });
 
     const slides = () => harness.containerRecords('[data-bits-browse]');
-    const lastFrame = (record: (typeof harness.records)[number]) =>
-      record.frames.at(-1)?.transform ?? '';
-    const firstFrame = (record: (typeof harness.records)[number]) =>
-      record.frames[0]?.transform ?? '';
 
     // 胶囊条按年份倒序：全部(第 1 颗) → 最新年份(第 2 颗) → 次新年份(第 3 颗)。
     // 全部 → 较早年份 = 往右点一颗 → 内容向左滑出、从右侧滑入。
@@ -533,17 +533,12 @@ describe('级联动效：串行，一次只走一步', () => {
     await harness.settleAll();
   });
 
-  // 归档一级胶囊与 /bits/ 年份胶囊同一套语义：按胶囊在条上的位置顺序决定方向，
-  // 若不给 contentSlider.run 传 direction 就永远只有 forward 一种方向。
+  // 归档一级胶囊与 /bits/ 年份胶囊同一套语义：按胶囊在条上的位置顺序决定方向。
   it('archive：一级胶囊往右切与往左切的滑动方向相反', async () => {
     await loadPage(PAGES[2]);
     await importEntrySearch({ archiveScope: true });
 
     const slides = () => harness.containerRecords('[data-archive-content]');
-    const lastFrame = (record: (typeof harness.records)[number]) =>
-      record.frames.at(-1)?.transform ?? '';
-    const firstFrame = (record: (typeof harness.records)[number]) =>
-      record.frames[0]?.transform ?? '';
 
     // 全部(第 1 颗) → 更新(第 4 颗)：往右切
     document.querySelector<HTMLElement>('[data-archive-scope="devlog"]')!

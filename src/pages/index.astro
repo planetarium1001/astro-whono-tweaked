@@ -43,7 +43,7 @@ type HomeHeadCriticalFontFace = {
   unicodeRange: string;
 };
 
-// Keep this subset aligned with the faces the home shell actually uses above the fold.
+// 只保留首页首屏实际用到的字面（family / weight / unicodeRange 子集）。
 const HOME_HEAD_CRITICAL_FONT_FACES = [
   {
     family: 'LXGW WenKai Lite',
@@ -492,7 +492,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
   font-weight: 600;
 }
 
-/* Keep above-the-fold EntryListItem copy stable until the deferred global stylesheet arrives. */
+/* 延后的全局样式表到位前，首屏 EntryListItem 摘要保持稳定。 */
 .list-item__excerpt {
   margin: 10px 0 0;
   color: #666;
@@ -557,7 +557,7 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
 }
 
 @media (max-width: 900px) {
-  /* Keep mobile shell rules aligned with src/styles/components/layout.css. */
+  /* 窄屏壳层规则与 src/styles/components/layout.css 同一档保持一致。 */
   :root {
     color-scheme: light;
     --sidebar: 1fr;

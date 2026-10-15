@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 /**
- * 刷新客户端行为测试用的页面快照。
- *
- * 客户端行为测试需要真实渲染后的 HTML（SSR 输出的 data-* 属性、inline JSON 数据脚本、
- * 脚本加载顺序），这些只有构建产物里才完整。
+ * 刷新客户端行为测试用的页面快照（SSR 输出与脚本加载顺序只有构建产物才完整）。
  *
  * 用法：`SITE_URL=... npm run build && node ./scripts/refresh-client-test-fixtures.mjs`
  */
@@ -16,10 +13,7 @@ import process from 'node:process';
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, 'tests', 'fixtures');
 
-/**
- * 文章详情页快照的来源：只有构建产物才带 data-article-toc / data-toc-toggle 结构，
- * 因此必须取一篇真实渲染过的文章；取字典序第一项。
- */
+/** 文章详情页快照来源：取构建产物里字典序第一篇文章。 */
 const resolveArticleFixtureSource = async () => {
   const blogDir = path.join(ROOT, 'dist', 'blog');
   if (!existsSync(blogDir)) return null;

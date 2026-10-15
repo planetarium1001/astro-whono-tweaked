@@ -3,24 +3,18 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { toTagKey, isRoutableTagKey } from '../src/lib/tags';
+import { createFixturePageLoader } from './fixture-page';
 
 /**
  * 文章详情页顶部的 tag 必须可点，且指向能真正筛选的地址。
  *
- * 用构建产物里的真实文章详情页 HTML 断言：每个 tag 都是 `<a>`，href 落在
- * `/blog/?tags=<key>`，key 与 `toTagKey(标签)` 一致且路由安全 —— 否则点进去筛不到东西。
- * 「点进去真的会筛选」由 tests/entry-search-client.test.ts 覆盖，两者合起来才是完整链路。
+ * 用构建产物里的真实详情页 HTML 断言：每个 tag 都是 `<a>`，href 落在 `/blog/?tags=<key>`，
+ * key 与 `toTagKey(标签)` 一致且路由安全；「点进去真的会筛选」由 entry-search-client 覆盖。
  */
 
-const FIXTURE = path.join(process.cwd(), 'tests', 'fixtures', 'article-page.dev.html');
 const BLOG_LIST_FIXTURE = path.join(process.cwd(), 'tests', 'fixtures', 'blog-page.dev.html');
 
-const loadPage = async () => {
-  const html = await readFile(FIXTURE, 'utf8');
-  document.documentElement.innerHTML = html
-    .replace(/^[\s\S]*?<html[^>]*>/i, '')
-    .replace(/<\/html>[\s\S]*$/i, '');
-};
+const loadPage = createFixturePageLoader('article-page.dev.html');
 
 const tagAnchors = () =>
   Array.from(document.querySelectorAll<HTMLAnchorElement>('.meta-line__item--tags a.tag'));

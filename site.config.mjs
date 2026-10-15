@@ -24,8 +24,7 @@ export const site = {
   description: '基于 cxro/astro-whono 的极简双栏 Astro 主题模板，面向长文阅读做了增量改造。'
 };
 
-// 服务端分页已取消，这三个值是前端每页条目数：列表页写入
-// `[data-entry-filters][data-page-size]`，客户端分页读取。
+// 前端每页条目数：列表页写入 `[data-entry-filters][data-page-size]`，客户端分页读取。
 export const PAGE_SIZE_BLOG = 12;
 export const PAGE_SIZE_BITS = 20;
 export const PAGE_SIZE_ARCHIVE = 20;

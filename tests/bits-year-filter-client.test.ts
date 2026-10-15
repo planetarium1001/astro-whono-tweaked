@@ -10,11 +10,8 @@ import {
 } from './entry-search-harness';
 
 /**
- * `/bits/` 年份胶囊的端到端客户端行为测试。
- *
- * 用构建产物里的真实 /bits/ 页面 HTML + 真实 index.json + 真实脚本
- * （entry-search.ts + bits-year-filter.ts）跑交互，断言可见性是否真的收敛、
- * 以及 `?year=` 双向一致。只 grep 标记时「未命中条目从不被隐藏」完全看不出来。
+ * `/bits/` 年份胶囊的端到端客户端行为测试：真实页面 HTML + 真实 index.json + 真实脚本
+ * （entry-search.ts + bits-year-filter.ts）跑交互，断言可见性收敛与 `?year=` 双向一致。
  */
 
 type BitsIndexItem = { slug: string; year: number | null };
@@ -73,7 +70,7 @@ describe('bits 年份胶囊客户端行为', () => {
     expect(index.length).toBe(allItems().length);
   });
 
-  it('点击某一年：只剩该年条目（这是「点了没反应」的回归面）', async () => {
+  it('点击某一年：只剩该年条目', async () => {
     const { indexItems: index } = await loadPage<BitsIndexItem>(BITS_PAGE);
     await importEntrySearch({ bitsYear: true });
 

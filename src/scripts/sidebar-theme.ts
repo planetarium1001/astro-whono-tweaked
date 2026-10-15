@@ -99,11 +99,8 @@ const listenSystemThemeChange = (listener: () => void) => {
 };
 
 /**
- * 主题切换涟漪：切到亮色时新快照从点击处向四周扩散
- * （`::view-transition-new(root)` 的 clip 从 0 圆放大到整屏）；切到暗色时反向收敛，
- * 用旧快照收缩（`::view-transition-old(root)` 的 clip 从整屏收到 0 圆）。
- *
- * 不支持 `startViewTransition` 或偏好减少动效时直接切换。
+ * 主题切换涟漪：亮色时新快照从点击处放大（`::view-transition-new(root)`），
+ * 暗色时旧快照反向收缩（`::view-transition-old(root)`）；不支持或偏好减少动效时直接切换。
  */
 type ViewTransitionLike = { ready: Promise<void> };
 type StartViewTransitionLike = (callback: () => void) => ViewTransitionLike;
@@ -137,11 +134,8 @@ const resolveRippleOrigin = (event: MouseEvent) => {
 };
 
 /**
- * 涟漪方向标记（`<html>` 上的 `data-theme-ripple`）。两个方向需要不同的层叠顺序，
- * 只改 clip-path 不够：
- * - `expand`（切到亮色）：动画 `::view-transition-new(root)`，新快照在上；
- * - `converge`（切到暗色）：动画 `::view-transition-old(root)`，旧快照必须压在新快照之上，
- *   否则裁掉旧快照的过程不可见（样式见 `global.css` 的 `[data-theme-ripple]` 规则）。
+ * 涟漪方向标记（`<html>` 的 `data-theme-ripple`）：`expand` 动画新快照，`converge` 动画旧快照，
+ * 两个方向的层叠顺序不同（样式见 `global.css`）。
  */
 const RIPPLE_ATTR = 'themeRipple';
 
@@ -164,13 +158,7 @@ const applyThemeWithRipple = (event: MouseEvent, apply: () => void, targetTheme:
   const expanding = targetTheme === 'light';
   root.dataset[RIPPLE_ATTR] = expanding ? 'expand' : 'converge';
 
-  /**
-   * 过渡期间冻结滚动条配色。
-   *
-   * View Transition 只拍内容区快照，滚动条由浏览器自己画：`color-scheme` 一变，
-   * 浏览器立刻把滚动条重画成新主题，看起来像涟漪漏了一块。
-   * 这里在过渡期间把 `color-scheme` 钉在旧主题上，动画结束后撤掉内联值交还 CSS。
-   */
+  /** 过渡期间把 `color-scheme` 钉在旧主题：View Transition 不拍滚动条快照，否则滚动条会先变新主题。 */
   const previousScheme = root.dataset.theme === 'dark' ? 'dark' : 'light';
   const inlineColorScheme = root.style.colorScheme;
   root.style.colorScheme = previousScheme;

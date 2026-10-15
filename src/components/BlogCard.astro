@@ -29,7 +29,7 @@ const shouldShowMetaLine = articleMetaSettings.showDate || (articleMetaSettings.
 const displayDate = updatedAt ?? date;
 const displayDateLabel = updatedAt ? '更新于：' : (articleMetaSettings.dateLabel ?? '');
 
-// 静态标签路由已删除，卡片标签与详情页一致，指向 `/blog/?tags=<key>`。
+// 卡片标签指向 `/blog/?tags=<key>`，与详情页一致。
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 const tagLinks = visibleTags.map((tag) => {

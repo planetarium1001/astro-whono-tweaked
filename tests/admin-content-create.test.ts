@@ -76,10 +76,8 @@ describe('admin content create contract', () => {
     expect(source).toContain('draft: true');
   });
 
-  // 公开 slug 允许 CJK（BLOG_PUBLIC_SLUG_RE 放开到 \p{Lo}），且默认由 entryId 派生，
-  // 因此创建路径上「派生不出合法 slug」已不可达。这里钉住确定性行为：
-  // CJK entryId 的公开 slug 就是它自己，不再写 hash 兜底 slug；显式 frontmatter.slug 优先。
-  // 兜底 slug 保留在编辑保存路径（用户可以手填任意非法 slug）作为纵深防御。
+  // 公开 slug 允许 CJK（BLOG_PUBLIC_SLUG_RE 放开到 \p{Lo}），且默认由 entryId 派生：
+  // CJK entryId 的公开 slug 就是它自己，显式 frontmatter.slug 优先。
   it('derives the public slug from the CJK-safe entryId (create flow)', async () => {
     const { POST } = await import('../src/pages/api/admin/content/create');
 
@@ -97,7 +95,7 @@ describe('admin content create contract', () => {
 
     expect(chineseResponse.status).toBe(200);
     const chineseSource = await readFile(path.join(getTempRoot(), 'src', 'content', 'blog', '中文标题.md'), 'utf8');
-    // CJK 现在是合法的公开 slug：不再需要 hash 兜底
+    // CJK 是合法的公开 slug，无需 hash 兜底
     expect(chineseSource).not.toMatch(/\bslug: blog-260608-/);
     expect(chineseSource).not.toMatch(/^slug: blog-/m);
 

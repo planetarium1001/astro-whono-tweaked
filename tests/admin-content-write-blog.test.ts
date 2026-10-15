@@ -548,7 +548,7 @@ describe('admin content blog write contract', () => {
     expect(after).toContain('tags:');
     expect(after).toContain('- fixed');
     expect(after).toContain('draft: false');
-    // archive 字段已废弃：字段矩阵不再包含它，存量行原样保留、不会被改写。
+    // archive 字段不在字段矩阵里：存量行原样保留，不会被改写。
     expect(after).not.toContain('archive: true');
     expect(after).toContain('archive: "yes"');
     expect(after).not.toContain('cover: 42');
@@ -612,8 +612,7 @@ describe('admin content blog write contract', () => {
 
     await mkdir(path.join(getTempRoot(), 'src', 'content', 'blog', 'demo-assets'), { recursive: true });
     await writeFile(path.join(getTempRoot(), 'src', 'content', 'blog', 'demo-assets', 'existing.webp'), 'image');
-    // 校验器会检查 `/images/...` 绝对路径，该文件必须真实存在，
-    // 否则用例会被「正文引用的本地图片不存在」拦下。
+    // 校验器检查 `/images/...` 绝对路径，该文件必须真实存在。
     const publicArchiveDir = path.join(getTempRoot(), 'public', 'images', 'archive');
     await mkdir(publicArchiveDir, { recursive: true });
     await writeFile(path.join(publicArchiveDir, 'demo.webp'), 'image');
@@ -752,7 +751,7 @@ describe('admin content blog write contract', () => {
     const { POST } = await import('../src/pages/api/admin/content/entry');
     const current = await readAdminContentEntryEditorPayload('blog', 'demo');
 
-    // `tag` 已从保留集释放（静态标签页已删除）；`page` / `rss.xml` 仍保留。
+    // `tag` 不在保留集里；`page` / `rss.xml` 仍保留。
     const response = await POST({
       request: createJsonRequest('http://127.0.0.1:4321/api/admin/content/entry?dryRun=1', {
         collection: 'blog',

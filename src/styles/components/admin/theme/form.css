@@ -1,6 +1,4 @@
-/* Admin Form
-   负责 Theme Console 表单控件、toggle、分组与底部操作区。
-*/
+/* Theme Console 表单控件、toggle、分组与底部操作区。 */
 
 .admin-form {
   container: admin-theme-form / inline-size;

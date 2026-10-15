@@ -1,6 +1,4 @@
-/* Admin Nav
-   负责 Theme Console 侧栏导航排序编辑表格。
-*/
+/* Theme Console 侧栏导航排序编辑表格。 */
 
 .admin-nav-grid {
   --admin-nav-column-gap: 16px;

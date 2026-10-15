@@ -26,11 +26,8 @@ const getSourceSectionLabel = (origin: AdminImageBrowseItem['origin']): string =
 const getSourceSectionKey = (origin: AdminImageBrowseItem['origin']): 'cloud' | 'local' =>
   origin === 'cloud' ? 'cloud' : 'local';
 
-// 正文图片引用：仅 public 图可作为根绝对路径写入 Markdown 正文（与现有 /images/... 约定一致）。
-// src/assets 需在代码中 import 后交由打包器处理；src/content 附件应在所属内容里用相对路径引用，
-// 且本面板无「当前编辑文件」上下文，二者均不在此生成，仅给出禁用原因。
-// 本地路径写入 Markdown 前补齐目标语法中的保留字符；云端 URL 已由 cloud adapter
-// 按 key 路径段编码，不能再次经过 encodeURI，否则 `%20` 会变成 `%2520`。
+// 正文图片引用：仅 public 图可写成根绝对路径，本地路径需先转义 Markdown 保留字符。
+// 云端 URL 已由 cloud adapter 按 key 路径段编码，不能再次 encodeURI（`%20` 会变成 `%2520`）。
 const encodeMarkdownImageDestination = (value: string): string =>
   encodeURI(value)
     .replace(/\(/g, '%28')

@@ -1,9 +1,6 @@
 /**
- * `/bits/` 年份胶囊。本脚本只声明年份：切换激活态、搬动滑块，再用 `entry-search:set-year`
- * 把年份交给 `entry-search.ts`；可见集合始终由后者算出，本脚本不写 `item.hidden`。
- *
- * `?year=` 由本脚本独占读写（`entry-search.ts` 只管 `?tags=&mode=`），双方都基于当前 URL
- * 改自己的参数；内容区滑动与 `/archive/` 一级胶囊共用 `content-slide.ts`。
+ * `/bits/` 年份胶囊：只声明年份（`entry-search:set-year`），可见集合始终由 `entry-search.ts` 算出。
+ * `?year=` 由本脚本独占读写；内容区滑动与 `/archive/` 一级胶囊共用 `content-slide.ts`。
  */
 
 import { createContentSlider, createPillCursor, pillDirection } from './content-slide';
@@ -47,8 +44,7 @@ if (bar) {
   };
 
   const setActiveYear = (year: number | null, options: { syncUrl?: boolean; animate?: boolean } = {}) => {
-    // 方向按胶囊在条上的位置顺序决定。条上的顺序是「全部 / 2026 / 2025 / …」（年份倒序），
-    // 因此「全部 → 2025」是往右点一颗（forward），「2025 → 2026」是往左点一颗。
+    // 方向按胶囊在条上的位置顺序决定（条上依次为「全部 / 2026 / 2025 / …」）。
     const direction = pillDirection(PILLS, readYear, activeYear, year);
 
     activeYear = year;
@@ -56,7 +52,7 @@ if (bar) {
     PILLS.forEach((pill) => {
       const isActive = readYear(pill) === year;
       pill.classList.toggle('is-active', isActive);
-      // 与原 /bits/ 年份胶囊一致：用 aria-pressed 表达选中态（不是 tablist/aria-selected）
+      // 用 aria-pressed 表达选中态。
       pill.setAttribute('aria-pressed', isActive ? 'true' : 'false');
       if (isActive) activePill = pill;
     });
@@ -64,7 +60,7 @@ if (bar) {
     if (activePill) cursor.moveTo(activePill);
     if (options.syncUrl !== false) syncUrl(year);
 
-    // 胶囊激活态与滑块立即更新（点击反馈不延迟），内容切换交给滑动过渡
+    // 胶囊激活态与滑块立即更新，内容切换交给滑动过渡。
     slider.run(
       () => {
         document.dispatchEvent(
@@ -85,14 +81,12 @@ if (bar) {
     });
   });
 
-  // 初始年份：`?year=` 只接受确实存在的年份，非法值静默忽略
+  // 初始年份：`?year=` 只接受确实存在的年份。
   const rawYear = (new URL(window.location.href).searchParams.get(QUERY_PARAM_YEAR) ?? '').trim();
   const parsedYear = rawYear === '' ? null : Number(rawYear);
   const initialYear =
     parsedYear !== null && Number.isFinite(parsedYear) && availableYears.has(parsedYear) ? parsedYear : null;
 
-  // 初始态来自 URL 时不要写回去（避免多一次 replaceState）；首屏也不播滑动动画。
+  // 初始态不写回 URL，首屏不播滑动动画。
   setActiveYear(initialYear, { syncUrl: rawYear !== '' && initialYear === null });
 }
-
-export {};
