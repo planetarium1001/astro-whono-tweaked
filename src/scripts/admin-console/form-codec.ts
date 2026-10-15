@@ -813,6 +813,9 @@ export const createFormCodec = ({
       settings.site.socialLinks?.presetOrder?.x ?? ADMIN_SOCIAL_PRESET_ORDER_DEFAULT.x
     );
     inputSiteSocialX.value = settings.site.socialLinks?.x || '';
+    // X 预置行只在已有链接时出现；留空的行不参与排序，也不占列表位置
+    const xPresetRow = inputSiteSocialX.closest<HTMLElement>('[data-social-preset-row]');
+    if (xPresetRow) xPresetRow.dataset.rowHidden = inputSiteSocialX.value.trim() ? 'false' : 'true';
     inputSiteSocialEmailOrder.value = String(
       settings.site.socialLinks?.presetOrder?.email ?? ADMIN_SOCIAL_PRESET_ORDER_DEFAULT.email
     );
@@ -892,6 +895,19 @@ export const createFormCodec = ({
       if (orderInput) orderInput.value = String(current?.order ?? (index + 1));
       if (visibleInput) visibleInput.checked = Boolean(current?.visible);
     });
+
+    // 行序与编号保持一致：按排序值重排导航行（同值保持现有先后）
+    const navRows = getNavRows();
+    const navList = navRows[0]?.parentElement;
+    if (navList) {
+      navRows
+        .map((row, index) => ({
+          row,
+          order: parseOrder(query<HTMLInputElement>(row, '[data-nav-field="order"]')?.value || '', index + 1)
+        }))
+        .sort((a, b) => a.order - b.order)
+        .forEach((item) => navList.append(item.row));
+    }
   };
 
   return {

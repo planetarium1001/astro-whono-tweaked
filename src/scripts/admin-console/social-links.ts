@@ -6,6 +6,7 @@ import {
   isAdminSocialPresetId
 } from '@/lib/admin-console/theme-shared';
 import type { EditableCustomSocialItem, SocialPresetOrder } from './form-codec';
+import { sortSocialOrderItems, type SocialOrderItem } from './social-order';
 
 type Query = <T extends Element>(parent: ParentNode, selector: string) => T | null;
 type QueryAll = <T extends Element>(parent: ParentNode, selector: string) => T[];
@@ -166,14 +167,6 @@ export const createSocialLinks = ({
   };
 
   const normalizeSocialOrders = (): void => {
-    type SocialOrderItem = {
-      row: HTMLElement;
-      type: 'preset' | 'custom';
-      visible: boolean;
-      order: number;
-      tie: number;
-    };
-
     const presetRows = getPresetRows();
     const customRows = getCustomRows();
     const items: SocialOrderItem[] = [
@@ -196,10 +189,12 @@ export const createSocialLinks = ({
       }))
     ];
 
-    const orderedItems = [
-      ...items.filter((item) => item.visible).sort((a, b) => a.order - b.order || a.tie - b.tie),
-      ...items.filter((item) => !item.visible).sort((a, b) => a.order - b.order || a.tie - b.tie)
-    ];
+    // 结构上隐藏的行（例如尚未填写的 X 预置行）排在末尾，但仍参与编号：
+    // 可见行因此始终是连续的 1..N，也不会与隐藏行的序号重复。
+    const orderedItems = sortSocialOrderItems(items);
+
+    // 先按排序结果重排 DOM，再写入 1..N：编号始终与行序一致
+    orderedItems.forEach((item) => socialCustomList.append(item.row));
 
     orderedItems.forEach((item, index) => {
       const nextValue = String(index + 1);

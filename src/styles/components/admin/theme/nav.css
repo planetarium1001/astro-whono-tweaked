@@ -6,7 +6,7 @@
   --admin-nav-column-gap: 16px;
   --admin-nav-grip-width: 26px;
   --admin-nav-grip-icon-size: 14px;
-  --admin-nav-columns: 52px 92px minmax(0, 0.95fr) 88px 96px var(--admin-nav-grip-width);
+  --admin-nav-columns: var(--admin-nav-grip-width) 52px 92px minmax(0, 0.95fr) 88px 96px;
   --admin-nav-table-min-width: 0;
   --admin-nav-header-padding-inline: var(--admin-row-table-padding-inline);
   --admin-nav-header-font-size: var(--admin-text-xs);
@@ -57,7 +57,7 @@
 
 .admin-nav-grid--compact {
   --admin-nav-column-gap: 6px;
-  --admin-nav-columns: 40px 50px minmax(78px, 1fr) 58px 46px var(--admin-nav-grip-width);
+  --admin-nav-columns: var(--admin-nav-grip-width) 40px 50px minmax(78px, 1fr) 58px 46px;
   --admin-nav-table-min-width: 352px;
   --admin-nav-header-padding-inline: 8px;
   --admin-nav-header-font-size: var(--admin-text-2xs);

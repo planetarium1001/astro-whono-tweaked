@@ -67,13 +67,18 @@
   display: grid;
   gap: var(--admin-social-column-gap);
   grid-template-columns:
+    var(--admin-social-column-grip-width)
     var(--admin-social-column-order-width)
     var(--admin-social-column-platform-width)
     var(--admin-social-column-icon-width)
     minmax(0, 1fr)
-    var(--admin-social-column-actions-width)
-    var(--admin-social-column-grip-width);
+    var(--admin-social-column-actions-width);
   align-items: center;
+}
+
+/* 结构上隐藏的行（例如尚未填写的 X 预置行）不占列表位置 */
+.admin-social-row[data-row-hidden='true'] {
+  display: none;
 }
 
 .admin-social-header {
@@ -90,27 +95,27 @@
 }
 
 .admin-social-header__order {
-  grid-column: 1;
-}
-
-.admin-social-header__platform {
   grid-column: 2;
 }
 
-.admin-social-header__icon {
+.admin-social-header__platform {
   grid-column: 3;
 }
 
-.admin-social-header__href {
+.admin-social-header__icon {
   grid-column: 4;
 }
 
-.admin-social-header__actions {
+.admin-social-header__href {
   grid-column: 5;
 }
 
-.admin-social-header__grip {
+.admin-social-header__actions {
   grid-column: 6;
+}
+
+.admin-social-header__grip {
+  grid-column: 1;
 }
 
 .admin-social-row {
@@ -130,26 +135,26 @@
 }
 
 .admin-social-field--order {
-  grid-column: 1;
-  justify-items: center;
-}
-
-.admin-social-field--platform {
   grid-column: 2;
   justify-items: center;
 }
 
-.admin-social-field--icon {
+.admin-social-field--platform {
   grid-column: 3;
   justify-items: center;
 }
 
-.admin-social-field--href {
+.admin-social-field--icon {
   grid-column: 4;
+  justify-items: center;
+}
+
+.admin-social-field--href {
+  grid-column: 5;
 }
 
 .admin-social-field--actions {
-  grid-column: 5;
+  grid-column: 6;
   display: grid;
   gap: 6px;
   justify-items: center;
@@ -365,7 +370,7 @@
 
 /* 拖动锚点：仅此处可发起拖拽，预设行与自定义行共用。 */
 .admin-social-grip {
-  grid-column: 6;
+  grid-column: 1;
   justify-self: center;
   align-self: center;
   display: inline-flex;

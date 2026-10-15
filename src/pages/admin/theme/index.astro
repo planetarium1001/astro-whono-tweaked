@@ -43,7 +43,6 @@ const loadThemeDevState = async () => {
   ]);
 
   const settingsEndpoint = withBase(ADMIN_SETTINGS_API_PATH);
-  const navIdOrder = ADMIN_NAV_IDS;
   const navLabelFallback = {
     blog: '博客',
     projects: '项目',
@@ -60,6 +59,15 @@ const loadThemeDevState = async () => {
   const socialCustomLimit = ADMIN_SOCIAL_CUSTOM_LIMIT;
 
   const initialState = getEditableThemeSettingsState();
+  // 行序与后台编号一致：按站点保存的排序值排列导航行，缺失的排在最后
+  const configuredNavOrders = initialState.ok
+    ? new Map(initialState.payload.settings.shell.nav.map((item) => [item.id, item.order]))
+    : new Map<string, number>();
+  const navIdOrder = [...ADMIN_NAV_IDS].sort(
+    (a, b) =>
+      (configuredNavOrders.get(a) ?? ADMIN_NAV_IDS.indexOf(a) + 1) -
+      (configuredNavOrders.get(b) ?? ADMIN_NAV_IDS.indexOf(b) + 1)
+  );
   const bootstrapState = initialState.ok
     ? (() => {
         const initialNavMap = new Map(

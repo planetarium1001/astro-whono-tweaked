@@ -1,5 +1,5 @@
 ---
-import type { SiteSocialIconKey, SiteSocialPresetId } from '../../lib/theme-settings';
+import { getThemeSettings, type SiteSocialIconKey, type SiteSocialPresetId } from '../../lib/theme-settings';
 import AdminSocialCustomRowTemplate from './AdminSocialCustomRowTemplate.astro';
 import AdminSocialPresetRow from './AdminSocialPresetRow.astro';
 
@@ -8,6 +8,10 @@ interface Props {
 }
 
 const { socialCustomLimit } = Astro.props;
+const { settings } = getThemeSettings();
+const presetOrder = settings.site.socialLinks.presetOrder;
+/** X 不再作为默认项：只有已配置链接时才渲染该行，其余情况由「新增链接」自选 X 图标。 */
+const hasPresetX = Boolean((settings.site.socialLinks.x ?? '').trim());
 
 type SocialIconOption = {
   value: SiteSocialIconKey;
@@ -24,6 +28,7 @@ type SocialPresetRow = {
   inputMode: 'url' | 'email';
   autoComplete: string;
   placeholder: string;
+  hidden?: boolean;
 };
 
 const socialIconOptions: readonly SocialIconOption[] = [
@@ -41,10 +46,10 @@ const socialIconOptions: readonly SocialIconOption[] = [
   { value: 'website', optionLabel: '网站', defaultLabel: '网站' }
 ];
 const customSocialIconOptions = socialIconOptions.filter(
-  (option) => option.value !== 'github' && option.value !== 'x' && option.value !== 'email'
+  (option) => option.value !== 'github' && option.value !== 'email'
 );
 const defaultCustomSocialIconKey: SiteSocialIconKey = customSocialIconOptions[0]?.value ?? 'website';
-const socialPresetRows: readonly SocialPresetRow[] = [
+const socialPresetRowList: SocialPresetRow[] = [
   {
     id: 'github',
     label: 'GitHub',
@@ -63,7 +68,8 @@ const socialPresetRows: readonly SocialPresetRow[] = [
     inputType: 'url',
     inputMode: 'url',
     autoComplete: 'url',
-    placeholder: 'https://x.com/username'
+    placeholder: 'https://x.com/username',
+    hidden: !hasPresetX
   },
   {
     id: 'email',
@@ -76,6 +82,11 @@ const socialPresetRows: readonly SocialPresetRow[] = [
     placeholder: 'name@example.com'
   }
 ];
+
+// 行序与后台编号一致
+const socialPresetRows: readonly SocialPresetRow[] = socialPresetRowList.sort(
+  (a, b) => (presetOrder[a.id] ?? 0) - (presetOrder[b.id] ?? 0)
+);
 ---
 
 <div class="admin-subgroup">
@@ -95,15 +106,15 @@ const socialPresetRows: readonly SocialPresetRow[] = [
     </div>
     <div class="admin-social-table">
       <div id="site-social-custom-head" class="admin-social-header" aria-hidden="true">
+        <span class="admin-social-header__grip">拖动</span>
         <span class="admin-social-header__order">位置</span>
         <span class="admin-social-header__platform">平台</span>
         <span class="admin-social-header__icon">图标</span>
         <span class="admin-social-header__href">链接地址</span>
         <span class="admin-social-header__actions">操作</span>
-        <span class="admin-social-header__grip">拖动</span>
       </div>
       <div id="site-social-custom-list" class="admin-social-list">
-        {socialPresetRows.map((row) => <AdminSocialPresetRow row={row} />)}
+        {socialPresetRows.map((row) => <AdminSocialPresetRow row={row} hidden={row.hidden} />)}
       </div>
     </div>
   </div>
