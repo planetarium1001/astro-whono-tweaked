@@ -519,8 +519,9 @@ body.admin-page {
   --admin-sidebar-padding: var(--sidebar-padding-block) var(--sidebar-padding-inline);
   --admin-sidebar-align: flex-end;
   --admin-sidebar-gap: 24px;
-  --admin-sidebar-divider-block-start: 50px;
-  --admin-sidebar-divider-block-end: 50px;
+  /* 分割线同样贯通上下，与公开站点一致 */
+  --admin-sidebar-divider-block-start: 0px;
+  --admin-sidebar-divider-block-end: 0px;
   --admin-sidebar-site-title-display: initial;
   --admin-sidebar-rail-title-display: none;
   --admin-sidebar-title-text-display: block;

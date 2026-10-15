@@ -113,6 +113,18 @@ compare(
   LAYOUT_CSS
 );
 
+// 分割线：快照残留上下留白时，空隙只会在首页出现
+const snapshotDivider = blockBody(desktopSnapshot, '.divider');
+const layoutDivider = blockBody(layoutCss, '.divider');
+['background', 'margin'].forEach((property) => {
+  compare(
+    `.divider ${property}`,
+    declaration(snapshotDivider, property),
+    declaration(layoutDivider, property),
+    LAYOUT_CSS
+  );
+});
+
 const snapshotSidebar = blockBody(desktopSnapshot, '.sidebar');
 const layoutSidebar = blockBody(layoutCss, '.sidebar');
 ['padding', 'gap'].forEach((property) => {

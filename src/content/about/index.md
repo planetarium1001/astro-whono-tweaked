@@ -9,25 +9,28 @@
 
 ## 致谢
 
-本主题基于 [cxro/astro-whono](https://github.com/cxro/astro-whono) 改造，本仓库为 [planetarium1001/astro-whono-tweaked](https://github.com/planetarium1001/astro-whono-tweaked)。排版风格的来源还包括 [elizen/elizen-blog](https://github.com/elizen/elizen-blog) 与 Hugo 主题 [yihui/hugo-ivy](https://github.com/yihui/hugo-ivy)。
+本主题基于 [cxro/astro-whono](https://github.com/cxro/astro-whono)（MIT）改造，由 [Astro](https://astro.build/) 构建。
 
 ## 朋友们
+
+:::friend{name="astro-whono-tweaked" url="https://github.com/planetarium1001/astro-whono-tweaked"}
+本主题仓库，也是本示例站点的源仓库
+:::
+
+:::friend{name="Whono" url="https://github.com/cxro/astro-whono" avatar="author/avatar.webp"}
+上游主题，一个极简的双栏 Astro 主题
+:::
 
 :::friend{name="Astro" url="https://astro.build/" avatar="https://cdn.nodeimage.com/i/LAW2Al4JZrPhfTs7ObHbisPLGwWuR6x5.webp"}
 用于构建高性能内容网站的前端框架
 :::
-
-:::friend{name="Whono" url="https://github.com/cxro/astro-whono" avatar="author/avatar.webp"}
-一个极简的双栏 Astro 主题
-:::
-
 
 ## 常见问题
 
 :::faq{question="如何交换友链？"}
 可以通过 GitHub Issue 联系我或者 [发送邮件](mailto:你的邮箱@example.com?subject=交换友链申请&body=站点名称：%0A链接：%0A简介：%0A头像：)，请附上站点名称、链接、简介和头像。
 
-::site-info{name="Whono" url="https://astro.whono.me/" description="一个极简的双栏 Astro 主题" avatar="https://astro.whono.me/author/avatar.webp"}
+:::site-info{name="astro-whono-tweaked" url="https://planetarium1001.github.io/astro-whono-tweaked/" description="一个极简的双栏 Astro 主题" avatar="author/avatar.webp"}
 :::
 
 :::faq{question="可以转载这里的内容吗？"}
