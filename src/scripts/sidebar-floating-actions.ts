@@ -1,4 +1,4 @@
-// 右下角浮动按钮列：回到顶部、回到上次阅读位置（退出阅读由 sidebar-reading.ts 控制）。
+// 右下角浮动按钮列：回到顶部、回到上次阅读位置、查看目录（退出阅读由 sidebar-reading.ts 控制）。
 // 位置记忆分两层：跨次打开按路径存 localStorage，本次会话用位置栈（目录跳转、回到顶部前入栈）。
 // 每条记「最近标题 + 段内偏移」与「滚动比例」，锚点优先、比例兜底。
 
@@ -7,6 +7,8 @@ const STORAGE_KEY = 'astro-whono:reading-position';
 const SAVE_INTERVAL_MS = 1500;
 const MIN_SCROLL_PX = 240;
 const MIN_DELTA_RATIO = 0.18;
+// 页面开头没有回退价值：此高度内不记返回位置。
+const MIN_FALLBACK_PX = 80;
 
 type SavedPosition = {
   headingId: string | null;
@@ -109,10 +111,16 @@ const initFloatingStack = () => {
   };
 
   const positionStack: SavedPosition[] = [];
+  /**
+   * 目录按钮的返回位置锁定标记：点目录按钮时把跳转前的位置入栈并锁定，
+   * 此后从目录条目跳转不再入栈，返回位置保持为「使用目录按钮之前」的位置。
+   * 返回位置被「回到上次阅读位置」用掉（或再次点目录按钮时重算）后解锁。
+   */
+  let tocReturnPinned = false;
 
   const pushCurrentPosition = () => {
     // 页面开头没有回退价值。
-    if (currentY() < 80) return;
+    if (currentY() < MIN_FALLBACK_PX) return;
     const current = capturePosition();
     const last = positionStack[positionStack.length - 1];
     // 位置几乎没变则不入栈，避免连点堆积历史。
@@ -186,6 +194,8 @@ const initFloatingStack = () => {
     const fromStored = positionStack.length === 0;
     const target = positionStack.pop() ?? storedPosition;
     if (!target) return;
+    // 目录按钮记下的返回位置已用掉，之后的目录跳转恢复入栈。
+    tocReturnPinned = false;
     // 记下当前位置，便于再跳回来。
     pushCurrentPosition();
     if (fromStored) {
@@ -200,9 +210,18 @@ const initFloatingStack = () => {
     syncAll();
   });
 
-  // 目录跳转前入栈（article-toc.ts 在滚动前派发）。
-  window.addEventListener('astro-whono:reading-jump', () => {
+  // 目录按钮跳转前入栈（article-toc.ts 在滚动前派发）。
+  window.addEventListener('astro-whono:toc-jump', () => {
     pushCurrentPosition();
+    // 页面开头没有可回退的位置，此时不锁定，后续目录跳转照常入栈。
+    tocReturnPinned = currentY() >= MIN_FALLBACK_PX;
+    syncAll();
+  });
+
+  // 目录条目跳转前入栈（article-toc.ts 在滚动前派发）。
+  window.addEventListener('astro-whono:reading-jump', () => {
+    // 用目录按钮进来的场景：中途的目录跳转不覆盖已锁定的返回位置。
+    if (!tocReturnPinned) pushCurrentPosition();
     syncAll();
   });
 

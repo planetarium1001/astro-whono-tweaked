@@ -118,7 +118,10 @@ const basePrefix = base.endsWith('/') ? base.slice(0, -1) : base;
 const routePath = basePrefix && pathname.startsWith(basePrefix)
   ? pathname.slice(basePrefix.length) || '/'
   : pathname;
-const showFloatStack = !isAdminPage && /^\/(?:archive|projects|bits|blog|devlog)(?:\/|$)/.test(routePath);
+// 首页同样是长滚动页，与列表页、文章页一样需要浮动列（回到顶部 / 回到上次阅读位置）；
+// 目录按钮的显隐由 article-toc.ts 按窄屏与内联目录是否存在单独判定。
+const showFloatStack = !isAdminPage
+  && (routePath === '/' || /^\/(?:archive|projects|bits|blog|devlog)(?:\/|$)/.test(routePath));
 // 阅读模式入口开关（Theme Console →「浮动操作列」）
 const showReaderToggle = settings.ui.readingMode.showEntry;
 // 同组的另外两个按钮开关
@@ -302,6 +305,20 @@ const adminUiPrefsScriptHref = isDevAdminPage
     </div>
     {showFloatStack && hasFloatButtons ? (
       <div class="float-stack" data-float-stack>
+        {/*
+          目录按钮：排在最上端，其余按钮位置不随它的显隐变化（浮动列自下而上堆叠）。
+          初始 hidden，只有 article-toc.ts 在窄屏且页面确有内联目录时才显示。
+        */}
+        <button
+          id="toc-jump"
+          class="float-stack__button"
+          type="button"
+          aria-label="查看目录"
+          title="查看目录"
+          hidden
+        >
+          <UiIcon name="list" class="icon" />
+        </button>
         {showReaderToggle ? (
           <button
             id="reader-toggle"

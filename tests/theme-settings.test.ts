@@ -142,6 +142,7 @@ describe('theme-settings revision semantics', () => {
     const state = getEditableThemeSettingsState(resolved);
 
     expect(resolved.settings.site.filings).toEqual({
+      scope: 'all',
       icp: { number: null, link: null },
       police: { number: null, link: null, icon: null }
     });
@@ -167,6 +168,38 @@ describe('theme-settings revision semantics', () => {
     });
     expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
     expect(state.ok).toBe(true);
+  });
+
+  it('falls back to the all-pages filings scope when site.json lacks scope', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const sitePath = path.join(settingsDir, 'site.json');
+    const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, unknown>;
+    // 断言的字段先删掉，避免依赖本地保存值
+    delete (siteJson.filings as Record<string, unknown>).scope;
+    await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+
+    const resolved = getThemeSettings();
+    const state = getEditableThemeSettingsState(resolved);
+
+    expect(resolved.settings.site.filings.scope).toBe('all');
+    expect(resolved.sources.site.filingsScope).toBe('default');
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(state.ok).toBe(true);
+  });
+
+  it('reads an explicit root-only filings scope without locking the console', async () => {
+    const settingsDir = await createTempSettingsFixture();
+    const sitePath = path.join(settingsDir, 'site.json');
+    const siteJson = JSON.parse(await readFile(sitePath, 'utf8')) as Record<string, any>;
+    siteJson.filings.scope = 'root';
+    await writeFile(sitePath, `${JSON.stringify(siteJson, null, 2)}\n`, 'utf8');
+
+    const resolved = getThemeSettings();
+
+    expect(resolved.settings.site.filings.scope).toBe('root');
+    expect(resolved.sources.site.filingsScope).toBe('new');
+    expect(getThemeSettingsReadDiagnostics(resolved)).toEqual([]);
+    expect(getEditableThemeSettingsPayload().settings.site.filings.scope).toBe('root');
   });
 
   it('keeps the console unlocked when ui.json lacks newer float stack fields', async () => {

@@ -549,7 +549,7 @@ describe('文章目录列：右边界跟随页面外缘间隙', () => {
 });
 
 describe('主题涟漪：按目标主题分类方向', () => {
-  it('亮色从点击处扩散、暗色从四周向点击处收敛', async () => {
+  it('亮色从按钮中心扩散、暗色从四周向按钮中心收敛', async () => {
     const [script, globalCss] = await Promise.all([
       read('src/scripts/sidebar-theme.ts'),
       read('src/styles/global.css')
@@ -571,6 +571,26 @@ describe('主题涟漪：按目标主题分类方向', () => {
     expect(globalCss).toMatch(
       /:root\[data-theme-ripple='expand'\]::view-transition-new\(root\)\s*\{[^}]*z-index:\s*1/
     );
+  });
+
+  it('圆心取主题切换按钮中心，不跟随指针坐标', async () => {
+    const script = await read('src/scripts/sidebar-theme.ts');
+
+    expect(script).toMatch(/const rect = themeBtn\?\.getBoundingClientRect\(\)/);
+    expect(script).toMatch(/x: rect\.left \+ rect\.width \/ 2, y: rect\.top \+ rect\.height \/ 2/);
+    expect(script).not.toContain('event.clientX');
+    expect(script).not.toContain('resolveRippleOrigin(event)');
+  });
+
+  it('有效主题未变时不跑涟漪，变化时按新有效主题定方向', async () => {
+    const script = await read('src/scripts/sidebar-theme.ts');
+
+    // 两边都取解析后的有效主题：跟随系统参与时同样只在有效主题变化时过渡
+    expect(script).toMatch(/const currentTheme = resolveTheme\(activeThemeMode\)/);
+    expect(script).toMatch(/const nextTheme = resolveTheme\(nextMode\)/);
+    expect(script).toMatch(/if \(nextTheme === currentTheme\) \{\s*apply\(\);\s*return;\s*\}/);
+    // 切到亮色 = 发散（expanding 为真），切到暗色 = 收缩（反向）
+    expect(script).toMatch(/const expanding = targetTheme === 'light'/);
   });
 });
 

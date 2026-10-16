@@ -1,5 +1,6 @@
 // 文章目录：滚动高亮、点击跳转、收起状态、跳转高亮。
 // rail / inline 两份目录按 data-toc-target 归组，统一更新高亮。
+// 窄屏浮动列的「查看目录」按钮也在这里接管：展开内联目录并滚过去。
 
 const SPY_OFFSET_PX = 96;
 const ACTIVE_CLASS = 'is-active';
@@ -7,6 +8,8 @@ const HEADING_SELECTOR = '.prose :is(h2, h3)[id]';
 // 与 article-toc.css 的 .prose-flash 动画（1400ms）同量级
 const FLASH_DURATION_MS = 1500;
 const TOC_COLLAPSED_KEY = 'astro-whono:toc-collapsed';
+// 内联目录在窄于该断点时才是目录的唯一形态（宽于它由右侧常驻目录接管）。
+const INLINE_TOC_MQ = '(max-width: 1279.98px)';
 
 const prefersReducedMotion = () =>
   typeof window.matchMedia === 'function'
@@ -195,6 +198,39 @@ const initArticleToc = () => {
     });
   }
 
+  /* 浮动列目录按钮：宽屏由右侧常驻目录承担，按钮只在窄屏且内联目录参与渲染时可用。 */
+  const tocJumpButton = document.getElementById('toc-jump');
+  const inlineToc = document.querySelector<HTMLDetailsElement>('details.article-toc--inline');
+
+  const isInlineTocOnly = () =>
+    inlineToc !== null
+    && typeof window.matchMedia === 'function'
+    && window.matchMedia(INLINE_TOC_MQ).matches
+    // 阅读模式下大屏改用右侧常驻目录，此时内联目录被 CSS 隐藏，按钮须同步隐藏。
+    && window.getComputedStyle(inlineToc).display !== 'none';
+
+  const syncTocJumpButton = () => {
+    if (!tocJumpButton) return;
+    tocJumpButton.hidden = !isInlineTocOnly();
+  };
+
+  if (tocJumpButton && inlineToc) {
+    tocJumpButton.addEventListener('click', () => {
+      if (!isInlineTocOnly()) return;
+      // 先通知浮动列把跳转前的位置入栈，再展开目录：返回位置是点按钮之前的阅读位置。
+      window.dispatchEvent(new CustomEvent('astro-whono:toc-jump'));
+      inlineToc.open = true;
+      // 展开会改变目录高度，滚动放到下一帧，落点才准。
+      window.requestAnimationFrame(() => {
+        inlineToc.scrollIntoView({
+          behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+          block: 'start'
+        });
+      });
+    });
+    syncTocJumpButton();
+  }
+
   // 带 hash 打开或切换 hash 时同样高亮。
   const flashByHash = () => {
     if (window.location.hash.length <= 1) return;
@@ -224,11 +260,18 @@ const initArticleToc = () => {
   }
 
   window.addEventListener('scroll', requestUpdate, { passive: true });
-  window.addEventListener('resize', requestUpdate);
+  window.addEventListener('resize', () => {
+    requestUpdate();
+    syncTocJumpButton();
+  });
   window.addEventListener('astro-whono:reading-mode-change', () => {
     requestUpdate();
+    syncTocJumpButton();
     // 阅读模式列宽过渡约 520ms，结束后再校准一次。
-    window.setTimeout(requestUpdate, 600);
+    window.setTimeout(() => {
+      requestUpdate();
+      syncTocJumpButton();
+    }, 600);
   });
   update();
 };

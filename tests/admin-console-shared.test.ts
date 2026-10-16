@@ -481,3 +481,48 @@ describe('admin-console/shared：列表页 RSS 开关', () => {
     expect(validateAdminThemeSettings(atLimit).map((issue) => issue.path)).not.toContain('shell.titleNarrow');
   });
 });
+
+/** 备案信息显示范围：`all` 渲染所有公开页面（默认），`root` 只在站点根目录渲染。 */
+describe('admin-console/shared：备案信息显示范围', () => {
+  it('默认值为 all，缺失时补齐', () => {
+    const raw = baseSettings() as Record<string, any>;
+    delete raw.site.filings.scope;
+    expect(canonicalizeAdminThemeSettings(raw).site.filings.scope).toBe('all');
+  });
+
+  it('接受显式取值，非法值回落到 all', () => {
+    const raw = baseSettings() as Record<string, any>;
+
+    raw.site.filings.scope = 'root';
+    expect(canonicalizeAdminThemeSettings(raw).site.filings.scope).toBe('root');
+
+    raw.site.filings.scope = 'all';
+    expect(canonicalizeAdminThemeSettings(raw).site.filings.scope).toBe('all');
+
+    raw.site.filings.scope = 'home';
+    expect(canonicalizeAdminThemeSettings(raw).site.filings.scope).toBe('all');
+  });
+
+  it('校验会拦住非法取值', () => {
+    const ok = canonicalizeAdminThemeSettings(baseSettings());
+    expect(validateAdminThemeSettings(ok).map((issue) => issue.path)).not.toContain('site.filings.scope');
+
+    const broken = structuredClone(ok) as Record<string, any>;
+    broken.site.filings.scope = 'home';
+    expect(
+      validateAdminThemeSettings(broken as EditableThemeSettings).map((issue) => issue.path)
+    ).toContain('site.filings.scope');
+  });
+
+  it('为缺少该键的旧快照补齐兼容默认值', () => {
+    const canonical = getEditableThemeSettingsPayload().settings;
+    const legacySnapshot = structuredClone(canonical) as Record<string, any>;
+    delete legacySnapshot.site.filings.scope;
+
+    const compatible = fillAdminThemeSettingsCompatibilityDefaults(legacySnapshot, canonical);
+    const mismatchPaths = createAdminThemeSettingsCanonicalMismatchIssues(compatible, canonical).map(
+      (issue) => issue.path
+    );
+    expect(mismatchPaths).not.toContain('site.filings.scope');
+  });
+});

@@ -4,6 +4,7 @@ import type {
   HomeIntroLinkKey,
   SidebarDividerVariant,
   SidebarNavId,
+  SiteFilingsScope,
   SiteSocialIconKey,
   SiteSocialPresetId,
   SiteSocialPresetOrder,
@@ -67,6 +68,20 @@ export const ADMIN_ARTICLE_META_DATE_LABEL_MAX_LENGTH = 20;
 export const ADMIN_FILINGS_NUMBER_MAX_LENGTH = 40;
 export const ADMIN_ICP_FILING_HOSTS = ['beian.miit.gov.cn'] as const;
 export const ADMIN_POLICE_FILING_HOSTS = ['beian.mps.gov.cn', 'beian.gov.cn'] as const;
+/**
+ * 备案信息显示范围：'all' 渲染到所有公开页面（默认，保证既有实例升级后行为不变），
+ * 'root' 只在站点根目录（首页）渲染。
+ */
+const ADMIN_FILINGS_SCOPES = ['all', 'root'] as const satisfies readonly SiteFilingsScope[];
+export const ADMIN_FILINGS_SCOPE_DEFAULT: SiteFilingsScope = 'all';
+const ADMIN_FILINGS_SCOPE_SET: ReadonlySet<SiteFilingsScope> = new Set(ADMIN_FILINGS_SCOPES);
+export const ADMIN_FILINGS_SCOPE_OPTIONS = [
+  { id: 'all', label: '所有页面显示' },
+  { id: 'root', label: '仅在首页显示' }
+] as const satisfies readonly {
+  id: SiteFilingsScope;
+  label: string;
+}[];
 
 export const ADMIN_VIEW_STATS_PV_LABEL_DEFAULT = '浏览';
 export const ADMIN_VIEW_STATS_UV_LABEL_DEFAULT = '访客';
@@ -213,6 +228,9 @@ const isAdminHeroPresetId = (value: string): value is HeroPresetId =>
 
 export const isAdminSidebarDividerVariant = (value: string): value is SidebarDividerVariant =>
   ADMIN_SIDEBAR_DIVIDER_SET.has(value as SidebarDividerVariant);
+
+export const isAdminFilingsScope = (value: string): value is SiteFilingsScope =>
+  ADMIN_FILINGS_SCOPE_SET.has(value as SiteFilingsScope);
 
 export const isAdminHomeIntroLinkKey = (value: string): value is HomeIntroLinkKey =>
   ADMIN_HOME_INTRO_LINK_KEY_SET.has(value as HomeIntroLinkKey);
@@ -462,6 +480,7 @@ export const canonicalizeAdminThemeSettings = (
   const rawFilings = isRecord(site.filings) ? site.filings : {};
   const rawFilingsIcp = isRecord(rawFilings.icp) ? rawFilings.icp : {};
   const rawFilingsPolice = isRecord(rawFilings.police) ? rawFilings.police : {};
+  const rawFilingsScope = normalizeTrimmed(rawFilings.scope);
   const rawUiArticleMeta: LooseRecord = isRecord(ui.articleMeta) ? ui.articleMeta : {};
   const rawUiFloatStack: LooseRecord = isRecord(ui.floatStack) ? ui.floatStack : {};
   const rawUiViewStats: LooseRecord = isRecord(ui.viewStats) ? ui.viewStats : {};
@@ -585,6 +604,8 @@ export const canonicalizeAdminThemeSettings = (
         )
       },
       filings: {
+        /* 显示范围：非法 / 缺失都回落到默认 'all'（所有页面） */
+        scope: isAdminFilingsScope(rawFilingsScope) ? rawFilingsScope : ADMIN_FILINGS_SCOPE_DEFAULT,
         icp: {
           number: normalizeOptionalSingleLine(String(rawFilingsIcp.number ?? '')),
           link: normalizeOptionalSingleLine(String(rawFilingsIcp.link ?? ''))
@@ -742,6 +763,7 @@ export const createAdminWritableThemeSettingsGroups = (
       ...settings.site.footer
     },
     filings: {
+      scope: settings.site.filings.scope,
       icp: { ...settings.site.filings.icp },
       police: { ...settings.site.filings.police }
     },
@@ -902,6 +924,10 @@ export const validateAdminThemeSettings = (
     if (typeof value !== 'string' || !isAdminAllowedHttpsUrl(value, hosts)) {
       pushIssue(path, `备案信息里的“${label}”只允许 ${hosts.map((host) => `https://${host}`).join(' 或 ')} 的地址`);
     }
+  }
+
+  if (!isAdminFilingsScope(settings.site.filings?.scope ?? '')) {
+    pushIssue('site.filings.scope', '备案信息显示范围只允许 所有页面显示 / 仅在首页显示');
   }
 
   const filingsIcon = settings.site.filings?.police?.icon ?? null;
@@ -1494,7 +1520,15 @@ const fillAdminThemeSettingsSiteCompatibilityDefaults = (
         const rawEntry = isRecord(rawFilings[key]) ? rawFilings[key] : {};
         return { ...canonicalEntry, ...rawEntry };
       };
-      next = { ...next, filings: { icp: mergeEntry('icp'), police: mergeEntry('police') } };
+      next = {
+        ...next,
+        filings: {
+          /* 旧配置没有显示范围时按默认补齐；已有值原样保留交给校验。 */
+          scope: rawFilings.scope === undefined ? canonicalFilings.scope : rawFilings.scope,
+          icp: mergeEntry('icp'),
+          police: mergeEntry('police')
+        }
+      };
     }
   }
 

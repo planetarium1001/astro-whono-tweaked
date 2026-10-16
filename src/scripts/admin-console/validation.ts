@@ -35,6 +35,7 @@ type ValidationContext = {
   inputSiteFilingsPoliceNumber: HTMLInputElement;
   inputSiteFilingsPoliceLink: HTMLInputElement;
   inputSiteFilingsPoliceIcon: HTMLInputElement;
+  inputSiteFilingsScope: HTMLSelectElement;
   inputSiteAdminOverviewPublicVisible: HTMLInputElement;
   inputSiteAdminOverviewHiddenMessage: HTMLInputElement;
   inputSiteSocialGithub: HTMLInputElement;
@@ -125,6 +126,7 @@ export const createValidation = ({
   inputSiteFilingsPoliceNumber,
   inputSiteFilingsPoliceLink,
   inputSiteFilingsPoliceIcon,
+  inputSiteFilingsScope,
   inputSiteAdminOverviewPublicVisible,
   inputSiteAdminOverviewHiddenMessage,
   inputSiteSocialGithub,
@@ -263,6 +265,8 @@ export const createValidation = ({
         return () => inputSiteFilingsPoliceLink;
       case 'site.filings.police.icon':
         return () => inputSiteFilingsPoliceIcon;
+      case 'site.filings.scope':
+        return () => inputSiteFilingsScope;
       case 'site.footer.copyright':
         return () => inputSiteFooterCopyright;
       case 'site.adminOverview.publicVisible':

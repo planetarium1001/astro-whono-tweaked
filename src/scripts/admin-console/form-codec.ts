@@ -2,6 +2,7 @@ import type {
   HomeIntroLinkKey,
   SidebarDividerVariant,
   SidebarNavId,
+  SiteFilingsScope,
   SiteSocialIconKey,
   SiteSocialPresetId,
   ThemeFontId,
@@ -18,6 +19,7 @@ import {
 } from '@/utils/format';
 import {
   ADMIN_ARTICLE_META_DATE_LABEL_DEFAULT,
+  ADMIN_FILINGS_SCOPE_DEFAULT,
   ADMIN_HERO_IMAGE_ALT_DEFAULT,
   ADMIN_HOME_INTRO_LINK_DEFAULT,
   ADMIN_HOME_INTRO_LINK_LIMIT,
@@ -33,6 +35,7 @@ import {
   ADMIN_VIEW_STATS_PV_LABEL_DEFAULT,
   ADMIN_VIEW_STATS_UV_LABEL_DEFAULT,
   canonicalizeAdminThemeSettings,
+  isAdminFilingsScope,
   isAdminHomeIntroLinkKey,
   isAdminNavId,
   isAdminTypographyFontId,
@@ -83,6 +86,7 @@ type FormCodecContext = {
   inputSiteFilingsPoliceNumber: HTMLInputElement;
   inputSiteFilingsPoliceLink: HTMLInputElement;
   inputSiteFilingsPoliceIcon: HTMLInputElement;
+  inputSiteFilingsScope: HTMLSelectElement;
   filingsPreviewValueEl: HTMLElement;
   filingsIconPreviewEl: HTMLElement;
   inputSiteAdminOverviewPublicVisible: HTMLInputElement;
@@ -230,6 +234,7 @@ export const createFormCodec = ({
   inputSiteFilingsPoliceNumber,
   inputSiteFilingsPoliceLink,
   inputSiteFilingsPoliceIcon,
+  inputSiteFilingsScope,
   filingsPreviewValueEl,
   filingsIconPreviewEl,
   inputSiteAdminOverviewPublicVisible,
@@ -490,6 +495,11 @@ export const createFormCodec = ({
     inputSidebarDividerNone.checked = value === 'none';
   };
 
+  const getSelectedFilingsScope = (): SiteFilingsScope => {
+    const value = inputSiteFilingsScope.value;
+    return isAdminFilingsScope(value) ? value : ADMIN_FILINGS_SCOPE_DEFAULT;
+  };
+
   const typographyGroups: Record<TypographyRole, HTMLElement> = {
     readable: inputTypographyReadable,
     copy: inputTypographyCopy,
@@ -647,6 +657,7 @@ export const createFormCodec = ({
           copyright: inputSiteFooterCopyright.value.trim()
         },
         filings: {
+          scope: getSelectedFilingsScope(),
           icp: {
             number: normalizeSingleLine(inputSiteFilingsIcpNumber.value) || null,
             link: normalizeSingleLine(inputSiteFilingsIcpLink.value) || null
@@ -795,6 +806,7 @@ export const createFormCodec = ({
     inputSiteFilingsPoliceNumber.value = settings.site.filings?.police?.number || '';
     inputSiteFilingsPoliceLink.value = settings.site.filings?.police?.link || '';
     inputSiteFilingsPoliceIcon.value = settings.site.filings?.police?.icon || '';
+    inputSiteFilingsScope.value = settings.site.filings?.scope ?? ADMIN_FILINGS_SCOPE_DEFAULT;
     inputSiteAdminOverviewPublicVisible.checked = settings.site.adminOverview?.publicVisible !== false;
     inputSiteAdminOverviewHiddenMessage.value =
       settings.site.adminOverview?.hiddenMessage || ADMIN_OVERVIEW_HIDDEN_MESSAGE_DEFAULT;

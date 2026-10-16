@@ -41,6 +41,7 @@ export type AdminThemeControls = RequiredElements<{
   inputSiteFilingsPoliceNumber: HTMLInputElement | null;
   inputSiteFilingsPoliceLink: HTMLInputElement | null;
   inputSiteFilingsPoliceIcon: HTMLInputElement | null;
+  inputSiteFilingsScope: HTMLSelectElement | null;
   filingsPreviewValueEl: HTMLElement | null;
   filingsIconPreviewEl: HTMLElement | null;
   socialCustomList: HTMLElement | null;
@@ -159,6 +160,7 @@ export const queryAdminThemeControls = (): AdminThemeControls | null => {
     inputSiteFilingsPoliceNumber: byId<HTMLInputElement>('site-filings-police-number'),
     inputSiteFilingsPoliceLink: byId<HTMLInputElement>('site-filings-police-link'),
     inputSiteFilingsPoliceIcon: byId<HTMLInputElement>('site-filings-police-icon'),
+    inputSiteFilingsScope: byId<HTMLSelectElement>('site-filings-scope'),
     filingsPreviewValueEl: byId<HTMLElement>('filings-preview-value'),
     filingsIconPreviewEl: byId<HTMLElement>('filings-icon-preview'),
     socialCustomList: byId<HTMLElement>('site-social-custom-list'),

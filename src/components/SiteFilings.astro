@@ -1,5 +1,6 @@
 ---
 // 备案信息（ICP / 公安联网备案）：渲染在页脚最底部，两项都为空时整块不输出。
+// scope 为 root 时只在站点根目录（含子路径部署的 base）输出，其余情况保持所有公开页面输出。
 // 号码与链接规则见 lib/filings.ts；图标允许 https 外链或 public 相对路径，文件缺失时不输出。
 import { createWithBase } from '../utils/format';
 import { resolveIcpFilingLink, resolvePoliceFilingLink } from '../lib/filings';
@@ -13,6 +14,11 @@ const { filings } = Astro.props;
 const base = import.meta.env.BASE_URL ?? '/';
 const withBase = createWithBase(base);
 
+// 根目录判定：base 与当前路径都补成结尾带斜杠的形式，子路径部署时 /repo/ 同样是根。
+const normalizeRootPath = (path: string): string => (path.endsWith('/') ? path : `${path}/`);
+const isSiteRoot = normalizeRootPath(Astro.url.pathname) === normalizeRootPath(base);
+const showFilings = filings.scope === 'root' ? isSiteRoot : true;
+
 const icpNumber = filings.icp.number;
 const policeNumber = filings.police.number;
 const icpHref = resolveIcpFilingLink(filings.icp.link);
@@ -23,7 +29,7 @@ const policeIconSrc = policeIcon
   : null;
 ---
 
-{icpNumber || policeNumber ? (
+{showFilings && (icpNumber || policeNumber) ? (
   <div class="site-footer__filings">
     {icpNumber ? (
       <a class="site-footer__filing" href={icpHref} target="_blank" rel="noreferrer">{icpNumber}</a>

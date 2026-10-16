@@ -150,6 +150,17 @@ const layoutSidebar = blockBody(layoutCss, '.sidebar');
   );
 });
 
+// 浮动列常驻首屏：定位与层级必须与 layout.css 一致，否则首页会先闪一下文档流里的按钮
+const snapshotFloatStack = blockBody(desktopSnapshot, '.float-stack');
+['position', 'right', 'bottom', 'display', 'z-index'].forEach((property) => {
+  compare(
+    `.float-stack ${property}`,
+    declaration(snapshotFloatStack, property),
+    declaration(blockBody(layoutCss, '.float-stack'), property),
+    LAYOUT_CSS
+  );
+});
+
 // 快照必须自带这些 token：缺了首屏会取不到值（例如 .page-header 的 gap 退化为 0）。
 [
   '--header-gap',
@@ -198,6 +209,89 @@ MOBILE_NAV_TIERS.forEach(({ query, gap, padding, fontSize }) => {
   compare(`${query} .nav a padding`, declaration(navLinkBlock, 'padding'), padding, LAYOUT_CSS);
   compare(`${query} .nav a font-size`, declaration(navLinkBlock, 'font-size'), fontSize, LAYOUT_CSS);
 });
+
+/**
+ * 窄屏顶栏（侧栏、标题、导航、动作图标）在首页快照里必须与 layout.css 的窄屏档逐条一致：
+ * 少一条或多一个值，都会让首页的标题到导航间距、动作图标位置与其他页面不同。
+ * 该档在 layout.css 里可能拆成多个 @media (max-width: 900px) 块，先合并再比较。
+ */
+const MOBILE_QUERY = '@media (max-width: 900px)';
+const MOBILE_HEADER_SELECTORS = [
+  ['.sidebar', ':where(body:not(.admin-page)) .sidebar'],
+  ['.sidebar__title', ':where(body:not(.admin-page)) .sidebar__title'],
+  ['.nav', ':where(body:not(.admin-page)) .nav'],
+  ['.sidebar-actions', ':where(body:not(.admin-page)) .sidebar-actions']
+];
+
+const mergeMediaBlocks = (css, query) => {
+  const merged = [];
+  let cursor = 0;
+  for (;;) {
+    const start = css.indexOf(query, cursor);
+    if (start === -1) return merged.join('\n');
+    const bodyStart = css.indexOf('{', start);
+    if (bodyStart === -1) return merged.join('\n');
+    let depth = 0;
+    let index = bodyStart;
+    for (; index < css.length; index += 1) {
+      if (css[index] === '{') depth += 1;
+      else if (css[index] === '}') {
+        depth -= 1;
+        if (depth === 0) break;
+      }
+    }
+    merged.push(css.slice(bodyStart + 1, index));
+    cursor = index;
+  }
+};
+
+/** 取媒体块内某选择器的全部声明，同名规则拆在多处时合并 */
+const mediaSelectorDeclarations = (block, selector) => {
+  if (!block) return null;
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`(?:^|\\n)[ \\t]*${escaped}\\s*\\{([^}]*)\\}`, 'g');
+  const merged = {};
+  let found = false;
+  let match;
+  while ((match = pattern.exec(block))) {
+    found = true;
+    match[1]
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .split(';')
+      .forEach((entry) => {
+        const index = entry.indexOf(':');
+        if (index === -1) return;
+        merged[entry.slice(0, index).trim()] = entry.slice(index + 1).replace(/\s+/g, ' ').trim();
+      });
+  }
+  return found ? merged : null;
+};
+
+const snapshotMobile = mergeMediaBlocks(snapshotCss, MOBILE_QUERY);
+const layoutMobile = mergeMediaBlocks(layoutCss, MOBILE_QUERY);
+if (!snapshotMobile || !layoutMobile) {
+  problems.push(`快照或 layout.css 缺少 ${MOBILE_QUERY} 档，无法比较窄屏顶栏`);
+} else {
+  MOBILE_HEADER_SELECTORS.forEach(([snapshotSelector, sourceSelector]) => {
+    const source = mediaSelectorDeclarations(layoutMobile, sourceSelector);
+    if (!source) return;
+    const snapshotDeclarations = mediaSelectorDeclarations(snapshotMobile, snapshotSelector);
+    Object.entries(source).forEach(([property, value]) => {
+      if (!snapshotDeclarations || !(property in snapshotDeclarations)) {
+        problems.push(
+          `快照缺少 ${MOBILE_QUERY} ${snapshotSelector} 的 ${property}（${path.relative(ROOT, LAYOUT_CSS)} = "${value}"）`
+        );
+        return;
+      }
+      if (snapshotDeclarations[property] !== value) {
+        problems.push(
+          `${MOBILE_QUERY} ${snapshotSelector} ${property} 漂移：首页快照 = "${snapshotDeclarations[property]}"，` +
+            `${path.relative(ROOT, LAYOUT_CSS)} = "${value}"`
+        );
+      }
+    });
+  });
+}
 
 if (problems.length > 0) {
   console.error('[check:home-critical-css] 首页首屏 critical CSS 与 src/styles 不一致：');

@@ -86,6 +86,16 @@
 
 `--page-gap-inline` 对应后台的「页面外缘间隙」（`site.pageGapPx`，默认与下限 32px）。`--page-inline = --page-gap-inline - --scrollbar-gutter-inline` 在构建期算好，与字体覆盖、窄屏标题宽度上限（`--site-title-max-inline`）一起以 `<html>` 内联属性输出，优先级高于 `:root` 与首屏快照。窄屏（≤ 900px）由 `global.css` 把 `--page-gap-inline` 与 `--page-inline` 覆写为 0。
 
+### 窄屏与触屏
+
+窄屏（≤ 900px）为单列壳层：壳层外边距归零，侧栏变成顶部横条，正文内边距由 `--pad-x` 决定。
+
+触屏设备（`hover: none` 且 `pointer: coarse`）的滚动条是浮层，不占布局宽度也不显示，桌面「结束内边距 = 起始内边距 − 滚动条槽」的换算不成立，因此单独处理：取消槽宽补偿使两侧视觉间隙相等，并撤掉为右下角浮动列预留的整列右内边距。`layout.css` 的触屏块声明在 `body` 上，以便盖过 `<html>` 内联的 `--page-inline`。窄屏内容区底部不留内边距，页脚贴底，与桌面一致。
+
+窄屏顶栏（站点标题、导航、动作图标）的尺寸在首页首屏快照与 `layout.css` 的窄屏档之间必须逐条一致，否则首页的标题到导航间距与图标位置会与其他页面不同；该一致性由 `check:home-critical-css` 比较。
+
+浮动列（`.float-stack`）常驻视口右下角，按需显示阅读模式、回到上次阅读位置与回到顶部按钮。窄屏与手机额外提供目录按钮：点击后滚动到文章开头的内联目录并展开，跳转前的位置入栈并锁定，此后目录内条目跳转不再入栈，「回到上次阅读位置」因此回到使用目录按钮之前的位置，用掉后恢复原有入栈规则。
+
 壳层几何的不变量由 `npm run check:layout-geometry` 解析构建产物断言：
 
 - 竖线两侧留白一致；
@@ -100,7 +110,7 @@
 
 `src/pages/index.astro` 的 `homeHeadCriticalCss` 是手写的首屏样式快照，在 head 中位于 `global.css` 之后，同优先级声明会长期覆盖真实样式。它与 `src/styles` 漂移时，问题只在首页复现。
 
-改动侧栏或壳层尺寸后，必须同步快照中的对应声明，由 `npm run check:home-critical-css` 比对 `index.astro` 与 `global.css`、`components/layout.css` 的取值。
+改动侧栏或壳层尺寸后，必须同步快照中的对应声明，由 `npm run check:home-critical-css` 比对 `index.astro` 与 `global.css`、`components/layout.css` 的取值：壳层与分割线、窄屏顶栏（侧栏、标题、导航、动作图标）逐条镜像，浮动列的定位与层级也在比对范围内。
 
 ## 字体子集与字符集
 

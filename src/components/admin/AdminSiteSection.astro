@@ -3,6 +3,8 @@ import AdminIcon from './AdminIcon.astro';
 import AdminSiteSocialSection from './AdminSiteSocialSection.astro';
 import {
   ADMIN_FILINGS_NUMBER_MAX_LENGTH,
+  ADMIN_FILINGS_SCOPE_DEFAULT,
+  ADMIN_FILINGS_SCOPE_OPTIONS,
   ADMIN_OVERVIEW_HIDDEN_MESSAGE_MAX_LENGTH,
   ADMIN_SITE_PAGE_GAP_DEFAULT,
   ADMIN_SITE_PAGE_GAP_HINT,
@@ -261,6 +263,17 @@ const filingFields: FilingField[] = [
           autocomplete="off"
           placeholder="images/beian.png"
         />
+      </label>
+      <label class="admin-field">
+        <span class="admin-label">
+          <span class="admin-label__main">备案信息显示范围</span>
+          <span class="admin-label__hint">（按规定只需在站点根目录可被检索到）</span>
+        </span>
+        <select class="admin-field__control" id="site-filings-scope">
+          {ADMIN_FILINGS_SCOPE_OPTIONS.map((option) => (
+            <option value={option.id} selected={option.id === ADMIN_FILINGS_SCOPE_DEFAULT}>{option.label}</option>
+          ))}
+        </select>
       </label>
       <div class="admin-field admin-field--full">
         <p class="admin-help">

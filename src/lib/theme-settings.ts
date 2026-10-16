@@ -49,6 +49,7 @@ import {
   getAdminThemeSettingsMismatchPaths,
   getAdminSocialOrderIssues,
   ADMIN_FILINGS_NUMBER_MAX_LENGTH,
+  ADMIN_FILINGS_SCOPE_DEFAULT,
   ADMIN_ICP_FILING_HOSTS,
   ADMIN_POLICE_FILING_HOSTS,
   ADMIN_SIDEBAR_DIVIDER_DEFAULT,
@@ -59,6 +60,7 @@ import {
   isAdminNavOrderValue,
   isAdminSocialOrderValue,
   isAdminSidebarDividerVariant,
+  isAdminFilingsScope,
   normalizeAdminSocialIconKey,
 } from './admin-console/theme-shared';
 
@@ -67,6 +69,8 @@ type SettingSource = 'new' | 'legacy' | 'default';
 export type SidebarNavId = 'blog' | 'projects' | 'bits' | 'devlog' | 'archive' | 'about';
 export type HeroPresetId = 'default' | 'none';
 export type SidebarDividerVariant = 'default' | 'subtle' | 'none';
+/** 备案信息显示范围：'all' 所有公开页面（默认），'root' 仅站点根目录。 */
+export type SiteFilingsScope = 'all' | 'root';
 // ThemeFontId 从字体注册表条目 id 派生：添加字体只需在 registry.ts 增加条目，无需改这里。
 export type { ThemeFontId } from './fonts/registry';
 export type TypographyRole = 'readable' | 'copy' | 'mono' | 'brand';
@@ -179,6 +183,11 @@ interface SiteFilingSettings {
 }
 
 export interface SiteFilingsSettings {
+  /**
+   * 备案信息显示范围：'all' 渲染到所有公开页面的页脚（默认，与历史行为一致），
+   * 'root' 只在站点根目录（含子路径部署的 base）渲染。
+   */
+  scope: SiteFilingsScope;
   icp: SiteFilingSettings;
   police: SiteFilingSettings & {
     icon: string | null;
@@ -328,6 +337,7 @@ interface ThemeSettingsSources {
     footerStartYear: SettingSource;
     footerShowCurrentYear: SettingSource;
     footerCopyright: SettingSource;
+    filingsScope: SettingSource;
     filingsIcpNumber: SettingSource;
     filingsIcpLink: SettingSource;
     filingsPoliceNumber: SettingSource;
@@ -579,6 +589,7 @@ const DEFAULT_SITE: SiteSettings = {
     copyright: LEGACY_FOOTER_COPYRIGHT
   },
   filings: {
+    scope: ADMIN_FILINGS_SCOPE_DEFAULT,
     icp: { number: null, link: null },
     police: { number: null, link: null, icon: null }
   },
@@ -864,6 +875,11 @@ const asHeroPresetId = (value: unknown): HeroPresetId | undefined => {
 const asSidebarDividerVariant = (value: unknown): SidebarDividerVariant | undefined => {
   if (typeof value !== 'string') return undefined;
   return isAdminSidebarDividerVariant(value) ? value : undefined;
+};
+
+const asSiteFilingsScope = (value: unknown): SiteFilingsScope | undefined => {
+  if (typeof value !== 'string') return undefined;
+  return isAdminFilingsScope(value) ? value : undefined;
 };
 
 const asTypographyFontId = (role: TypographyRole, value: unknown): ThemeFontId | undefined =>
@@ -1387,6 +1403,11 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
     undefined,
     DEFAULT_SITE.adminOverview.hiddenMessage
   );
+  const filingsScope = resolveValue<SiteFilingsScope>(
+    asSiteFilingsScope(siteFilingsJson?.scope),
+    undefined,
+    DEFAULT_SITE.filings.scope
+  );
   const filingsIcpNumber = resolveValue<string | null>(
     asNullableSingleLineString(siteFilingsIcpJson?.number, ADMIN_FILINGS_NUMBER_MAX_LENGTH),
     undefined,
@@ -1762,6 +1783,7 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
           hiddenMessage: adminOverviewHiddenMessage.value
         },
         filings: {
+          scope: filingsScope.value,
           icp: {
             number: filingsIcpNumber.value,
             link: filingsIcpLink.value
@@ -1890,6 +1912,7 @@ export const getThemeSettings = (): ThemeSettingsResolved => {
         footerCopyright: footerCopyright.source,
         adminOverviewPublicVisible: adminOverviewPublicVisible.source,
         adminOverviewHiddenMessage: adminOverviewHiddenMessage.source,
+        filingsScope: filingsScope.source,
         filingsIcpNumber: filingsIcpNumber.source,
         filingsIcpLink: filingsIcpLink.source,
         filingsPoliceNumber: filingsPoliceNumber.source,
@@ -2009,6 +2032,7 @@ const buildEditableThemeSettingsSnapshot = (
         ...resolved.settings.site.adminOverview
       },
       filings: {
+        scope: resolved.settings.site.filings.scope,
         icp: { ...resolved.settings.site.filings.icp },
         police: { ...resolved.settings.site.filings.police }
       },

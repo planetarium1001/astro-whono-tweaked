@@ -99,8 +99,9 @@ const listenSystemThemeChange = (listener: () => void) => {
 };
 
 /**
- * 主题切换涟漪：亮色时新快照从点击处放大（`::view-transition-new(root)`），
- * 暗色时旧快照反向收缩（`::view-transition-old(root)`）；不支持或偏好减少动效时直接切换。
+ * 主题切换涟漪：切到亮色时新快照自按钮中心放大（`::view-transition-new(root)`），
+ * 切到暗色时旧快照反向收缩回按钮中心（`::view-transition-old(root)`）；
+ * 不支持 View Transitions 或偏好减少动效时直接切换。
  */
 type ViewTransitionLike = { ready: Promise<void> };
 type StartViewTransitionLike = (callback: () => void) => ViewTransitionLike;
@@ -119,12 +120,8 @@ const getStartViewTransition = (): StartViewTransitionLike | null => {
   return (candidate as StartViewTransitionLike).bind(document);
 };
 
-// 圆心取指针位置；键盘触发（clientX/Y 为 0）时回退到按钮中心。
-const resolveRippleOrigin = (event: MouseEvent) => {
-  if (event.clientX > 0 || event.clientY > 0) {
-    return { x: event.clientX, y: event.clientY };
-  }
-
+// 圆心取主题切换按钮自身的中心；按钮缺失或量不到尺寸时回退到视口顶部中点。
+const resolveRippleOrigin = () => {
   const rect = themeBtn?.getBoundingClientRect();
   if (rect && (rect.width > 0 || rect.height > 0)) {
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
@@ -139,14 +136,14 @@ const resolveRippleOrigin = (event: MouseEvent) => {
  */
 const RIPPLE_ATTR = 'themeRipple';
 
-const applyThemeWithRipple = (event: MouseEvent, apply: () => void, targetTheme: Theme) => {
+const applyThemeWithRipple = (apply: () => void, targetTheme: Theme) => {
   const startViewTransition = getStartViewTransition();
   if (!startViewTransition || prefersReducedMotion()) {
     apply();
     return;
   }
 
-  const { x, y } = resolveRippleOrigin(event);
+  const { x, y } = resolveRippleOrigin();
   const radius = Math.hypot(
     Math.max(x, window.innerWidth - x),
     Math.max(y, window.innerHeight - y)
@@ -154,7 +151,8 @@ const applyThemeWithRipple = (event: MouseEvent, apply: () => void, targetTheme:
   const center = `${x}px ${y}px`;
   const circle = (r: number) => `circle(${Math.ceil(r)}px at ${center})`;
 
-  // 亮色 = 扩散（新快照从小圆放大）；暗色 = 收敛（旧快照从整屏收到点击处）。
+  // 只有有效主题发生变化才会走到这里：切到亮色 = 发散（新快照从小圆放大到整屏），
+  // 切到暗色 = 收缩（旧快照从整屏收到按钮中心）。
   const expanding = targetTheme === 'light';
   root.dataset[RIPPLE_ATTR] = expanding ? 'expand' : 'converge';
 
@@ -193,18 +191,19 @@ const applyThemeWithRipple = (event: MouseEvent, apply: () => void, targetTheme:
 
 const initTheme = () => {
   setThemeMode(activeThemeMode, false);
-  themeBtn?.addEventListener('click', (event) => {
+  themeBtn?.addEventListener('click', () => {
     const nextMode = getNextThemeMode(activeThemeMode);
-    const apply = () => setThemeMode(nextMode);
+    const currentTheme = resolveTheme(activeThemeMode);
     const nextTheme = resolveTheme(nextMode);
+    const apply = () => setThemeMode(nextMode);
 
-    // 解析后主题未变（如浅色 → 跟随系统且系统为浅色）时不跑涟漪。
-    if (nextTheme === resolveTheme(activeThemeMode)) {
+    // 有效主题未变（如亮色 → 跟随系统且系统为浅色）时不跑涟漪，直接切换模式。
+    if (nextTheme === currentTheme) {
       apply();
       return;
     }
 
-    applyThemeWithRipple(event, apply, nextTheme);
+    applyThemeWithRipple(apply, nextTheme);
   });
 
   const syncSystemTheme = () => {

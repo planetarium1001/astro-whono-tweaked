@@ -1512,15 +1512,6 @@ body.immersive-page[data-reading="immersive"] .content__inner {
   margin: 0 auto;
 }
 
-body.immersive-page[data-reading="immersive"] .prose {
-  font-size: 17px;
-  line-height: 1.9;
-}
-
-body.immersive-page[data-reading="immersive"] .prose p {
-  margin: 16px 0;
-}
-
 /* 窄屏：侧栏是顶部横条，用 max-height 收起（高度由 sidebar-reading.ts 量出） */
 @media (max-width: 900px) {
   body.immersive-page .sidebar {

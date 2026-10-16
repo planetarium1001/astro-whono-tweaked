@@ -185,7 +185,7 @@
 
 /**
  * 涟漪方向决定层叠顺序：默认新快照在上，扩散只需动画新快照的 clip；
- * 收敛要让旧快照从整屏收到点击点，旧快照须抬到新快照之上。
+ * 收敛要让旧快照从整屏收到按钮中心，旧快照须抬到新快照之上。
  * data-theme-ripple 由 scripts/sidebar-theme.ts 在过渡期间挂在 <html> 上。
  */
 :root[data-theme-ripple='expand']::view-transition-new(root) {
