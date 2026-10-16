@@ -81,8 +81,12 @@ type BuildBaseIslandPropsInput<Payload extends AdminContentWorkspaceEditorPayloa
 type BuildListIslandPropsInput = BuildBaseIslandPropsInput<
   AdminBlogEditorPayload | AdminProjectsEditorPayload | AdminDevlogEditorPayload
 > & {
-  BlogOutlineItems: EditorOutlineBlogSourceItem[];
   initialArticleInfoOpen: boolean;
+};
+
+/** blog 是列表集合中唯一渲染目录/大纲的集合。 */
+type BuildBlogIslandPropsInput = BuildListIslandPropsInput & {
+  BlogOutlineItems: EditorOutlineBlogSourceItem[];
 };
 
 type BuildBitsIslandPropsInput = BuildBaseIslandPropsInput<AdminBitsEditorPayload> & {
@@ -94,7 +98,7 @@ type BuildAboutIslandPropsInput = BuildBaseIslandPropsInput<AdminAboutEditorPayl
 
 type BuildIslandPropsInput<Payload extends AdminContentWorkspaceEditorPayload> =
   Payload extends AdminBlogEditorPayload
-    ? BuildListIslandPropsInput
+    ? BuildBlogIslandPropsInput
     : Payload extends AdminProjectsEditorPayload
       ? BuildListIslandPropsInput
       : Payload extends AdminBitsEditorPayload
@@ -232,7 +236,6 @@ const buildListEditorIslandProps = ({
   payload,
   endpoints,
   returnHref,
-  BlogOutlineItems,
   initialArticleInfoOpen
 }: BuildListIslandPropsInput): BlogEditorShellProps => ({
   collection: payload.collection,
@@ -244,8 +247,16 @@ const buildListEditorIslandProps = ({
   revision: payload.revision,
   initialFrontmatter: payload.values,
   initialBody: payload.bodyText,
-  BlogOutlineItems,
   initialArticleInfoOpen
+});
+
+/** blog 额外带目录条目；projects / devlog 没有目录，不进入岛属性。 */
+const buildBlogEditorIslandProps = ({
+  BlogOutlineItems,
+  ...listInput
+}: BuildBlogIslandPropsInput): BlogEditorShellProps => ({
+  ...buildListEditorIslandProps(listInput),
+  BlogOutlineItems
 });
 
 const buildBitsEditorIslandProps = ({
@@ -302,7 +313,7 @@ const CONTENT_EDITOR_PAGE_REGISTRY = {
     },
     usesImagePicker: getAdminContentCollectionCapability('blog').imagePicker,
     resolveReturnHref: ({ withBase }) => withBase('/admin/content/'),
-    buildIslandProps: buildListEditorIslandProps
+    buildIslandProps: buildBlogEditorIslandProps
   },
   bits: {
     collection: 'bits',
@@ -337,7 +348,7 @@ const CONTENT_EDITOR_PAGE_REGISTRY = {
       'adminContentEditorImageInsert',
       'adminContentEditorGalleryInsert'
     ],
-    outlineKind: 'list',
+    outlineKind: 'none',
     infoTrigger: {
       attribute: 'data-admin-article-info-trigger',
       label: '修改信息',
@@ -359,7 +370,7 @@ const CONTENT_EDITOR_PAGE_REGISTRY = {
       'adminContentEditorImageInsert',
       'adminContentEditorGalleryInsert'
     ],
-    outlineKind: 'list',
+    outlineKind: 'none',
     infoTrigger: {
       attribute: 'data-admin-article-info-trigger',
       label: '修改信息',
@@ -413,16 +424,21 @@ export const buildAdminContentEditorIslandProps = ({
   outlines: AdminContentEditorOutlines;
   initialArticleInfoOpen: boolean;
 }): AdminContentEditorIslandProps => {
-  if (
-    payload.collection === 'blog'
-    || payload.collection === 'projects'
-    || payload.collection === 'devlog'
-  ) {
-    return CONTENT_EDITOR_PAGE_REGISTRY[payload.collection].buildIslandProps({
+  if (payload.collection === 'blog') {
+    return CONTENT_EDITOR_PAGE_REGISTRY.blog.buildIslandProps({
       payload,
       endpoints,
       returnHref,
       BlogOutlineItems: outlines.BlogOutlineItems,
+      initialArticleInfoOpen
+    });
+  }
+
+  if (payload.collection === 'projects' || payload.collection === 'devlog') {
+    return CONTENT_EDITOR_PAGE_REGISTRY[payload.collection].buildIslandProps({
+      payload,
+      endpoints,
+      returnHref,
       initialArticleInfoOpen
     });
   }

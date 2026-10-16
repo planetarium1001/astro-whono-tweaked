@@ -215,6 +215,24 @@
   }
 }
 
+/**
+ * 触屏设备（手机、平板）单独处理：滚动条是浮层，不占布局宽度也不显示，
+ * 桌面按「起始内边距 = 结束内边距 + 滚动条槽」对齐的做法在这里不成立。
+ * 1) 结束内边距不再扣滚动条槽，两侧视觉间隙相等；
+ * 2) 右下角浮动列是浮层，不为它预留整列右内边距，正文左右对称。
+ * 声明落在 body 上，以便盖过 <html> 内联的 --page-inline。
+ */
+@media (hover: none) and (pointer: coarse) {
+  body:not(.admin-page) {
+    --scrollbar-gutter-inline: 0px;
+    --page-inline: var(--page-gap-inline);
+  }
+
+  :root:not([data-toc-collapsed='true']) body.immersive-page .shell[data-toc='true'] .content {
+    padding-right: var(--pad-x);
+  }
+}
+
 .content {
   padding: 56px var(--pad-x);
   min-height: 100vh;
@@ -988,7 +1006,7 @@ body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
-    row-gap: 10px;
+    row-gap: 6px;
     column-gap: 12px;
   }
 
@@ -997,6 +1015,8 @@ body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
     order: 1;
     flex: 1 1 auto;
     font-size: 24px;
+    /* 顶栏标题收紧行高，避免与导航之间出现过大间隙 */
+    line-height: 1.3;
     /* 窄屏是横向顶栏：按内容宽度、左对齐，避免挤掉右侧动作图标 */
     width: auto;
     text-align: left;
@@ -1078,7 +1098,8 @@ body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
   }
 
   :where(body:not(.admin-page)) .content {
-    padding: calc(10px + env(safe-area-inset-top)) calc(var(--pad-x) + env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) calc(var(--pad-x) + env(safe-area-inset-left));
+    /* 公开页底部不留内边距，页脚自带间距并贴底，与桌面一致；只保留安全区 */
+    padding: calc(10px + env(safe-area-inset-top)) calc(var(--pad-x) + env(safe-area-inset-right)) env(safe-area-inset-bottom) calc(var(--pad-x) + env(safe-area-inset-left));
   }
 
   :where(body:not(.admin-page)) .page-header {
@@ -1114,7 +1135,8 @@ body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
   }
 
   :where(body:not(.admin-page)) .content {
-    padding: calc(18px + env(safe-area-inset-top)) calc(var(--pad-x) + env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) calc(var(--pad-x) + env(safe-area-inset-left));
+    /* 同上：底部只保留安全区，页脚贴底 */
+    padding: calc(18px + env(safe-area-inset-top)) calc(var(--pad-x) + env(safe-area-inset-right)) env(safe-area-inset-bottom) calc(var(--pad-x) + env(safe-area-inset-left));
   }
 
   :where(body:not(.admin-page)) .nav a {

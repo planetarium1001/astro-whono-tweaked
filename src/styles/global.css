@@ -281,6 +281,14 @@ a:focus-visible {
   border-bottom-color: transparent;
 }
 
+/* 编程式聚焦的容器不画焦点环：跳过链接目标（main）与弹窗本体、弹窗标题 */
+:where([tabindex='-1']):focus,
+:where([tabindex='-1']):focus-visible,
+dialog:focus,
+dialog:focus-visible {
+  outline: none;
+}
+
 /* 正文区域链接：默认虚线，悬停实线 */
 .content__inner :where(p, li, blockquote, figcaption) a:where(:not([class])) {
   border-bottom: 1px dashed currentColor;

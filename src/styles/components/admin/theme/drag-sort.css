@@ -1,0 +1,81 @@
+/* Theme Console 列表拖拽：侧栏导航表与社交链接表共用的把手外观与拖动态。
+   两表的类名前缀与尺寸变量不同，差异以并列前缀写在同一处，规则本身只有一份。
+   本文件由 theme/index.css 统一引入（两表同属一个样式入口，避免规则被内联两次）。 */
+
+/* 拖动锚点：仅此处可发起拖拽。 */
+.admin-nav-grip,
+.admin-social-grip {
+  justify-self: center;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--faint);
+  cursor: grab;
+}
+
+.admin-nav-grip {
+  width: var(--admin-nav-grip-width);
+}
+
+/* 社交表的把手显式固定在第 1 列；导航表靠栅格自动排布到把手列。 */
+.admin-social-grip {
+  grid-column: 1;
+  width: var(--admin-social-column-grip-width);
+}
+
+.admin-nav-grip:hover,
+.admin-social-grip:hover {
+  color: var(--muted);
+}
+
+.admin-nav-grip:focus-visible,
+.admin-social-grip:focus-visible {
+  outline: none;
+  box-shadow: var(--admin-focus-shadow);
+  color: var(--text);
+}
+
+.admin-nav-grip:active,
+.admin-nav-row[data-drag-sort-dragging='true'] .admin-nav-grip,
+.admin-social-grip:active,
+.admin-social-row[data-drag-sort-dragging='true'] .admin-social-grip {
+  cursor: grabbing;
+}
+
+.admin-nav-grip__icon,
+.admin-social-grip__icon {
+  display: block;
+  pointer-events: none;
+}
+
+.admin-nav-grip__icon {
+  width: var(--admin-nav-grip-icon-size);
+  height: var(--admin-nav-grip-icon-size);
+}
+
+.admin-social-grip__icon {
+  width: var(--admin-social-grip-icon-size);
+  height: var(--admin-social-grip-icon-size);
+}
+
+/* 拖动中的行与目标插入位置。 */
+.admin-nav-row[data-drag-sort-dragging='true'],
+.admin-social-row[data-drag-sort-dragging='true'] {
+  opacity: 0.5;
+}
+
+.admin-nav-row[data-drag-sort-over='before'],
+.admin-social-row[data-drag-sort-over='before'] {
+  box-shadow: inset 0 2px 0 var(--admin-focus-border);
+}
+
+.admin-nav-row[data-drag-sort-over='after'],
+.admin-social-row[data-drag-sort-over='after'] {
+  box-shadow: inset 0 -2px 0 var(--admin-focus-border);
+}

@@ -1,5 +1,7 @@
 /* /archive/ 全站时间线（一级胶囊 + 年月分组，含窄屏）；一级胶囊样式见 components/scope-pills.css。 */
 @import "./components/scope-pills.css";
+/* 条目（行）排版与 /devlog/ 共用。 */
+@import "./components/timeline-entry.css";
 
 .archive-timeline {
   display: flex;
@@ -39,16 +41,12 @@
 .archive-timeline__date {
   /* 日期不用 --faint（亮暗都太淡），改用项目卡胶囊的文字色 --muted */
   color: var(--muted);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 
 .archive-timeline__title {
   color: var(--text);
   font-size: 15px;
   text-decoration: none;
-  min-width: 0;
   /* 标题允许换行，不截断 */
   overflow-wrap: anywhere;
 }

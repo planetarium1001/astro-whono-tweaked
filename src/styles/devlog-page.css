@@ -3,6 +3,9 @@
    仅在日期处用页面底色断开成节点；摘要一刀切：任一条被压成省略号或处于窄屏档时，
    列表内不展示摘要，回退到展开正文顶部（devlog-excerpts.ts / devlog-drawer.ts）。 */
 
+/* 条目（行）排版与 /archive/ 共用。 */
+@import "./components/timeline-entry.css";
+
 :root {
   /*
    * 时间线 x = 行左内边距 8px + 年份中轴 16px = 24px。
@@ -109,12 +112,9 @@
   z-index: 1;
   padding-right: 2px;
   background: var(--bg);
-  font-variant-numeric: tabular-nums;
   /* 用 --muted 而非 --faint：后者在亮暗两种模式下都偏淡 */
   color: var(--muted);
-  font-size: 13px;
   font-weight: 400;
-  white-space: nowrap;
 }
 
 /**
@@ -188,7 +188,6 @@
   font-weight: 400;
   color: var(--text);
   font-size: 14px;
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

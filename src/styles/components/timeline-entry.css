@@ -1,0 +1,15 @@
+/* /archive/ 与 /devlog/ 条目（行）共用的排版：
+   日期的等宽数字与不换行、标题允许收缩的基准。
+   两页的行栅格、标题字号层级、截断方式与悬停效果各自不同，仍留在各自页面样式里。 */
+
+.archive-timeline__date,
+.devlog-row__date {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.archive-timeline__title,
+.devlog-row__title {
+  min-width: 0;
+}

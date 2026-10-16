@@ -1,7 +1,9 @@
 /* Admin Theme Console
-   聚合 Theme Console 私有表单、侧栏导航编辑与社交链接样式。
+   聚合 Theme Console 私有表单、侧栏导航编辑、社交链接与列表拖拽样式。
+   drag-sort.css 由导航表与社交表共用，只在此引入一次。
 */
 
 @import "./form.css";
 @import "./social.css";
 @import "./nav.css";
+@import "./drag-sort.css";

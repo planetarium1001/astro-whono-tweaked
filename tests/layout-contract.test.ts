@@ -297,6 +297,37 @@ describe('窄屏站点标题宽度：后台百分比设置', () => {
   });
 });
 
+describe('触屏设备：滚动条不占宽度，正文左右必须对称', () => {
+  const TOUCH_QUERY = '@media (hover: none) and (pointer: coarse)';
+
+  const touchBlock = (layout: string) => {
+    const start = layout.indexOf(TOUCH_QUERY);
+    return start === -1 ? '' : layout.slice(start, layout.indexOf('\n}\n', start));
+  };
+
+  it('触屏块取消滚动条槽补偿，两侧视觉间隙相等', async () => {
+    const block = touchBlock(await read(LAYOUT_CSS));
+
+    expect(block).toContain('--scrollbar-gutter-inline: 0px');
+    expect(block).toMatch(/--page-inline:\s*var\(--page-gap-inline\)/);
+  });
+
+  it('触屏不为右下角浮动列预留整列右内边距', async () => {
+    const layout = await read(LAYOUT_CSS);
+
+    // 中屏的预留规则仍在，只由触屏块覆盖为对称值
+    expect(layout).toContain('padding-right: max(calc(var(--pad-x) / 2)');
+    expect(touchBlock(layout)).toContain('padding-right: var(--pad-x)');
+  });
+
+  it('窄屏内容区底部不留额外内边距，页脚贴底', async () => {
+    const layout = await read(LAYOUT_CSS);
+
+    expect(layout).not.toContain('calc(48px + env(safe-area-inset-bottom))');
+    expect(layout).not.toContain('calc(56px + env(safe-area-inset-bottom))');
+  });
+});
+
 describe('页面外缘间隙：后台 px 设置', () => {
   it('BaseLayout 把间隙与换算后的 --page-inline 写成 <html> 内联属性', async () => {
     const [layout, globalCss, themeSettings] = await Promise.all([

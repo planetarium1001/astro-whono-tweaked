@@ -71,8 +71,15 @@ const LEAVE_CONFIRM_MESSAGE = '当前有未保存更改，确定要离开此页�
 const ARTICLE_INFO_TRIGGER_SELECTOR = '[data-admin-article-info-trigger]';
 const PAGE_ACTIONS_HOST_SELECTOR = '[data-admin-editor-page-actions-host]';
 const FRONTMATTER_PANEL_ID = 'admin-editor-frontmatter-panel';
-const ARTICLE_INFO_DIALOG_TITLE = '文章信息';
-const ARTICLE_INFO_FIELDS_ARIA_LABEL = '随笔字段';
+/** 壳层由 blog / projects / devlog 共用，信息弹窗文案按集合取。 */
+const ARTICLE_INFO_COPY: Record<BlogEditorShellProps['collection'], {
+  dialogTitle: string;
+  fieldsAriaLabel: string;
+}> = {
+  blog: { dialogTitle: '文章信息', fieldsAriaLabel: '随笔字段' },
+  projects: { dialogTitle: '项目信息', fieldsAriaLabel: '项目字段' },
+  devlog: { dialogTitle: '更新信息', fieldsAriaLabel: '更新字段' }
+};
 const OUTLINE_PANEL_ID = 'admin-editor-outline-panel';
 const SYNTAX_PANEL_ID = 'admin-editor-syntax-panel';
 const PREVIEW_OUTLINE_KEY_ATTR = 'data-admin-outline-key';
@@ -98,6 +105,7 @@ let {
 }: BlogEditorShellProps = $props();
 
 const editorAdapter = getContentEditorAdapter(collection);
+const articleInfoCopy = ARTICLE_INFO_COPY[collection];
 const slugPlaceholder = $derived(`留空使用默认：${defaultPublicSlug || flattenEntryIdToSlug(entryId)}`);
 const bodyEditingEnabled = editorAdapter.capabilities.body;
 const previewEnabled = editorAdapter.capabilities.preview;
@@ -881,8 +889,8 @@ $effect(() => {
     bind:this={editorDialogs}
     bind:frontmatter
     {collection}
-    dialogTitle={ARTICLE_INFO_DIALOG_TITLE}
-    fieldsAriaLabel={ARTICLE_INFO_FIELDS_ARIA_LABEL}
+    dialogTitle={articleInfoCopy.dialogTitle}
+    fieldsAriaLabel={articleInfoCopy.fieldsAriaLabel}
     frontmatterOpen={frontmatterPanelOpen}
     {relativePath}
     {issues}
