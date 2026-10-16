@@ -297,6 +297,35 @@ describe('窄屏站点标题宽度：后台百分比设置', () => {
   });
 });
 
+describe('窄屏覆盖规则的源码顺序', () => {
+  it('窄屏顶栏覆盖排在基础规则之后，否则同特异性下会被覆盖', async () => {
+    const layout = await read(LAYOUT_CSS);
+    const baseTitle = layout.indexOf('\n.sidebar__title {');
+    const baseActions = layout.indexOf('\n.sidebar-actions {');
+    const override = layout.indexOf('窄屏顶栏的最终覆盖');
+
+    expect(baseTitle, '需要基础 .sidebar__title 规则').toBeGreaterThan(-1);
+    expect(baseActions, '需要基础 .sidebar-actions 规则').toBeGreaterThan(-1);
+    expect(override, '需要文件末尾的窄屏顶栏最终覆盖').toBeGreaterThan(-1);
+    expect(override).toBeGreaterThan(baseTitle);
+    expect(override).toBeGreaterThan(baseActions);
+
+    const block = layout.slice(override);
+    expect(block).toMatch(/\.sidebar__title\s*\{[^}]*text-align:\s*left/);
+    expect(block).toMatch(/\.sidebar-actions\s*\{[^}]*align-self:\s*start/);
+  });
+
+  it('窄屏表格覆盖排在基础表格规则之后', async () => {
+    const prose = await read('src/styles/components/prose.css');
+    const base = prose.indexOf('\n.prose table {');
+    const override = prose.indexOf('.prose table {\n    display: block;');
+
+    expect(base, '需要基础 .prose table 规则').toBeGreaterThan(-1);
+    expect(override, '需要窄屏表格覆盖').toBeGreaterThan(-1);
+    expect(override).toBeGreaterThan(base);
+  });
+});
+
 describe('触屏设备：滚动条不占宽度，正文左右必须对称', () => {
   const TOUCH_QUERY = '@media (hover: none) and (pointer: coarse)';
 

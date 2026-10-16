@@ -1643,3 +1643,35 @@ body.immersive-page[data-reading="immersive"] .content__inner {
     transition: none;
   }
 }
+
+/**
+ * 窄屏顶栏的最终覆盖，必须留在文件末尾。
+ * 上面的窄屏块与基础规则特异性相同（:where(...) 不计特异性），而
+ * .sidebar__title 与 .sidebar-actions 的基础样式在本文件靠后的一节里，
+ * 同特异性下后写者赢：不在这里再声明一次，标题字号/对齐与图标的 align-self
+ * 会被基础规则覆盖，窄屏顶栏因此只在首页（首屏快照把规则放在末尾）表现正常。
+ */
+@media (max-width: 900px) {
+  :where(body:not(.admin-page)) .sidebar__title {
+    font-size: 24px;
+    line-height: 1.3;
+    width: auto;
+    text-align: left;
+    transform-origin: left center;
+    max-width: var(--site-title-max-inline, 35%);
+    flex: 1 1 auto;
+    order: 1;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  :where(body:not(.admin-page)) .sidebar-actions {
+    order: 2;
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: calc((24px * 1.3 - 36px) / 2);
+    align-self: start;
+    margin-left: auto;
+    gap: 4px;
+  }
+}
