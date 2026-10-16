@@ -2,7 +2,7 @@
   "title": "Astro Whono Tweaked",
   "description": "一个极简双栏 Astro 主题的展示站，本仓库为 planetarium1001/astro-whono-tweaked。",
   "defaultLocale": "zh-CN",
-  "titleMaxPercent": 35,
+  "titleMaxPercent": 50,
   "pageGapPx": 32,
   "footer": {
     "startYear": 2025,

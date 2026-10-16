@@ -1509,7 +1509,11 @@ body[data-reading="immersive"] .reader-toggle .icon-book-open {
 .float-stack__button[aria-disabled="true"] {
   opacity: 0.35;
   cursor: default;
-  pointer-events: none;
+}
+
+/* 触屏：手势交给点击处理，避免双击缩放与轻微滑动把点击吃掉 */
+.float-stack__button {
+  touch-action: manipulation;
 }
 
 .float-stack__button .icon {

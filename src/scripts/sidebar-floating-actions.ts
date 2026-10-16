@@ -184,6 +184,8 @@ const initFloatingStack = () => {
   };
 
   stackButton?.addEventListener('click', () => {
+    // 状态可能过期（滚动事件还没同步）：先重算，避免这次点击被直接吞掉。
+    syncScrollTopButton();
     if (stackButton?.getAttribute('aria-disabled') === 'true') return;
     pushCurrentPosition();
     scrollToY(0);
@@ -191,6 +193,8 @@ const initFloatingStack = () => {
   });
 
   resumeButton?.addEventListener('click', () => {
+    // 同上：点击时先按当前位置重算可见性，再决定用栈顶还是跨次记录。
+    syncResumeButton();
     const fromStored = positionStack.length === 0;
     const target = positionStack.pop() ?? storedPosition;
     if (!target) return;
