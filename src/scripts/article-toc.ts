@@ -10,6 +10,11 @@ const FLASH_DURATION_MS = 1500;
 const TOC_COLLAPSED_KEY = 'astro-whono:toc-collapsed';
 // 内联目录在窄于该断点时才是目录的唯一形态（宽于它由右侧常驻目录接管）。
 const INLINE_TOC_MQ = '(max-width: 1279.98px)';
+// 与 article-toc.css 的 .article-toc--inline[data-toc-anim] 过渡时长对齐，另留少量余量。
+const INLINE_TOC_ANIM_MS = 320;
+// 过渡高度变量与状态属性，见 article-toc.css 同名选择器。
+const INLINE_TOC_HEIGHT_VAR = '--article-toc-inline-height';
+const INLINE_TOC_ANIM_ATTR = 'data-toc-anim';
 
 const prefersReducedMotion = () =>
   typeof window.matchMedia === 'function'
@@ -83,10 +88,118 @@ const initArticleToc = () => {
     });
   };
 
-  const closeInlineToc = (link: Element) => {
-    const details = link.closest<HTMLDetailsElement>('details.article-toc--inline');
-    if (details?.open) details.open = false;
+  /**
+   * 窄屏内联目录的展开 / 收起过渡。
+   *
+   * `<details>` 的原生开合不参与高度过渡，这里沿用窄屏侧栏收起的一套做法
+   * （见 layout.css 的 body[data-reading-anim] .sidebar 与 sidebar-reading.ts）：
+   * 脚本量出高度写入 --article-toc-inline-height，过渡期间裁掉溢出，结束后撤掉过渡态。
+   * 过渡期间 details 保持展开（内容才有得裁），收起结束时才落定 details.open。
+   */
+  const inlineToc = document.querySelector<HTMLDetailsElement>('details.article-toc--inline');
+
+  type InlineTocPending = { open: boolean; onSettled?: (() => void) | undefined };
+  let inlineTocPending: InlineTocPending | null = null;
+  let inlineTocTimer: number | undefined;
+
+  /** 撤掉过渡态：状态属性、高度变量与兜底定时器。 */
+  const resetInlineTocAnim = () => {
+    if (inlineTocTimer !== undefined) {
+      window.clearTimeout(inlineTocTimer);
+      inlineTocTimer = undefined;
+    }
+    if (!inlineToc) return;
+    inlineToc.removeAttribute(INLINE_TOC_ANIM_ATTR);
+    inlineToc.style.removeProperty(INLINE_TOC_HEIGHT_VAR);
   };
+
+  /** 过渡收尾：先撤掉裁切再落定 details.open，两端都不会跳变。 */
+  const settleInlineToc = (open: boolean, onSettled?: () => void) => {
+    resetInlineTocAnim();
+    inlineTocPending = null;
+    if (inlineToc) inlineToc.open = open;
+    onSettled?.();
+  };
+
+  /**
+   * 展开 / 收起内联目录，返回是否真的做了过渡。
+   * onSettled 在过渡结束后调用；未做过渡（减弱动效、元素缺失）时立即调用。
+   */
+  const toggleInlineToc = (open: boolean, onSettled?: () => void) => {
+    // 打断上一段过渡：上一段的收尾回调照常执行，不丢用户已发起的跳转。
+    const interrupted = inlineTocPending;
+    resetInlineTocAnim();
+    inlineTocPending = null;
+
+    const list = inlineToc?.querySelector<HTMLElement>('.article-toc__list') ?? null;
+    if (!inlineToc || !list || prefersReducedMotion()) {
+      if (inlineToc) inlineToc.open = open;
+      interrupted?.onSettled?.();
+      onSettled?.();
+      return false;
+    }
+
+    // 目标态已达成又没有待收尾的过渡：不必把内容重放一次淡入。
+    if (!interrupted && inlineToc.open === open) {
+      onSettled?.();
+      return false;
+    }
+
+    const openedBefore = inlineToc.open;
+    // 起点取当前可见高度：被打断时也从中途接着走，不会跳变。
+    const startHeight = inlineToc.getBoundingClientRect().height;
+    // 量自然高度须先渲染内容（关闭态下列表不显示），并撤掉裁切；同帧内不会绘出中间态。
+    inlineToc.open = true;
+    inlineToc.removeAttribute(INLINE_TOC_ANIM_ATTR);
+    inlineToc.style.removeProperty(INLINE_TOC_HEIGHT_VAR);
+    void inlineToc.offsetHeight;
+    const expandedHeight = inlineToc.getBoundingClientRect().height;
+    const collapsedHeight = Math.max(expandedHeight - list.getBoundingClientRect().height, 0);
+
+    // 起点帧：借用相反方向的值把列表压回起点；列表本来就在场时不重放淡入。
+    inlineToc.setAttribute(INLINE_TOC_ANIM_ATTR, open && !openedBefore ? 'collapse' : 'expand');
+    inlineToc.style.setProperty(INLINE_TOC_HEIGHT_VAR, `${startHeight}px`);
+    // 强制一次布局：max-height 由 none 进入具体值无法插值，须先提交起点帧。
+    void inlineToc.offsetHeight;
+    // 终点帧：高度取刚量到的自然高度，撤掉裁切时不会露出被裁的内容。
+    inlineToc.setAttribute(INLINE_TOC_ANIM_ATTR, open ? 'expand' : 'collapse');
+    inlineToc.style.setProperty(
+      INLINE_TOC_HEIGHT_VAR,
+      `${open ? expandedHeight : collapsedHeight}px`
+    );
+
+    inlineTocPending = { open, onSettled };
+    interrupted?.onSettled?.();
+    inlineTocTimer = window.setTimeout(() => settleInlineToc(open, onSettled), INLINE_TOC_ANIM_MS);
+    return true;
+  };
+
+  /** 目录条目跳转前收起内联目录，收尾后再滚动，落点才不受过渡期间的高度变化影响。 */
+  const closeInlineToc = (link: Element, onSettled: () => void) => {
+    const details = link.closest<HTMLDetailsElement>('details.article-toc--inline');
+    if (!details || !details.open) {
+      onSettled();
+      return;
+    }
+    if (details === inlineToc) {
+      toggleInlineToc(false, onSettled);
+      return;
+    }
+    details.open = false;
+    onSettled();
+  };
+
+  /* 摘要条的点击也由脚本接管：原生开合没有高度过渡。 */
+  const inlineTocSummary = inlineToc?.querySelector<HTMLElement>('summary') ?? null;
+
+  if (inlineToc && inlineTocSummary) {
+    const toc = inlineToc;
+    inlineTocSummary.addEventListener('click', (event) => {
+      event.preventDefault();
+      // 过渡期间 open 一直为 true，这里按当前状态取反即「展开中再点收起」。
+      toggleInlineToc(!toc.open);
+    });
+  }
 
   /* 目标章节高亮：铺一层从标题到下一个同级/更高级标题的淡色带。 */
   const prose = document.querySelector<HTMLElement>('.prose');
@@ -138,25 +251,28 @@ const initArticleToc = () => {
 
       event.preventDefault();
       setActive(id);
-      // 先收起折叠目录再滚动，避免落点偏移。
-      closeInlineToc(link);
-      // 覆盖层随正文滚动，可在平滑滚动前铺好。
+      // 覆盖层随正文滚动，可在平滑滚动前铺好；此时目录尚未变高变矮，量到的位置就是正文位置。
       flashSection(heading);
       // 通知浮动列把跳转前的位置入栈。
       window.dispatchEvent(new CustomEvent('astro-whono:reading-jump'));
+      try {
+        window.history.pushState(null, '', `#${id}`);
+      } catch (_) {}
 
-      window.requestAnimationFrame(() => {
-        heading.scrollIntoView({
-          behavior: prefersReducedMotion() ? 'auto' : 'smooth',
-          block: 'start'
+      const scrollToHeading = () => {
+        window.requestAnimationFrame(() => {
+          heading.scrollIntoView({
+            behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+            block: 'start'
+          });
+          // 聚焦标题，便于读屏落到该小节。
+          if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+          heading.focus({ preventScroll: true });
         });
-        // 聚焦标题，便于读屏落到该小节。
-        if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
-        heading.focus({ preventScroll: true });
-        try {
-          window.history.pushState(null, '', `#${id}`);
-        } catch (_) {}
-      });
+      };
+
+      // 目录在正文上方：收起过渡会挪动正文，等过渡结束再滚，落点才准。
+      closeInlineToc(link, scrollToHeading);
     });
   });
 
@@ -200,7 +316,6 @@ const initArticleToc = () => {
 
   /* 浮动列目录按钮：宽屏由右侧常驻目录承担，按钮只在窄屏且内联目录参与渲染时可用。 */
   const tocJumpButton = document.getElementById('toc-jump');
-  const inlineToc = document.querySelector<HTMLDetailsElement>('details.article-toc--inline');
 
   const isInlineTocOnly = () =>
     inlineToc !== null
@@ -228,19 +343,20 @@ const initArticleToc = () => {
       if (!isInlineTocOnly()) return;
       if (isInlineTocInView()) {
         // 目录就在眼前：原地点一下开、再点一下关，不记录返回位置。
-        inlineToc.open = !inlineToc.open;
+        toggleInlineToc(!toc.open);
         return;
       }
       // 不在可视范围：先通知浮动列把跳转前的位置入栈，再展开目录并滚过去。
       window.dispatchEvent(new CustomEvent('astro-whono:toc-jump'));
-      inlineToc.open = true;
-      // 展开会改变目录高度，滚动放到下一帧，落点才准。
-      window.requestAnimationFrame(() => {
-        inlineToc.scrollIntoView({
+      const scrollToToc = () =>
+        toc.scrollIntoView({
           behavior: prefersReducedMotion() ? 'auto' : 'smooth',
           block: 'start'
         });
-      });
+      // 展开会改变目录高度，滚动放到下一帧，落点才准。
+      window.requestAnimationFrame(scrollToToc);
+      // 过渡结束后再校准一次：展开抬高页高，末尾的滚动可能被夹紧。
+      toggleInlineToc(true, () => window.requestAnimationFrame(scrollToToc));
     });
     syncTocJumpButton();
   }

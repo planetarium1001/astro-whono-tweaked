@@ -109,6 +109,8 @@
   --blur-md: 8px;
   --blur-lg: 12px;
   /* 公开组件的键盘焦点环：颜色继承元素文字色，个别组件另行覆盖。 */
+  /* 点击时不要浏览器默认的蓝色高亮块，交互反馈交给各组件自己的状态样式 */
+  -webkit-tap-highlight-color: transparent;
   --focus-ring: 2px solid currentColor;
   --focus-ring-offset: 2px;
   --code-header-bg: #f2f2f0;
@@ -220,6 +222,11 @@ body {
 }
 
 html {
+  /**
+   * 兜住多余的横向溢出：窄屏一旦出现横向滚动，浏览器会缩放到能容纳内容，
+   * 固定定位的浮动列随之被推到可视区外。clip 不建立滚动容器，桌面端 sticky 侧栏不受影响。
+   */
+  overflow-x: clip;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   /* 固定滚动条槽位：页面高度变化时可用宽度不变，避免壳层重新居中导致整页横跳 */
@@ -279,6 +286,13 @@ a:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-bottom-color: transparent;
+}
+
+/* 目录横条等可点元素用主题焦点环，避免浏览器默认焦点框 */
+summary:focus-visible,
+[data-toc-toggle]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* 编程式聚焦的容器不画焦点环：跳过链接目标（main）与弹窗本体、弹窗标题 */

@@ -92,6 +92,32 @@
   padding-top: 10px;
 }
 
+/**
+ * 内联目录的展开 / 收起过渡：`<details>` 原生开合不参与高度过渡，
+ * 由脚本量出高度写入 --article-toc-inline-height，过渡期间裁掉溢出，结束后撤掉状态属性。
+ * 与窄屏侧栏收起（layout.css 的 body[data-reading-anim] .sidebar）同一套做法，
+ * 时长与 article-toc.ts 的 INLINE_TOC_ANIM_MS 对齐。
+ */
+.article-toc--inline[data-toc-anim] {
+  max-height: var(--article-toc-inline-height, none);
+  overflow: hidden;
+  transition: max-height 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 条目随高度淡入淡出，裁切边缘不显得生硬 */
+.article-toc--inline[data-toc-anim] .article-toc__list {
+  transition: opacity 200ms ease;
+}
+
+.article-toc--inline[data-toc-anim='collapse'] .article-toc__list {
+  opacity: 0;
+}
+
+/* 收起时箭头从点击那一刻翻回，不必等 details.open 落定 */
+.article-toc--inline[data-toc-anim='collapse'] .article-toc__summary-chevron {
+  transform: rotate(0deg);
+}
+
 /* 锚点跳转时给标题留出呼吸空间 */
 body.immersive-page .prose :is(h2, h3)[id] {
   scroll-margin-top: 24px;
@@ -375,6 +401,8 @@ body.immersive-page .prose :is(h2, h3)[id][tabindex]:focus-visible {
   .article-toc__link,
   .article-toc__summary-chevron,
   .article-toc__bar,
+  .article-toc--inline[data-toc-anim],
+  .article-toc--inline[data-toc-anim] .article-toc__list,
   .article-toc--rail {
     transition: none;
   }

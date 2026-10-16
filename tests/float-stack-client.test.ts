@@ -202,11 +202,19 @@ describe('窄屏目录按钮', () => {
 
     click(tocJumpButton());
     expect(details.open, '视口内点击应展开目录').toBe(true);
+    expect(details.dataset.tocAnim, '展开走高度过渡').toBe('expand');
     expect(scrollIntoView, '视口内不跳转').not.toHaveBeenCalled();
     expect(resume.hidden, '视口内开关不记录返回位置').toBe(true);
 
     click(tocJumpButton());
-    expect(details.open, '再点一次应关闭目录').toBe(false);
+    // 收起同样走过渡：过渡期间 details 保持 open（内容才有得裁），结束后才落定关闭。
+    expect(details.open, '收起过渡期间 details 保持展开').toBe(true);
+    expect(details.dataset.tocAnim).toBe('collapse');
+    expect(details.style.getPropertyValue('--article-toc-inline-height')).toMatch(/px$/);
+    await vi.waitFor(() => expect(details.open, '再点一次应关闭目录').toBe(false));
+    // 过渡态必须撤干净：既不留裁切，也不留收起后的占位高度。
+    expect(details.dataset.tocAnim).toBeUndefined();
+    expect(details.style.getPropertyValue('--article-toc-inline-height')).toBe('');
   });
 
   it('使用目录按钮后，中途的目录条目跳转不覆盖返回位置', async () => {

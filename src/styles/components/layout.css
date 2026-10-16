@@ -1009,13 +1009,14 @@ body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
     display: none;
   }
 
+  /* 窄屏顶栏固定为两行：标题与动作图标同行（图标靠右并垂直居中），导航单独一行。
+     用网格而不是会换行的 flex：标题长度不同时，图标在 flex 下会落到不同的行。 */
   :where(body:not(.admin-page)) .sidebar {
     position: static;
     height: auto;
     padding: calc(32px + env(safe-area-inset-top)) calc(var(--pad-x) + env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) calc(var(--pad-x) + env(safe-area-inset-left));
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     row-gap: 6px;
     column-gap: 12px;
@@ -1024,6 +1025,9 @@ body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
   :where(body:not(.admin-page)) .sidebar__title {
     transform-origin: left center;
     order: 1;
+    /* 顶栏第一行第一列：与右侧动作图标同一行 */
+    grid-column: 1;
+    grid-row: 1;
     flex: 1 1 auto;
     font-size: 24px;
     /* 顶栏标题收紧行高，避免与导航之间出现过大间隙 */
@@ -1053,6 +1057,9 @@ body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
   }
 
   :where(body:not(.admin-page)) .nav {
+    /* 导航单独占第二行，横跨两列 */
+    grid-column: 1 / -1;
+    grid-row: 2;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
@@ -1088,6 +1095,9 @@ body.admin-page .sidebar-actions .icon-button[data-tooltip]::after {
 
   :where(body:not(.admin-page)) .sidebar-actions {
     order: 2;
+    /* 顶栏第一行第二列：靠右并与标题垂直居中 */
+    grid-column: 2;
+    grid-row: 1;
     margin-top: 0;
     align-self: center;
   }
