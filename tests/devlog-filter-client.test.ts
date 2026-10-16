@@ -118,7 +118,10 @@ describe('/devlog/ 的「项目」筛选与行内展开', () => {
     // 样式载体是 tag dialog
     expect(dialog(), '需要复用 tag dialog').not.toBeNull();
     expect(dialog()!.classList.contains('entry-tags-dialog')).toBe(true);
-    expect(dialog()!.querySelector('.entry-tags-dialog__title')?.textContent?.trim()).toBe('更新项目');
+    // 标题 = 集合展示名 + 取值域；展示名随站点设置变化，从 fixture 自身推导
+    const pageTitle = document.querySelector('.page-title')?.textContent?.trim() ?? '';
+    expect(pageTitle).not.toBe('');
+    expect(dialog()!.querySelector('.entry-tags-dialog__title')?.textContent?.trim()).toBe(`${pageTitle}项目`);
     expect(trigger(), '需要一个打开 dialog 的触发器').not.toBeNull();
     expect(trigger()!.textContent?.trim(), '未筛选时触发器显示 #项目').toBe('#项目');
     // 单选项目没有 AND/OR 语义，也没有 RSS
