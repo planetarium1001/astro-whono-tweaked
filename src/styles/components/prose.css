@@ -19,6 +19,22 @@
   .prose img {
     max-width: 92%;
   }
+
+  /* 窄屏表头允许折行：nowrap 的表头会把表格最小内容宽度顶到超出屏幕 */
+  .prose thead th {
+    white-space: normal;
+  }
+
+  /**
+   * 仍然超宽的表格在表格内部横向滚动。表格的最小内容宽度可能大于窄屏内容宽度，
+   * 一旦把整页撑宽，移动端浏览器会缩放到能容纳内容，固定定位的浮动列随之跑到可视区外。
+   */
+  .prose table {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    overflow-x: auto;
+  }
 }
 
 @media (max-width: 640px) {
