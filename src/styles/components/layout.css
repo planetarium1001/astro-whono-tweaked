@@ -1573,8 +1573,7 @@ body.immersive-page[data-reading="immersive"] .content__inner {
       visibility 0s linear 420ms;
   }
 
-  body.immersive-page[data-reading="immersive"] .divider,
-  body.immersive-page[data-reading="immersive"] .site-footer {
+  body.immersive-page[data-reading="immersive"] .divider {
     display: none;
   }
 }
@@ -1631,10 +1630,7 @@ body.immersive-page[data-reading="immersive"] .content__inner {
       visibility 0s linear 420ms;
   }
 
-  body.immersive-page[data-reading="immersive"] .site-footer {
-    opacity: 0;
-    visibility: hidden;
-  }
+  /* 阅读模式保留页脚：版权与备案信息在阅读模式下同样可见 */
 }
 
 @media (prefers-reduced-motion: reduce) {
