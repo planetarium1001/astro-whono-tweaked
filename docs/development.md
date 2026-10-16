@@ -14,7 +14,7 @@ Node.js ≥ 22.12.0，版本基线写在 `.nvmrc`（当前 22.22.0）并与 `pac
 | `npm run preview` | 预览构建产物 |
 | `npm run check` | 类型检查与源码类守卫 |
 | `npm test` | Vitest 用例 |
-| `npm run verify` | check、test、build 与产物类校验依次执行 |
+| `npm run verify` | check、build、刷新 fixture、test 与产物类校验依次执行 |
 | `npm run ci` | 等价于 `verify`，CI 使用 |
 | `npm run new:bit` | 生成一条动态草稿 |
 | `npm run theme:update` | 从主题仓库同步更新，见 [../README.md](../README.md) 的「主题同步」 |
@@ -27,11 +27,11 @@ Node.js ≥ 22.12.0，版本基线写在 `.nvmrc`（当前 22.22.0）并与 `pac
 ```bash
 npm run check     # astro check + 下列源码类守卫
 npm test          # Vitest
-npm run verify    # check → test → build → test:fixtures → 三项产物校验
+npm run verify    # check → build → test:fixtures → test → 三项产物校验
 npm run ci        # 等价于 verify
 ```
 
-源码类守卫只读取源文件或设置 JSON；产物类守卫读取 `dist/`，必须在构建后执行，因此统一挂在 `verify` 的后半段。`SITE_URL` 为空时 sitemap 不生成，`check:prod-artifacts` 会失败。
+源码类守卫只读取源文件或设置 JSON；产物类守卫读取 `dist/`，必须在构建后执行，因此统一挂在 `verify` 的后半段。客户端用例读取 `tests/fixtures/` 的渲染快照，快照由 `test:fixtures` 从 `dist/` 复制，所以刷新排在 `build` 之后、`test` 之前：站点同步主题后第一次跑 `verify` 时，用例读到的是与当前渲染一致的快照。`SITE_URL` 为空时 sitemap 不生成，`check:prod-artifacts` 会失败。
 
 | 脚本 | 作用 | 阶段 |
 | --- | --- | --- |

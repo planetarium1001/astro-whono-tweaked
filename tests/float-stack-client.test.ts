@@ -115,16 +115,19 @@ describe('窄屏目录按钮', () => {
   /** 快照 + 几何替身：jsdom 没有布局，滚动位置、文档高度与标题位置都要自己给出。 */
   const prepareArticle = async () => {
     await loadArticlePage();
-    const heading = document.querySelector<HTMLElement>('.prose h2[id]');
-    expect(heading, '快照正文里应有带锚点的标题').not.toBeNull();
-    heading!.getBoundingClientRect = () => rectAt(HEADING_DOC_TOP - scrollY);
-    // jsdom 不实现 scrollIntoView，目录按钮与条目跳转都会调用它。
-    (heading as unknown as { scrollIntoView: () => void }).scrollIntoView = vi.fn();
+    // 站位随站点内容变化，几何替身必须覆盖全部标题，不能只认某一个。
+    const headings = Array.from(document.querySelectorAll<HTMLElement>('.prose :is(h2, h3)[id]'));
+    expect(headings.length, '快照正文里应有带锚点的标题').toBeGreaterThan(0);
+    headings.forEach((heading, index) => {
+      heading.getBoundingClientRect = () => rectAt(HEADING_DOC_TOP + index * 800 - scrollY);
+      // jsdom 不实现 scrollIntoView，目录按钮与条目跳转都会调用它。
+      (heading as unknown as { scrollIntoView: () => void }).scrollIntoView = vi.fn();
+    });
     const details = inlineToc();
     (details as unknown as { scrollIntoView: () => void }).scrollIntoView = vi.fn();
     const link = details.querySelector<HTMLAnchorElement>('a[data-toc-target]');
     expect(link, '内联目录里应有条目链接').not.toBeNull();
-    return { details, link: link! };
+    return { details, link: link!, targetId: link!.dataset.tocTarget ?? '' };
   };
 
   beforeEach(async () => {
@@ -188,7 +191,7 @@ describe('窄屏目录按钮', () => {
 
   it('使用目录按钮后，中途的目录条目跳转不覆盖返回位置', async () => {
     stubMatchMedia(true);
-    const { link } = await prepareArticle();
+    const { link, targetId } = await prepareArticle();
 
     setScrollY(1000);
     await importScripts();
@@ -203,7 +206,7 @@ describe('窄屏目录按钮', () => {
     expect(
       decodeURIComponent(window.location.hash.slice(1)),
       '目录条目跳转必须真的发生'
-    ).toBe('正文');
+    ).toBe(targetId);
     // 用户继续读到别处，再点「回到上次阅读位置」。
     setScrollY(3000);
     (window.scrollTo as unknown as ReturnType<typeof vi.fn>).mockClear();

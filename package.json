@@ -22,7 +22,7 @@
     "preview": "astro preview",
     "check": "astro check && npm run check:svelte && npm run check:admin-content-source-boundary && npm run check:home-critical-css && npm run check:image-references && npm run check:font-charset",
     "test": "vitest run --config ./vitest.config.ts",
-    "verify": "npm run check && npm run test && npm run build && npm run test:fixtures && npm run check:prod-artifacts && npm run check:layout-geometry && npm run check:touch-targets",
+    "verify": "npm run check && npm run build && npm run test:fixtures && npm run test && npm run check:prod-artifacts && npm run check:layout-geometry && npm run check:touch-targets",
     "ci": "npm run verify",
     "audit:prod": "npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org",
     "check:markdown-smoke": "node ./scripts/check-markdown-smoke.mjs",
