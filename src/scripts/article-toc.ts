@@ -215,9 +215,23 @@ const initArticleToc = () => {
   };
 
   if (tocJumpButton && inlineToc) {
+    const toc = inlineToc;
+
+    /** 目录是否已在视口内：在视口内只开关，不做跳转。 */
+    const isInlineTocInView = () => {
+      const rect = toc.getBoundingClientRect();
+      const height = rect.height || 0;
+      return rect.top < window.innerHeight && rect.top + height > 0;
+    };
+
     tocJumpButton.addEventListener('click', () => {
       if (!isInlineTocOnly()) return;
-      // 先通知浮动列把跳转前的位置入栈，再展开目录：返回位置是点按钮之前的阅读位置。
+      if (isInlineTocInView()) {
+        // 目录就在眼前：原地点一下开、再点一下关，不记录返回位置。
+        inlineToc.open = !inlineToc.open;
+        return;
+      }
+      // 不在可视范围：先通知浮动列把跳转前的位置入栈，再展开目录并滚过去。
       window.dispatchEvent(new CustomEvent('astro-whono:toc-jump'));
       inlineToc.open = true;
       // 展开会改变目录高度，滚动放到下一帧，落点才准。

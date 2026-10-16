@@ -233,6 +233,17 @@
   }
 }
 
+/**
+ * 窄屏是单列布局，右下角浮动列只是浮层：不为它预留整列右内边距，正文左右对称。
+ * 这里用宽度断点而不是 hover / pointer：部分手机浏览器把指针上报为 fine，
+ * 会让预留规则继续生效，正文右侧因此比左侧宽出一截。
+ */
+@media (max-width: 900px) {
+  :root:not([data-toc-collapsed='true']) body.immersive-page .shell[data-toc='true'] .content {
+    padding-right: var(--pad-x);
+  }
+}
+
 .content {
   padding: 56px var(--pad-x);
   min-height: 100vh;

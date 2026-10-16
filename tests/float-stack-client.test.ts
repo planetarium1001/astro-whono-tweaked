@@ -189,6 +189,26 @@ describe('窄屏目录按钮', () => {
     expect(tocJumpButton().hidden).toBe(true);
   });
 
+  it('目录已在视口内：按钮只开关目录，不跳转也不记录返回位置', async () => {
+    stubMatchMedia(true);
+    const { details } = await prepareArticle();
+    // 目录就在眼前
+    (details as unknown as { getBoundingClientRect: () => DOMRect }).getBoundingClientRect = () =>
+      rectAt(200);
+
+    await importScripts();
+    const resume = document.querySelector<HTMLButtonElement>('#resume-reading')!;
+    const scrollIntoView = details.scrollIntoView as unknown as ReturnType<typeof vi.fn>;
+
+    click(tocJumpButton());
+    expect(details.open, '视口内点击应展开目录').toBe(true);
+    expect(scrollIntoView, '视口内不跳转').not.toHaveBeenCalled();
+    expect(resume.hidden, '视口内开关不记录返回位置').toBe(true);
+
+    click(tocJumpButton());
+    expect(details.open, '再点一次应关闭目录').toBe(false);
+  });
+
   it('使用目录按钮后，中途的目录条目跳转不覆盖返回位置', async () => {
     stubMatchMedia(true);
     const { link, targetId } = await prepareArticle();
