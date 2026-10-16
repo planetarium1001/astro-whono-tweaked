@@ -242,8 +242,8 @@
   width: 100%;
 }
 
-/* 公开页底部不留内边距：页脚因此贴在页面底部（页脚自带上方间距）。 */
-:where(body:not(.admin-page)) .content {
+/* 底部不留内边距：页脚因此贴在页面底部（页脚自带上方间距）。公开页与后台一致。 */
+.content {
   padding-bottom: 0;
 }
 

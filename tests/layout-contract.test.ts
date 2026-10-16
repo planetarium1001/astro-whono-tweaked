@@ -508,9 +508,9 @@ describe('阅读模式与页脚位置', () => {
     );
   });
 
-  it('公开页页脚贴页面底部：内容区底部不留内边距，页脚自身顶到底部', async () => {
+  it('页脚贴页面底部：内容区底部不留内边距（含后台），页脚自身顶到底部', async () => {
     const layout = await read('src/styles/components/layout.css');
-    expect(layout).toMatch(/:where\(body:not\(\.admin-page\)\) \.content\s*\{[^}]*padding-bottom:\s*0/);
+    expect(layout).toMatch(/\.content\s*\{[^}]*padding-bottom:\s*0/);
     expect(layout).toMatch(/\.site-footer\s*\{[^}]*margin-top:\s*auto/);
   });
 });

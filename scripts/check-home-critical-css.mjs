@@ -293,6 +293,15 @@ if (!snapshotMobile || !layoutMobile) {
   });
 }
 
+// 页脚贴底依赖内容区底部不留内边距；快照漏了这条，首页页脚就会比其它页面高出一截。
+// 两边都合并整份样式里的同名规则：layout.css 的第一个 @media 出现得早，不能按位置切段。
+compare(
+  '.content padding-bottom',
+  mediaSelectorDeclarations(snapshotCss, '.content')?.['padding-bottom'] ?? null,
+  mediaSelectorDeclarations(layoutCss, '.content')?.['padding-bottom'] ?? null,
+  LAYOUT_CSS
+);
+
 if (problems.length > 0) {
   console.error('[check:home-critical-css] 首页首屏 critical CSS 与 src/styles 不一致：');
   problems.forEach((problem) => console.error(`  - ${problem}`));
