@@ -89,12 +89,9 @@ const initArticleToc = () => {
   };
 
   /**
-   * 窄屏内联目录的展开 / 收起过渡。
-   *
-   * `<details>` 的原生开合不参与高度过渡，这里沿用窄屏侧栏收起的一套做法
-   * （见 layout.css 的 body[data-reading-anim] .sidebar 与 sidebar-reading.ts）：
-   * 脚本量出高度写入 --article-toc-inline-height，过渡期间裁掉溢出，结束后撤掉过渡态。
-   * 过渡期间 details 保持展开（内容才有得裁），收起结束时才落定 details.open。
+   * 窄屏内联目录的展开 / 收起过渡：`<details>` 原生开合不做高度过渡，
+   * 沿用窄屏侧栏收起的做法，脚本量高写入 --article-toc-inline-height；
+   * 过渡期间保持展开以便裁切，结束后才撤掉过渡态并落定 details.open。
    */
   const inlineToc = document.querySelector<HTMLDetailsElement>('details.article-toc--inline');
 

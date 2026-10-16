@@ -93,9 +93,8 @@
 }
 
 /**
- * 内联目录的展开 / 收起过渡：`<details>` 原生开合不参与高度过渡，
- * 由脚本量出高度写入 --article-toc-inline-height，过渡期间裁掉溢出，结束后撤掉状态属性。
- * 与窄屏侧栏收起（layout.css 的 body[data-reading-anim] .sidebar）同一套做法，
+ * 内联目录的展开 / 收起过渡：由脚本量高写入 --article-toc-inline-height，
+ * 过渡期间裁掉溢出、结束后撤掉状态属性，与窄屏侧栏收起同一套做法。
  * 时长与 article-toc.ts 的 INLINE_TOC_ANIM_MS 对齐。
  */
 .article-toc--inline[data-toc-anim] {

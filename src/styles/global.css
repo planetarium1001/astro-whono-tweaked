@@ -129,10 +129,8 @@
   --sidebar-padding-block: 52px;
   /**
    * 间距几何硬约束，由 check-layout-geometry.mjs 断言：
-   * nav gap + dot + sidebarPad == contentPad；
-   * 壳层起始内边距 == 结束内边距 + scrollbarGutter；
-   * 悬浮列距视口右缘 >= 4px，且与目录把手同线。
-   * 改值须同步 src/pages/index.astro 的 critical CSS 快照（check:home-critical-css）。
+   * nav gap + dot + sidebarPad == contentPad；起始内边距 == 结束内边距 + 滚动条槽；
+   * 悬浮列距视口右缘 >= 4px 且与目录把手同线。改值须同步首页首屏快照。
    */
   --scrollbar-gutter-inline: 15px;
   /* 内容盒到浏览器边缘的视觉间隙：起始内边距直接取它，结束内边距再扣掉滚动条槽。 */
